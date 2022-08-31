@@ -1,23 +1,34 @@
 # Smarterise - api
 
-## Overview
-
-The requirements are located in the `requirements` folder.
-
-
 ## Requirements
 
-- Python 3.9 or above
-- (Optional) Virtualenv (or pyenv, venv...)
+1. [Docker](https://www.docker.com/products/docker-desktop/)
+2. [Python 3.9](https://www.python.org/downloads/)
+3. Virtual environment of choice (virtualenv, venv, virtualenvwrapper...)
+4. [Pytest](https://docs.pytest.org/en/7.1.x/)
 
 ## How to install
 
- 1. `make requirements-dev` - Installs all the requirements needed for dev.
- 2. `make requirements` (No need if 3. run) - Installs all the requirements base.
+1. Create a virtual environment matching the Python version `python3.9 -m venv venv`
+2. Start the virtual environment: `source venv/bin/activate`
+3. Run `make requirements`
+4. Generate your own .env file by doing `cp .env.example src/.env`
+5. Source the .env file by running `source src/.env`
+6. Run `docker compose up` starts the docker or `docker compose up -d` starts the docker without
+   the logs.
+7. Run `make migrate` runs the migrations or `python src/manage.py migrate`.
+8. Create a superuser by running `python src/manage.py createsuperuser` and use the email added to `.env`.
+9. Run `make run` starts the development server or `python src/manage.py runserver`.
 
-## Run locally
 
-## Configurations
+## Swagger API
+
+1. `http://localhost:8000/swagger/redoc` - In development mode shows the apis in redoc format.
+2. `http://localhost:8000/swagger/` - In development mode, shows the apis in swagger format.
 
 
-## Run tests
+## Testing
+
+The app uses pytest.
+
+1. `make test` runs all the tests
