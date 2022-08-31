@@ -53,6 +53,10 @@ test: ## Runs the tests
 go: ## Starts the venv, sources the files and starts the server
 	source venv/bin/activate
 
+.PHONY: load
+go: ## Load the env vars from .env
+	source src/.env
+
 ifndef VERBOSE
 .SILENT:
 endif
