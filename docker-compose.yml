@@ -1,0 +1,30 @@
+version: "3.8"
+services:
+  adminer:
+    image: adminer
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
+  db:
+    image: postgres:12.9-alpine # if need to add jars etc. comment out this and add the above 3.
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: "1234"
+      POSTGRES_USER: smt
+      POSTGRES_DB: smt
+    ports:
+      - "5432:5432"
+    volumes:
+       - "postgres_smt_db_data:/var/lib/postgresql/data"
+  redis:
+    restart: always
+    image: redis:latest
+    expose:
+      - "6379"
+    ports:
+      - "6379:6379"
+
+volumes:
+  postgres_smt_db_data:
+    driver: local
