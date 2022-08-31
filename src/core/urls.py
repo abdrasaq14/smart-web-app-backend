@@ -1,5 +1,6 @@
 from django.urls import path
+from core.views import WidgetsApiView
 
 urlpatterns = [
-    # path("tenant/", default_tenant_info_view, name="tenant-data"),
+    path("widgets/", WidgetsApiView.as_view(), name="widgets-data"),
 ]
