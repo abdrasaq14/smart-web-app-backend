@@ -55,7 +55,7 @@ CORS_ALLOWED_ORIGINS = env.list(
 BASE_INSTALLED_APPS = [
     "django.contrib.admin",
     "django.contrib.auth",
-    # "polymorphic",
+    "polymorphic",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
@@ -63,13 +63,18 @@ BASE_INSTALLED_APPS = [
     "drf_yasg",
     "rest_framework",
     "corsheaders",
-    # "guardian",
+    "guardian",
     # "django_celery_results",
 ]
 
 INSTALLED_APPS = [
     "core",
+    "accounts"
 ] + BASE_INSTALLED_APPS
+
+AUTHENTICATION_BACKENDS = [
+    "guardian.backends.ObjectPermissionBackend",
+]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -80,6 +85,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # "lib.middleware.loguru.middleware.DjangoLoguruMiddleware",
 ]
 
 ROOT_URLCONF = "main.urls"
@@ -167,6 +173,6 @@ STATIC_URL = "static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # Auth
-# AUTH_USER_MODEL = "accounts.User"
+AUTH_USER_MODEL = "accounts.User"
 
 BYPASS_AUTH = env.bool("DJANGO_BYPASS_AUTH", default=False)
