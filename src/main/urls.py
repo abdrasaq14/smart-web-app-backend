@@ -20,7 +20,7 @@ from rest_framework import permissions
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("api/", include(("core.urls", "apis"))),
+    path("api/", include(("core.api.urls", "core-apis"))),
 ]
 
 # ADD Swagger

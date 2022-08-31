@@ -2,7 +2,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from core.serializers import WidgetsSerializer
+from core.api.serializers import WidgetsSerializer
 
 # Create your views here.
 
