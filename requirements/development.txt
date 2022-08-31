@@ -7,4 +7,4 @@ ipdb==0.13.7
 isort
 pre_commit==2.15.0
 ipython
-Werkzeug==2.0.2
+Werkzeug==2.2.2 # 2.0.2

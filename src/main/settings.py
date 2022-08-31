@@ -20,7 +20,7 @@ from corsheaders.defaults import default_headers
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 os.path.basename(os.path.dirname(BASE_DIR))
-# sys.path.append(os.path.join(BASE_DIR, "apps"))
+sys.path.append(os.path.join(BASE_DIR))
 
 # Environment setup
 env = environ.Env()
@@ -60,7 +60,7 @@ BASE_INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # "drf_yasg",
+    "drf_yasg",
     "rest_framework",
     "corsheaders",
     # "guardian",
