@@ -20,3 +20,14 @@ class Alert(models.Model):
 
     def __str__(self) -> str:
         return f"{self.alert_id} - {self.status}"
+
+
+class TransactionHistory(models.Model):
+    site = models.CharField(max_length=120)
+    subscription = models.CharField(max_length=120)
+
+    amount_billed = models.FloatField(default=0)
+    amount_bought = models.FloatField(default=0)
+
+    duration_days = models.IntegerField()
+    time = models.DateTimeField()

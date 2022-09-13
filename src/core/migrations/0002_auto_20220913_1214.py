@@ -6,7 +6,7 @@ from django.core.management import call_command
 def mock_alerts(apps, schema_editor):
     call_command('mockalerts', clear=True, number=100)
 
-def do_nothing(apps, schema_editor):
+def clear_data(apps, schema_editor):
     call_command('mockalerts', clear=True, number=0)
 
 
@@ -17,5 +17,5 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunPython(mock_alerts, do_nothing)
+        migrations.RunPython(mock_alerts, clear_data)
     ]

@@ -1,9 +1,9 @@
 import factory
-from factory.fuzzy import FuzzyDateTime
+from factory.fuzzy import FuzzyDateTime, FuzzyFloat, FuzzyInteger
 from datetime import datetime
 from pytz import UTC
 
-from core.models import Alert
+from core.models import Alert, TransactionHistory
 from core.types import AlertStatusType
 
 
@@ -18,3 +18,17 @@ class AlertFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Alert
+
+
+class TransactionHistoryFactory(factory.django.DjangoModelFactory):
+    site = factory.Sequence(lambda n: "Site - %s" % n)
+    subscription = factory.Sequence(lambda n: "Sub - %s" % n)
+
+    amount_billed = FuzzyFloat(0, 99999)
+    amount_bought = FuzzyFloat(0, 99999)
+
+    duration_days = FuzzyInteger(0, 10)
+    time = FuzzyDateTime(datetime(2019, 1, 1, tzinfo=UTC))
+
+    class Meta:
+        model = TransactionHistory
