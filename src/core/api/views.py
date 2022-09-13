@@ -1,6 +1,7 @@
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
+from core.mock_data import OrganizationMockData
 
 from core.models import Alert
 from core.api.serializers import AlertSerializer, WidgetsSerializer
@@ -30,3 +31,15 @@ class AlertApiView(ListAPIView):
         page = self.paginate_queryset(self.get_queryset())
         serializer = self.get_serializer(page, many=True)
         return self.get_paginated_response(serializer.data)
+
+
+class OrganizationApiView(GenericAPIView):
+    """
+    List the data used on the organization page
+    """
+    def get(self, request):
+        data_provider = OrganizationMockData()
+        return Response(
+            data_provider.get_data(),
+            status=status.HTTP_200_OK
+        )
