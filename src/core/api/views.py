@@ -4,6 +4,7 @@ from rest_framework import status
 
 from core.models import Alert
 from core.api.serializers import AlertSerializer, WidgetsSerializer
+from core.pagination import TablePagination
 
 
 class WidgetsApiView(ListAPIView):
@@ -22,8 +23,10 @@ class AlertApiView(ListAPIView):
     Lists all alerts
     """
     serializer_class = AlertSerializer
-    queryset = Alert.objects.all()
+    queryset = Alert.objects.all().order_by('time')
+    pagination_class = TablePagination
 
-    def get_queryset(self):
-        queryset = self.queryset
-        return queryset.order_by('time')
+    def get(self, request):
+        page = self.paginate_queryset(self.get_queryset())
+        serializer = self.get_serializer(page, many=True)
+        return self.get_paginated_response(serializer.data)
