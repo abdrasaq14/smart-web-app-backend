@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from core.mock_data import OrganizationMockData
 
-from core.models import Alert
-from core.api.serializers import AlertSerializer, WidgetsSerializer
+from core.models import Alert, TransactionHistory
+from core.api.serializers import AlertSerializer, TransactionHistorySerializer, WidgetsSerializer
 from core.pagination import TablePagination
 
 
@@ -27,11 +27,6 @@ class AlertApiView(ListAPIView):
     queryset = Alert.objects.all().order_by('time')
     pagination_class = TablePagination
 
-    def get(self, request):
-        page = self.paginate_queryset(self.get_queryset())
-        serializer = self.get_serializer(page, many=True)
-        return self.get_paginated_response(serializer.data)
-
 
 class OrganizationApiView(GenericAPIView):
     """
@@ -43,3 +38,12 @@ class OrganizationApiView(GenericAPIView):
             data_provider.get_data(),
             status=status.HTTP_200_OK
         )
+
+
+class TransactionHistoryApiView(ListAPIView):
+    """
+    Lists the transaction history
+    """
+    serializer_class = TransactionHistorySerializer
+    queryset = TransactionHistory.objects.all().order_by('time')
+    pagination_class = TablePagination
