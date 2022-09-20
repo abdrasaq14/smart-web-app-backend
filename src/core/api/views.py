@@ -9,10 +9,6 @@ from core.pagination import TablePagination
 
 
 class OperationsCardsDataApiView(ListAPIView):
-    """
-    Lists the cards data for the operations screen
-    """
-
     def get(self, request, **kwargs):
         return Response({
             "totalConsumption": 32727658,
@@ -24,19 +20,35 @@ class OperationsCardsDataApiView(ListAPIView):
         }, status=status.HTTP_200_OK)
 
 
+class OperationsProfileChartApiView(ListAPIView):
+    def get(self, request, **kwargs):
+        return Response({
+            "dataset": [
+                ['day', 'profile1', 'profile2'],
+                [0, 17, 14],
+                [2, 15, 13],
+                [4, 12, 12],
+                [6, 13, 11],
+                [8, 14, 12],
+                [10, 16, 13],
+                [12, 14, 10],
+                [14, 20, 12],
+                [16, 19, 9],
+                [18, 18, 10],
+                [20, 17, 11],
+                [22, 22, 10],
+                [24, 24, 13]
+            ],
+        }, status=status.HTTP_200_OK)
+
+
 class AlertApiView(ListAPIView):
-    """
-    Lists all alerts
-    """
     serializer_class = AlertSerializer
     queryset = Alert.objects.all().order_by('time')
     pagination_class = TablePagination
 
 
 class OrganizationApiView(GenericAPIView):
-    """
-    List the data used on the organization page
-    """
     def get(self, request):
         data_provider = OrganizationMockData()
         return Response(
@@ -46,9 +58,6 @@ class OrganizationApiView(GenericAPIView):
 
 
 class TransactionHistoryApiView(ListAPIView):
-    """
-    Lists the transaction history
-    """
     serializer_class = TransactionHistorySerializer
     queryset = TransactionHistory.objects.all().order_by('time')
     pagination_class = TablePagination
