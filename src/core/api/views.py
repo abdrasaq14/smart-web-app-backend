@@ -1,26 +1,25 @@
 from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
-from core.mock_data import OrganizationMockData
 
 from core.models import Alert, TransactionHistory
 from core.api.serializers import AlertSerializer, TransactionHistorySerializer
 from core.pagination import TablePagination
 
 
-class OperationsCardsDataApiView(ListAPIView):
+class OperationsCardsDataApiView(GenericAPIView):
     def get(self, request, **kwargs):
         return Response({
-            "totalConsumption": 32727658,
-            "currentLoad": 2727121,
-            "avgAvailability": 20,
-            "powerCuts": 5,
-            "overloadedDTs": 10,
-            "sitesUnderMaintenance": 2,
+            "total_consumption": 32727658,
+            "current_load": 2727121,
+            "avg_availability": 20,
+            "power_cuts": 5,
+            "overloaded_dts": 10,
+            "sites_under_maintenance": 2,
         }, status=status.HTTP_200_OK)
 
 
-class OperationsProfileChartApiView(ListAPIView):
+class OperationsProfileChartApiView(GenericAPIView):
     def get(self, request, **kwargs):
         return Response({
             "dataset": [
@@ -42,19 +41,35 @@ class OperationsProfileChartApiView(ListAPIView):
         }, status=status.HTTP_200_OK)
 
 
+class OperationsPowerConsumptionChartApiView(GenericAPIView):
+    def get(self, request, **kwargs):
+        return Response({
+            "dataset": [
+                ['district', 'consumption'],
+                ['District E', 850],
+                ['District D', 200],
+                ['District C', 300],
+                ['District B', 500],
+                ['District A', 800]
+            ],
+        }, status=status.HTTP_200_OK)
+
+
+class OperationsSitesApiView(GenericAPIView):
+    def get(self, request, **kwargs):
+        return Response({
+            "total": 12000,
+            "dataset": [
+                {"key": 'active', "value": 40},
+                {"key": 'offline', "value": 60},
+            ],
+        }, status=status.HTTP_200_OK)
+
+
 class AlertApiView(ListAPIView):
     serializer_class = AlertSerializer
     queryset = Alert.objects.all().order_by('time')
     pagination_class = TablePagination
-
-
-class OrganizationApiView(GenericAPIView):
-    def get(self, request):
-        data_provider = OrganizationMockData()
-        return Response(
-            data_provider.get_data(),
-            status=status.HTTP_200_OK
-        )
 
 
 class TransactionHistoryApiView(ListAPIView):
