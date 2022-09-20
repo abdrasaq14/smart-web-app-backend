@@ -3,10 +3,6 @@ from rest_framework import serializers
 from core.models import Alert, TransactionHistory
 
 
-class WidgetsSerializer(serializers.Serializer):
-    total_revenue = serializers.FloatField()
-
-
 class AlertSerializer(serializers.ModelSerializer):
     class Meta:
         model = Alert

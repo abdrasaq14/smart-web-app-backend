@@ -4,19 +4,24 @@ from rest_framework import status
 from core.mock_data import OrganizationMockData
 
 from core.models import Alert, TransactionHistory
-from core.api.serializers import AlertSerializer, TransactionHistorySerializer, WidgetsSerializer
+from core.api.serializers import AlertSerializer, TransactionHistorySerializer
 from core.pagination import TablePagination
 
 
-class WidgetsApiView(ListAPIView):
+class OperationsCardsDataApiView(ListAPIView):
     """
-    Lists all the projects and allows to create a project as well.
+    Lists the cards data for the operations screen
     """
-    serializer_class = WidgetsSerializer
 
     def get(self, request, **kwargs):
-        serializer = self.get_serializer_class()({'total_revenue': 1232.324})
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response({
+            "totalConsumption": 32727658,
+            "currentLoad": 2727121,
+            "avgAvailability": 20,
+            "powerCuts": 5,
+            "overloadedDTs": 10,
+            "sitesUnderMaintenance": 2,
+        }, status=status.HTTP_200_OK)
 
 
 class AlertApiView(ListAPIView):
