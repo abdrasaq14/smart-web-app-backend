@@ -32,3 +32,8 @@
 The app uses pytest.
 
 1. `make test` runs all the tests
+
+## Mocking data
+```
+python src/manage.py mockalerts --clear True --number 100
+```
