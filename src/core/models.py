@@ -31,3 +31,14 @@ class TransactionHistory(models.Model):
 
     duration_days = models.IntegerField()
     time = models.DateTimeField()
+
+
+class Site(models.Model):
+    name = models.CharField(max_length=120)
+
+    asset_name = models.CharField(max_length=240)
+    asset_type = models.CharField(max_length=120)
+    asset_co_ordinate = models.CharField(max_length=120)
+    asset_capacity = models.CharField(max_length=120)
+
+    time = models.DateTimeField()
