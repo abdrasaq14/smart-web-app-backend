@@ -1,8 +1,8 @@
 from typing import Any
 
 from django.core.management import BaseCommand, CommandParser
-from core.models import Alert, TransactionHistory
-from core.tests.factories import AlertFactory, TransactionHistoryFactory
+from core.models import Alert, Site, TransactionHistory
+from core.tests.factories import AlertFactory, SiteFactory, TransactionHistoryFactory
 
 
 class Command(BaseCommand):
@@ -37,25 +37,32 @@ class Command(BaseCommand):
         Generate some mock data for Alert model
         """
         clear = options["clear"]
-        alerts_no = options["number"]
+        number = options["number"]
         generated = {
             'alerts': 0,
-            'transaction_history': 0
+            'transaction_history': 0,
+            'sites': 0
         }
 
         if clear:
             Alert.objects.all().delete()
             TransactionHistory.objects.all().delete()
+            Site.objects.all().delete()
 
         # Create objects
-        for i in range(alerts_no):
+        for i in range(number):
+            # Sites
+            site = SiteFactory()
+            generated['sites'] += 1
+
             # Alerts
-            AlertFactory()
+            AlertFactory(site=site)
             generated['alerts'] += 1
 
             # Transaction history
-            TransactionHistoryFactory()
+            TransactionHistoryFactory(site=site)
             generated['transaction_history'] += 1
 
         self.stdout.write(f"{generated['alerts']} alerts generated!")
         self.stdout.write(f"{generated['transaction_history']} transaction history objects generated!")
+        self.stdout.write(f"{generated['sites']} sites generated!")
