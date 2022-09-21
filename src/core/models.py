@@ -4,7 +4,7 @@ from core.types import AlertStatusType
 
 class Alert(models.Model):
     alert_id = models.CharField(max_length=120)  # Should be unique?
-    site = models.CharField(max_length=120)
+    site = models.ForeignKey('core.Site', blank=False, null=False, on_delete=models.CASCADE)
     zone = models.CharField(max_length=120)
     district = models.CharField(max_length=120)
     activity = models.CharField(max_length=120)
@@ -23,7 +23,7 @@ class Alert(models.Model):
 
 
 class TransactionHistory(models.Model):
-    site = models.CharField(max_length=120)
+    site = models.ForeignKey('core.Site', blank=False, null=False, on_delete=models.CASCADE)
     subscription = models.CharField(max_length=120)
 
     amount_billed = models.FloatField(default=0)
