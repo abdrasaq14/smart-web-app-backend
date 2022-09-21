@@ -57,6 +57,10 @@ go: ## Starts the venv, sources the files and starts the server
 load: ## Load the env vars from .env
 	source src/.env
 
+.PHONY: mock
+mock: ## Create mock data
+	python src/manage.py mock_data --clear True --number 60
+
 ifndef VERBOSE
 .SILENT:
 endif
