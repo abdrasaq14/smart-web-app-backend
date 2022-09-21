@@ -2,8 +2,8 @@ from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from core.models import Alert, TransactionHistory
-from core.api.serializers import AlertSerializer, TransactionHistorySerializer
+from core.models import Alert, Site, TransactionHistory
+from core.api.serializers import AlertSerializer, SiteSerializer, TransactionHistorySerializer
 from core.pagination import TablePagination
 
 
@@ -75,4 +75,10 @@ class AlertApiView(ListAPIView):
 class TransactionHistoryApiView(ListAPIView):
     serializer_class = TransactionHistorySerializer
     queryset = TransactionHistory.objects.all().order_by('time')
+    pagination_class = TablePagination
+
+
+class SiteApiView(ListAPIView):
+    serializer_class = SiteSerializer
+    queryset = Site.objects.all().order_by('time')
     pagination_class = TablePagination

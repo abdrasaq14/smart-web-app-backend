@@ -1,11 +1,12 @@
 from django.urls import path
 from core.api.views import (
     AlertApiView, OperationsCardsDataApiView, OperationsPowerConsumptionChartApiView, OperationsProfileChartApiView,
-    OperationsSitesApiView, TransactionHistoryApiView
+    OperationsSitesApiView, SiteApiView, TransactionHistoryApiView
 )
 
 urlpatterns = [
     path("alerts/", AlertApiView.as_view(), name="alerts"),
+    path("sites/", SiteApiView.as_view(), name="sites"),
 
     # Operations
     path("operations/cards-data/", OperationsCardsDataApiView.as_view(), name="operations-cards-data"),
