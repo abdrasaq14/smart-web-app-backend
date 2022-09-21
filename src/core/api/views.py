@@ -15,7 +15,7 @@ class OperationsCardsDataApiView(GenericAPIView):
             "avg_availability": 20,
             "power_cuts": 5,
             "overloaded_dts": 10,
-            "sites_under_maintenance": 2,
+            "sites_under_maintenance": Site.objects.filter(under_maintenance=True).count(),
         }, status=status.HTTP_200_OK)
 
 

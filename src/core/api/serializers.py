@@ -24,4 +24,4 @@ class TransactionHistorySerializer(serializers.ModelSerializer):
 class SiteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Site
-        fields = ['id', 'name', 'asset_name', 'asset_type', 'asset_co_ordinate', 'asset_capacity', 'time']
+        fields = ['id', 'name', 'asset_name', 'asset_type', 'asset_co_ordinate', 'asset_capacity', 'under_maintenance', 'time']

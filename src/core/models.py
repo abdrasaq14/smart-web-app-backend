@@ -41,4 +41,6 @@ class Site(models.Model):
     asset_co_ordinate = models.CharField(max_length=120)
     asset_capacity = models.CharField(max_length=120)
 
+    under_maintenance = models.BooleanField(default=False)
+
     time = models.DateTimeField()
