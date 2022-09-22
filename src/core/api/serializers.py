@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from core.models import Alert, TransactionHistory
+from core.models import Alert, Site, TransactionHistory
 
 
 class AlertSerializer(serializers.ModelSerializer):
@@ -19,3 +19,9 @@ class TransactionHistorySerializer(serializers.ModelSerializer):
 
     def get_days(self, obj):
         return obj.duration_days or 0
+
+
+class SiteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Site
+        fields = ['id', 'name', 'asset_name', 'asset_type', 'asset_co_ordinate', 'asset_capacity', 'under_maintenance', 'time']
