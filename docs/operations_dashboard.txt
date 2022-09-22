@@ -1,0 +1,20 @@
+dashboard overview Operations - Home:
+	Total Consumption = sum of all devices of (delta1 - delta0 (values in EP_TOTAL_kWh column)) over start-end date
+	Current Load = sum of all devices of last value in column R (Psum_kW)
+	Avg Availability = average over a month period (default)/ over start-end period of all devices' time online (Time column: all 3 voltage columns need to be 0 to determine that the device has been offline)
+	Power Cuts = number of times the device has been offline in the default 1 month period / start-end period
+	Site Monitored = live count of currently online/offline devices
+	Load Profile = average load - column Psum_kW -(default over 30 days) spread over hours
+	Power Consumption = EP_TOTAL_kWh values per districts in Company
+	
+	Alert History - (need to define rules for alerts)
+	Overloaded DTs (distribution transformer) - number of dts where Psum_kW value is over a limit
+	Site Under Maintenance - number of DTs that have a "Pending" status 
+	
+dashboard overview Operations - Site - list of all devices in company:
+	Asset Name: Device name 
+	Asset co-ordinate: log-lat values
+	Asset Capacity: 
+
+
+Alerts are part of an Event, Alerts will have numbers
