@@ -1,3 +1,5 @@
+import awswrangler as wr
+import pandas as pd
 from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -5,18 +7,33 @@ from rest_framework import status
 from core.models import Alert, Site, TransactionHistory
 from core.api.serializers import AlertSerializer, SiteSerializer, TransactionHistorySerializer
 from core.pagination import TablePagination
+from main import ARC
 
 
 class OperationsCardsDataApiView(GenericAPIView):
     def get(self, request, **kwargs):
-        return Response({
-            "total_consumption": 32727658,
-            "current_load": 2727121,
+        results = {
+            "total_consumption": 0,
+            "current_load": 0,
             "avg_availability": 20,
             "power_cuts": 5,
             "overloaded_dts": 10,
             "sites_under_maintenance": Site.objects.filter(under_maintenance=True).count(),
-        }, status=status.HTTP_200_OK)
+        }
+
+        try:
+            df = wr.data_api.rds.read_sql_query(
+                sql="SELECT * FROM public.test_table limit 1000",
+                con=ARC,
+            )
+
+            results['total_consumption'] = int(sum([float(x) for x in df['import_active_energy_overall_total']]))
+            results['current_load'] = int(sum([float(x) for x in df['active_power_overall_total']]))
+
+        except Exception as e:
+            raise e
+
+        return Response(results, status=status.HTTP_200_OK)
 
 
 class OperationsProfileChartApiView(GenericAPIView):
