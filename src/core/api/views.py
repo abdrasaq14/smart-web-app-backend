@@ -1,4 +1,6 @@
+import json
 import awswrangler as wr
+import numpy as np
 import pandas as pd
 from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.response import Response
@@ -60,16 +62,24 @@ class OperationsProfileChartApiView(GenericAPIView):
 
 class OperationsPowerConsumptionChartApiView(GenericAPIView):
     def get(self, request, **kwargs):
-        return Response({
+        response = {
             "dataset": [
                 ['district', 'consumption'],
-                ['District E', 850],
-                ['District D', 200],
-                ['District C', 300],
-                ['District B', 500],
-                ['District A', 800]
-            ],
-        }, status=status.HTTP_200_OK)
+            ]
+        }
+        df = wr.data_api.rds.read_sql_query(
+            sql="SELECT * FROM public.test_table limit 1000",
+            con=ARC,
+        )
+        df['import_active_energy_overall_total'] = df['import_active_energy_overall_total'].astype('float')
+
+        group_by = json.loads(df.groupby('device_model').agg(Sum=('import_active_energy_overall_total', np.sum)).to_json())
+        group_by_sum = group_by['Sum']
+
+        for k, v in group_by_sum.items():
+            response["dataset"].append([k, v])
+
+        return Response(response, status=status.HTTP_200_OK)
 
 
 class OperationsSitesApiView(GenericAPIView):
