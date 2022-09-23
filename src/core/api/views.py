@@ -75,10 +75,10 @@ class OperationsPowerConsumptionChartApiView(GenericAPIView):
 class OperationsSitesApiView(GenericAPIView):
     def get(self, request, **kwargs):
         return Response({
-            "total": 12000,
+            "total": Site.objects.all().count(),
             "dataset": [
-                {"key": 'active', "value": 40},
-                {"key": 'offline', "value": 60},
+                {"key": 'active', "value": Site.objects.filter(is_active=True).count()},
+                {"key": 'offline', "value": Site.objects.filter(is_active=False).count()},
             ],
         }, status=status.HTTP_200_OK)
 

@@ -42,5 +42,6 @@ class Site(models.Model):
     asset_capacity = models.CharField(max_length=120)
 
     under_maintenance = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
     time = models.DateTimeField()
