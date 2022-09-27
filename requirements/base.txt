@@ -28,3 +28,5 @@ requests-aws4auth==1.1.2
 s3transfer==0.6.0
 sqlparse==0.4.2
 urllib3==1.26.12
+matplotlib==3.6.0
+matplotlib-inline==0.1.6
