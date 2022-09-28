@@ -5,7 +5,7 @@ from typing import List
 import pandas as pd
 
 from main import ARC
-from core.models import Site
+from core.models import Device, Site
 from core.constants import DEVICE_DATE_FORMAT, DEVICE_DATETIME_FORMAT
 
 
@@ -145,4 +145,20 @@ class OrganizationDeviceData(DeviceRules):
                 inactive_time += diff_minutes
 
         return int(active_time / 60), int(inactive_time / 60)
+
+    def get_overloaded_dts(self):
+        # count (active_power_overall_total)/DT capacity > 0.75
+        overloaded_dts = 0
+
+        for device_id in self.device_ids:
+            sql_query = f"""
+                SELECT active_power_overall_total FROM public.smart_device_readings
+                WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial = '{device_id}'
+            """
+            df = self.read_sql(sql_query)
+            df['results'] = df['active_power_overall_total'] / Device.objects.get(id=device_id).asset_capacity
+            if not df[df['results'] > 0.75].empty:
+                overloaded_dts += 1
+
+        return overloaded_dts
 

@@ -59,7 +59,7 @@ class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
             results['avg_availability'] = active_power
             results['power_cuts'] = inactive_power
 
-            # results['overloaded_dts'] = 
+            results['overloaded_dts'] = org_device_data.get_overloaded_dts()
 
         except Exception as e:
             raise e
