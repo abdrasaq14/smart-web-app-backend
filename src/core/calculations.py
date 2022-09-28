@@ -56,44 +56,25 @@ class DeviceRules(BaseDeviceData):
 
     def dt_active(self) -> int:
         # (line_to_neutral_voltage_phase_a OR line_to_neutral_voltage_phase_b OR line_to_neutral_voltage_phase_c <> 0)
-        # AND (line_to_neutral_voltage_phase_a != 0 OR line_to_neutral_voltage_phase_b != 0 OR line_to_neutral_voltage_phase_c != 0)
 
-        # sql_query = f"""
-        #     SELECT timestamp, line_to_neutral_voltage_phase_a, line_to_neutral_voltage_phase_b, line_to_neutral_voltage_phase_c  FROM public.smart_device_readings
-        #     WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
-        # """
+        sql_query = f"""
+            SELECT timestamp, line_to_neutral_voltage_phase_a, line_to_neutral_voltage_phase_b, line_to_neutral_voltage_phase_c  FROM public.smart_device_readings
+            WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
+            AND (line_to_neutral_voltage_phase_a != 0 OR line_to_neutral_voltage_phase_b != 0 OR line_to_neutral_voltage_phase_c != 0)
+        """
 
-        # df = self.read_sql(sql_query)
-        # active_time = 0
+        df = self.read_sql(sql_query)
+        return df
 
-        # for idx, row in df.iterrows():
-        #     volt_a = row['line_to_neutral_voltage_phase_a']
-        #     volt_b = row['line_to_neutral_voltage_phase_b']
-        #     volt_c = row['line_to_neutral_voltage_phase_c']
-
-        #     if volt_a != 0 or volt_b != 0 or volt_c != 0:
-        #         try:
-        #             nxt = df.iloc[[idx + 1]]
-        #         except IndexError:
-        #             break
-
-        #         nxt_datetime = datetime.strptime(nxt['timestamp'][idx + 1], DEVICE_DATETIME_FORMAT)
-        #         now_datetime = datetime.strptime(row['timestamp'], DEVICE_DATETIME_FORMAT)
-
-        #         diff_time = nxt_datetime - now_datetime
-        #         minutes = diff_time.total_seconds() / 60
-        #         active_time += minutes
-
-        # return int(active_time)
-        ...
-
-
-    def dt_offline():
+    def dt_offline(self):
         sql_query = f"""
             SELECT timestamp, line_to_neutral_voltage_phase_a, line_to_neutral_voltage_phase_b, line_to_neutral_voltage_phase_c  FROM public.smart_device_readings
             WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
             AND (line_to_neutral_voltage_phase_a = 0 AND line_to_neutral_voltage_phase_b = 0 AND line_to_neutral_voltage_phase_c = 0)
         """
+
+        df = self.read_sql(sql_query)
+        return df
 
     def estimated_tariff():
         ...
