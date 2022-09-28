@@ -45,3 +45,20 @@ class Site(models.Model):
     is_active = models.BooleanField(default=True)
 
     time = models.DateTimeField()
+
+
+class Device(models.Model):
+    id = models.CharField(max_length=240, unique=True, primary_key=True)
+
+    name = models.CharField(max_length=120)
+    location = models.CharField(max_length=240)
+    co_ordinate = models.CharField(max_length=240)
+
+    # Should be relation in the future
+    company_name = models.CharField(max_length=120)
+
+    site = models.ForeignKey(
+        Site,
+        null=False, blank=False,
+        on_delete=models.CASCADE
+    )
