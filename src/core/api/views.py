@@ -9,6 +9,7 @@ from rest_framework import status
 from core.models import Alert, Site, TransactionHistory
 from core.api.serializers import AlertSerializer, SiteSerializer, TransactionHistorySerializer
 from core.pagination import TablePagination
+from core.calculations import OrganizationDeviceData
 from main import ARC
 
 
@@ -24,13 +25,8 @@ class OperationsCardsDataApiView(GenericAPIView):
         }
 
         try:
-            df = wr.data_api.rds.read_sql_query(
-                sql="SELECT * FROM public.test_table limit 1000",
-                con=ARC,
-            )
-
-            results['total_consumption'] = int(sum([float(x) for x in df['import_active_energy_overall_total']]))
-            results['current_load'] = int(sum([float(x) for x in df['active_power_overall_total']]))
+            results['total_consumption'] = OrganizationDeviceData.get_total_consumption()
+            results['current_load'] = OrganizationDeviceData.get_current_load()
 
         except Exception as e:
             raise e
