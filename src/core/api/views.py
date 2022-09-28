@@ -10,7 +10,7 @@ from core.exceptions import GenericErrorException
 from core.models import Alert, Site, TransactionHistory
 from core.api.serializers import AlertSerializer, SiteSerializer, TransactionHistorySerializer
 from core.pagination import TablePagination
-from core.calculations import OrganizationDeviceData
+from core.calculations import DeviceRules, OrganizationDeviceData
 from core.types import AlertStatusType
 from main import ARC
 
@@ -40,6 +40,8 @@ class GetSitesMixin:
 class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
+        start_date = request.query_params.get('start_date', None)
+        end_date = request.query_params.get('end_date', None)
 
         sites_under_maintenance = 0
         for site in sites:
@@ -55,7 +57,7 @@ class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
         }
 
         try:
-            org_device_data = OrganizationDeviceData(sites)
+            org_device_data = OrganizationDeviceData(sites, start_date, end_date)
 
             results['total_consumption'] = org_device_data.get_total_consumption()
             results['current_load'] = org_device_data.get_current_load()
@@ -116,13 +118,21 @@ class OperationsPowerConsumptionChartApiView(GenericAPIView):
         return Response(response, status=status.HTTP_200_OK)
 
 
-class OperationsSitesApiView(GenericAPIView):
+class OperationsSiteMonitoredApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
+        sites = self.get_sites(request)
+        start_date = request.query_params.get('start_date', None)
+        end_date = request.query_params.get('end_date', None)
+
+        device_rules = DeviceRules(sites, start_date, end_date)
+        dt_active_df = device_rules.dt_active()
+        dt_inactive_df = device_rules.dt_offline()
+
         return Response({
             "total": Site.objects.all().count(),
             "dataset": [
-                {"key": 'active', "value": Site.objects.filter(is_active=True).count()},
-                {"key": 'offline', "value": Site.objects.filter(is_active=False).count()},
+                {"key": 'active', "value": len(dt_active_df.index)},
+                {"key": 'offline', "value": len(dt_inactive_df.index)},
             ],
         }, status=status.HTTP_200_OK)
 

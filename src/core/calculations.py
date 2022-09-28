@@ -55,12 +55,13 @@ class BaseDeviceData:
 class DeviceRules(BaseDeviceData):
 
     def dt_active(self) -> int:
-        # (line_to_neutral_voltage_phase_a OR line_to_neutral_voltage_phase_b OR line_to_neutral_voltage_phase_c <> 0)
-
         sql_query = f"""
-            SELECT timestamp, line_to_neutral_voltage_phase_a, line_to_neutral_voltage_phase_b, line_to_neutral_voltage_phase_c  FROM public.smart_device_readings
+            SELECT COUNT(timestamp), device_serial
+            FROM public.smart_device_readings
             WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
             AND (line_to_neutral_voltage_phase_a != 0 OR line_to_neutral_voltage_phase_b != 0 OR line_to_neutral_voltage_phase_c != 0)
+            GROUP BY device_serial
+            ORDER BY COUNT(timestamp) DESC
         """
 
         df = self.read_sql(sql_query)
@@ -68,9 +69,12 @@ class DeviceRules(BaseDeviceData):
 
     def dt_offline(self):
         sql_query = f"""
-            SELECT timestamp, line_to_neutral_voltage_phase_a, line_to_neutral_voltage_phase_b, line_to_neutral_voltage_phase_c  FROM public.smart_device_readings
+            SELECT COUNT(timestamp), device_serial
+            FROM public.smart_device_readings
             WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
             AND (line_to_neutral_voltage_phase_a = 0 AND line_to_neutral_voltage_phase_b = 0 AND line_to_neutral_voltage_phase_c = 0)
+            GROUP BY device_serial
+            ORDER BY COUNT(timestamp) DESC
         """
 
         df = self.read_sql(sql_query)
@@ -110,9 +114,6 @@ class OrganizationDeviceData(DeviceRules):
 
         df = self.read_sql(sql_query)
         return round(df['avg'][0], 2)
-
-    def get_overloaded_dts(date=get_last_month_date()) -> float:
-        ...
 
     def get_avg_availability_and_power_cuts(self):
         # AVG availability - Sum for active time
@@ -161,4 +162,3 @@ class OrganizationDeviceData(DeviceRules):
                 overloaded_dts += 1
 
         return overloaded_dts
-
