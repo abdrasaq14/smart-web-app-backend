@@ -60,5 +60,8 @@ class Device(models.Model):
     site = models.ForeignKey(
         Site,
         null=False, blank=False,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='devices'
     )
+
+    linked_at = models.DateTimeField(auto_now_add=True)
