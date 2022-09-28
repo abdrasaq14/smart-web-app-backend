@@ -1,8 +1,8 @@
 from typing import Any
 
 from django.core.management import BaseCommand, CommandParser
-from core.models import Alert, Site, TransactionHistory
-from core.tests.factories import AlertFactory, SiteFactory, TransactionHistoryFactory
+from core.models import Alert, Device, Site, TransactionHistory
+from core.tests.factories import AlertFactory, DeviceFactory, SiteFactory, TransactionHistoryFactory
 
 
 class Command(BaseCommand):
@@ -41,20 +41,22 @@ class Command(BaseCommand):
         generated = {
             'alerts': 0,
             'transaction_history': 0,
-            'sites': 0
+            'sites': 0,
+            'devices': 0
         }
 
         if clear:
             Alert.objects.all().delete()
             TransactionHistory.objects.all().delete()
+            Device.objects.all().delete()
             Site.objects.all().delete()
+
+        # Sites
+        site = SiteFactory()
+        generated['sites'] += 1
 
         # Create objects
         for i in range(number):
-            # Sites
-            site = SiteFactory()
-            generated['sites'] += 1
-
             # Alerts
             AlertFactory(site=site)
             generated['alerts'] += 1
@@ -63,6 +65,9 @@ class Command(BaseCommand):
             TransactionHistoryFactory(site=site)
             generated['transaction_history'] += 1
 
-        self.stdout.write(f"{generated['alerts']} alerts generated!")
-        self.stdout.write(f"{generated['transaction_history']} transaction history objects generated!")
-        self.stdout.write(f"{generated['sites']} sites generated!")
+        # Devices
+        DeviceFactory(site=site, id='AH19141125')
+        generated['devices'] = 1
+
+        for key in generated.keys():
+            self.stdout.write(f"{generated[key]} {key} generated!")
