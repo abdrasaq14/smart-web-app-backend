@@ -3,7 +3,7 @@ from factory.fuzzy import FuzzyDateTime, FuzzyFloat, FuzzyInteger
 from datetime import datetime
 from pytz import UTC
 
-from core.models import Alert, Site, TransactionHistory
+from core.models import Alert, Device, Site, TransactionHistory
 from core.types import AlertStatusType
 
 
@@ -48,3 +48,18 @@ class AlertFactory(factory.django.DjangoModelFactory):
 
     class Meta:
         model = Alert
+
+
+class DeviceFactory(factory.django.DjangoModelFactory):
+    id = factory.Sequence(lambda n: "DEVICE-ABU-%s" % n)
+
+    site = factory.SubFactory(SiteFactory)
+
+    name = factory.Sequence(lambda n: "Device_%s" % n)
+    location = factory.Sequence(lambda n: "Location - %s" % n)
+    co_ordinate = factory.Sequence(lambda n: "Co ordinate - %s" % n)
+
+    company_name = factory.Sequence(lambda n: "Company - %s" % n)
+
+    class Meta:
+        model = Device
