@@ -11,11 +11,12 @@ from core.models import Alert, Site, TransactionHistory
 from core.api.serializers import AlertSerializer, SiteSerializer, TransactionHistorySerializer
 from core.pagination import TablePagination
 from core.calculations import OrganizationDeviceData
+from core.types import AlertStatusType
 from main import ARC
 
 
 class GetSitesMixin:
-    def get_sites(self, request):
+    def get_sites(self, request) -> List[Site]:
         sites = request.query_params.get('sites', '')
 
         if not sites:
@@ -40,13 +41,17 @@ class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
 
+        sites_under_maintenance = 0
+        for site in sites:
+            sites_under_maintenance += site.alerts.filter(status=AlertStatusType.PENDING.value).count()
+
         results = {
             "total_consumption": 0,
             "current_load": 0,
             "avg_availability": 20,
             "power_cuts": 5,
             "overloaded_dts": 10,
-            "sites_under_maintenance": Site.objects.filter(under_maintenance=True).count(),
+            "sites_under_maintenance": sites_under_maintenance,
         }
 
         try:

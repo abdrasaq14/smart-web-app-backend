@@ -3,11 +3,18 @@ from core.types import AlertStatusType
 
 
 class Alert(models.Model):
-    alert_id = models.CharField(max_length=120)  # Should be unique?
-    site = models.ForeignKey('core.Site', blank=False, null=False, on_delete=models.CASCADE)
+    alert_id = models.CharField(max_length=120)
+    site = models.ForeignKey(
+        'core.Site',
+        blank=False, null=False,
+        on_delete=models.CASCADE,
+        related_name='alerts'
+    )
+
     zone = models.CharField(max_length=120)
     district = models.CharField(max_length=120)
     activity = models.CharField(max_length=120)
+
     status = models.CharField(
         max_length=50,
         null=False,
