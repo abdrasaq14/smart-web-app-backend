@@ -51,7 +51,7 @@ class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
             org_device_data = OrganizationDeviceData(sites)
 
             results['total_consumption'] = org_device_data.get_total_consumption()
-            results['current_load'] = OrganizationDeviceData.get_current_load()
+            results['current_load'] = org_device_data.get_current_load()
 
         except Exception as e:
             raise e
