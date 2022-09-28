@@ -56,6 +56,12 @@ class Device(models.Model):
 
     # Should be relation in the future
     company_name = models.CharField(max_length=120)
+    company_district = models.CharField(max_length=120)
+    company_zone = models.CharField(max_length=120)
+    asset_type = models.CharField(max_length=120)
+    asset_capacity = models.IntegerField()
+
+    tariff = models.CharField(max_length=120)
 
     site = models.ForeignKey(
         Site,
