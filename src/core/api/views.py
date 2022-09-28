@@ -2,7 +2,6 @@ import json
 from typing import List
 import awswrangler as wr
 import numpy as np
-import pandas as pd
 from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -52,6 +51,10 @@ class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
 
             results['total_consumption'] = org_device_data.get_total_consumption()
             results['current_load'] = org_device_data.get_current_load()
+            active_power, inactive_power = org_device_data.get_avg_availability_and_power_cuts()
+
+            results['avg_availability'] = active_power
+            results['power_cuts'] = inactive_power
 
         except Exception as e:
             raise e

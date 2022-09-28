@@ -6,7 +6,7 @@ import pandas as pd
 
 from main import ARC
 from core.models import Site
-from core.constants import DEVICE_DATE_FORMAT
+from core.constants import DEVICE_DATE_FORMAT, DEVICE_DATETIME_FORMAT
 
 
 def get_last_month_date() -> str:
@@ -15,7 +15,7 @@ def get_last_month_date() -> str:
     return last_month.strftime(DEVICE_DATE_FORMAT)
 
 
-class OrganizationDeviceData:
+class BaseDeviceData:
     sites: List[Site] = []
     start_date = None
     end_date = None
@@ -51,6 +51,65 @@ class OrganizationDeviceData:
         print(sql_query)
         return wr.data_api.rds.read_sql_query(sql=sql_query, con=ARC)
 
+
+class DeviceRules(BaseDeviceData):
+
+    def dt_active(self) -> int:
+        # (line_to_neutral_voltage_phase_a OR line_to_neutral_voltage_phase_b OR line_to_neutral_voltage_phase_c <> 0)
+        # AND (line_to_neutral_voltage_phase_a != 0 OR line_to_neutral_voltage_phase_b != 0 OR line_to_neutral_voltage_phase_c != 0)
+
+        # sql_query = f"""
+        #     SELECT timestamp, line_to_neutral_voltage_phase_a, line_to_neutral_voltage_phase_b, line_to_neutral_voltage_phase_c  FROM public.smart_device_readings
+        #     WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
+        # """
+
+        # df = self.read_sql(sql_query)
+        # active_time = 0
+
+        # for idx, row in df.iterrows():
+        #     volt_a = row['line_to_neutral_voltage_phase_a']
+        #     volt_b = row['line_to_neutral_voltage_phase_b']
+        #     volt_c = row['line_to_neutral_voltage_phase_c']
+
+        #     if volt_a != 0 or volt_b != 0 or volt_c != 0:
+        #         try:
+        #             nxt = df.iloc[[idx + 1]]
+        #         except IndexError:
+        #             break
+
+        #         nxt_datetime = datetime.strptime(nxt['timestamp'][idx + 1], DEVICE_DATETIME_FORMAT)
+        #         now_datetime = datetime.strptime(row['timestamp'], DEVICE_DATETIME_FORMAT)
+
+        #         diff_time = nxt_datetime - now_datetime
+        #         minutes = diff_time.total_seconds() / 60
+        #         active_time += minutes
+
+        # return int(active_time)
+        ...
+
+
+    def dt_offline():
+        sql_query = f"""
+            SELECT timestamp, line_to_neutral_voltage_phase_a, line_to_neutral_voltage_phase_b, line_to_neutral_voltage_phase_c  FROM public.smart_device_readings
+            WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
+            AND (line_to_neutral_voltage_phase_a = 0 AND line_to_neutral_voltage_phase_b = 0 AND line_to_neutral_voltage_phase_c = 0)
+        """
+
+    def estimated_tariff():
+        ...
+
+    def average_load():
+        ...
+
+    def potential_consumption():
+        ...
+
+    def dt_capacity():
+        ...
+
+
+class OrganizationDeviceData(DeviceRules):
+
     def get_total_consumption(self) -> float:
         # Total Consumption
         sql_query = f"""
@@ -74,32 +133,35 @@ class OrganizationDeviceData:
     def get_overloaded_dts(date=get_last_month_date()) -> float:
         ...
 
+    def get_avg_availability_and_power_cuts(self):
+        # AVG availability - Sum for active time
+        sql_query = f"""
+            SELECT timestamp, line_to_neutral_voltage_phase_a, line_to_neutral_voltage_phase_b, line_to_neutral_voltage_phase_c  FROM public.smart_device_readings
+            WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
+        """
 
-class DeviceRules:
+        df = self.read_sql(sql_query)
+        active_time = inactive_time = 0
 
-    def dt_active(date):
-        # (line_to_neutral_voltage_phase_a AND line_to_neutral_voltage_phase_b AND line_to_neutral_voltage_phase_c <> 0)
-        df = wr.data_api.rds.read_sql_query(
-            sql=f"""
-                SELECT * FROM public.smart_device_readings
-                WHERE line_to_neutral_voltage_phase_a != 0 AND line_to_neutral_voltage_phase_b != 0 AND line_to_neutral_voltage_phase_c != 0
-                AND date > '{date}'
-            """,
-            con=ARC,
-        )
+        for idx, row in df.iterrows():
+            volt_a = row['line_to_neutral_voltage_phase_a']
+            volt_b = row['line_to_neutral_voltage_phase_b']
+            volt_c = row['line_to_neutral_voltage_phase_c']
 
-    def dt_offline():
-        ...
+            try:
+                nxt = df.iloc[[idx + 1]]
+            except IndexError:
+                break
 
-    def estimated_tariff():
-        ...
+            nxt_datetime = datetime.strptime(nxt['timestamp'][idx + 1], DEVICE_DATETIME_FORMAT)
+            now_datetime = datetime.strptime(row['timestamp'], DEVICE_DATETIME_FORMAT)
+            diff_time = nxt_datetime - now_datetime
+            diff_minutes = diff_time.total_seconds() / 60
 
-    def average_load():
-        ...
+            if volt_a != 0 or volt_b != 0 or volt_c != 0:
+                active_time += diff_minutes
+            elif volt_a == 0 and volt_b == 0 and volt_c == 0:
+                inactive_time += diff_minutes
 
-    def potential_consumption():
-        ...
-
-    def dt_capacity():
-        ...
+        return int(active_time / 60), int(inactive_time / 60)
 
