@@ -1,10 +1,12 @@
 import json
+from typing import List
 import awswrangler as wr
 import numpy as np
 import pandas as pd
 from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
+from core.exceptions import GenericErrorException
 
 from core.models import Alert, Site, TransactionHistory
 from core.api.serializers import AlertSerializer, SiteSerializer, TransactionHistorySerializer
@@ -13,8 +15,29 @@ from core.calculations import OrganizationDeviceData
 from main import ARC
 
 
-class OperationsCardsDataApiView(GenericAPIView):
+class GetSitesMixin:
+    def get_sites(self, request):
+        sites = request.query_params.get('sites', '')
+        site_ids = sites.split(',')
+
+        return self.search_sites(site_ids)
+
+    def search_sites(self, site_ids: List[str]) -> List[Site]:
+        sites = []
+
+        for site_id in site_ids:
+            try:
+                sites.append(Site.objects.get(id=int(site_id)))
+            except Site.DoesNotExist:
+                raise GenericErrorException(f'Site: {site_id} does not exist')
+
+        return sites
+
+
+class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
+        sites = self.get_sites(request)
+
         results = {
             "total_consumption": 0,
             "current_load": 0,
@@ -25,7 +48,9 @@ class OperationsCardsDataApiView(GenericAPIView):
         }
 
         try:
-            results['total_consumption'] = OrganizationDeviceData.get_total_consumption()
+            org_device_data = OrganizationDeviceData(sites)
+
+            results['total_consumption'] = org_device_data.get_total_consumption()
             results['current_load'] = OrganizationDeviceData.get_current_load()
 
         except Exception as e:
