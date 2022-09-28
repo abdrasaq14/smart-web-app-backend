@@ -17,8 +17,11 @@ from main import ARC
 class GetSitesMixin:
     def get_sites(self, request):
         sites = request.query_params.get('sites', '')
-        site_ids = sites.split(',')
 
+        if not sites:
+            return Site.objects.all()
+
+        site_ids = sites.split(',')
         return self.search_sites(site_ids)
 
     def search_sites(self, site_ids: List[str]) -> List[Site]:
@@ -55,6 +58,8 @@ class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
 
             results['avg_availability'] = active_power
             results['power_cuts'] = inactive_power
+
+            # results['overloaded_dts'] = 
 
         except Exception as e:
             raise e
