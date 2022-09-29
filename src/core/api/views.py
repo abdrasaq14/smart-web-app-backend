@@ -71,26 +71,31 @@ class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
         return Response(results, status=status.HTTP_200_OK)
 
 
-class OperationsProfileChartApiView(GenericAPIView):
+class OperationsProfileChartApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
-        return Response({
-            "dataset": [
-                ['day', 'profile1', 'profile2'],
-                [0, 17, 14],
-                [2, 15, 13],
-                [4, 12, 12],
-                [6, 13, 11],
-                [8, 14, 12],
-                [10, 16, 13],
-                [12, 14, 10],
-                [14, 20, 12],
-                [16, 19, 9],
-                [18, 18, 10],
-                [20, 17, 11],
-                [22, 22, 10],
-                [24, 24, 13]
-            ],
-        }, status=status.HTTP_200_OK)
+        sites = self.get_sites(request)
+        start_date = request.query_params.get('start_date', None)
+        end_date = request.query_params.get('end_date', None)
+
+        org_device_data = OrganizationDeviceData(sites, start_date, end_date)
+        df, device_ids = org_device_data.get_load_profile()
+        pivoted_df = df.pivot_table(index="timestamp", columns="device_serial", values="active_power_overall_total")
+        pivoted_df = pivoted_df.fillna(0)
+
+        # response = {"dataset": [["day"]]}
+        response = {"dataset": []}
+        data_dict = []
+        # data_dict = [list(pivoted_df.index)]
+
+        for column in device_ids:
+            # response['dataset'][0].append(column)
+            try:
+                data_dict.append(list(pivoted_df[column]))
+            except KeyError:
+                pass
+
+        response['dataset'] = response['dataset'] + [list(x) for x in zip(*data_dict)]
+        return Response(response, status=status.HTTP_200_OK)
 
 
 class OperationsPowerConsumptionChartApiView(GenericAPIView, GetSitesMixin):

@@ -1,6 +1,7 @@
 import awswrangler as wr
 from datetime import datetime, timedelta
 from typing import List
+import numpy as np
 
 import pandas as pd
 
@@ -192,3 +193,20 @@ class OrganizationDeviceData(DeviceRules):
                 by_district[device.company_district] += device_avg
 
         return by_district
+
+    def get_load_profile(self):
+        sql_query = f"""
+            SELECT DISTINCT timestamp, active_power_overall_total, device_serial FROM public.smart_device_readings
+            WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
+            GROUP BY timestamp, active_power_overall_total, device_serial
+            ORDER BY timestamp ASC
+        """
+
+        df = self.read_sql(sql_query)
+
+        # Remove some data if we need.
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        df = df[df['timestamp'].dt.second.eq(0)]
+        # df = df[df['timestamp'].dt.minute.eq(0) & df['timestamp'].dt.second.eq(0)]
+
+        return df, self.device_ids
