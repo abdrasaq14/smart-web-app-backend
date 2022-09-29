@@ -169,3 +169,27 @@ class OrganizationDeviceData(DeviceRules):
                 overloaded_dts += 1
 
         return overloaded_dts
+
+    def get_power_consumption(self, districts: List[str]):
+        # net(import_active_energy_overall_total) aggregated across all devices, filtered by district
+
+        sql_query = f"""
+            SELECT device_serial, AVG(import_active_energy_overall_total) FROM public.smart_device_readings
+            WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
+            GROUP BY device_serial
+        """
+
+        df = self.read_sql(sql_query)
+        by_district = {}
+
+        for device_serial in self.device_ids:
+            device = Device.objects.get(id=device_serial)
+
+            if device.company_district not in by_district:
+                by_district[device.company_district] = 0
+
+            device_avg = df.loc[df['device_serial'] == device_serial]['avg']
+            if not device_avg.empty:
+                by_district[device.company_district] += device_avg
+
+        return by_district
