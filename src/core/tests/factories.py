@@ -15,7 +15,7 @@ class SiteFactory(factory.django.DjangoModelFactory):
     asset_co_ordinate = factory.Sequence(lambda n: "#4312SDSA - %s" % n)
     asset_capacity = factory.Sequence(lambda n: "1234 KW - %s" % n)
 
-    created_at = FuzzyDateTime(datetime(2019, 1, 1, tzinfo=UTC))
+    time = FuzzyDateTime(datetime(2019, 1, 1, tzinfo=UTC))
 
     class Meta:
         model = Site
@@ -29,7 +29,7 @@ class TransactionHistoryFactory(factory.django.DjangoModelFactory):
     amount_bought = FuzzyFloat(0, 99999)
 
     duration_days = FuzzyInteger(0, 10)
-    created_at = FuzzyDateTime(datetime(2019, 1, 1, tzinfo=UTC))
+    time = FuzzyDateTime(datetime(2019, 1, 1, tzinfo=UTC))
 
     class Meta:
         model = TransactionHistory
@@ -44,7 +44,7 @@ class AlertFactory(factory.django.DjangoModelFactory):
     district = factory.Sequence(lambda n: "District - %s" % n)
     activity = factory.Sequence(lambda n: "Activity - %s" % n)
     status = AlertStatusType.PENDING.value
-    created_at = FuzzyDateTime(datetime(2008, 1, 1, tzinfo=UTC))
+    time = FuzzyDateTime(datetime(2008, 1, 1, tzinfo=UTC))
 
     class Meta:
         model = Alert
