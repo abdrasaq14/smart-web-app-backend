@@ -27,10 +27,11 @@ class BaseDeviceData:
         self.start_date = start_date
         self.end_date = end_date
 
-        if not self.start_date:
-            self.start_date = get_last_month_date()
         if not self.end_date:
             self.end_date = datetime.now().strftime(DEVICE_DATE_FORMAT)
+        if not self.start_date:
+            default_start_date = datetime.strptime(self.end_date, DEVICE_DATE_FORMAT) - timedelta(days=30)
+            self.start_date = default_start_date.strftime(DEVICE_DATE_FORMAT)
 
         self.device_ids = self._devices_from_sites()
         self.devices_query = self._devices_for_query()
@@ -56,12 +57,12 @@ class DeviceRules(BaseDeviceData):
 
     def dt_active(self) -> int:
         sql_query = f"""
-            SELECT COUNT(timestamp), device_serial
+            SELECT timestamp, device_serial
             FROM public.smart_device_readings
             WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
             AND (line_to_neutral_voltage_phase_a != 0 OR line_to_neutral_voltage_phase_b != 0 OR line_to_neutral_voltage_phase_c != 0)
             GROUP BY device_serial
-            ORDER BY COUNT(timestamp) DESC
+            ORDER BY timestamp ASC
         """
 
         df = self.read_sql(sql_query)
@@ -69,12 +70,12 @@ class DeviceRules(BaseDeviceData):
 
     def dt_offline(self):
         sql_query = f"""
-            SELECT COUNT(timestamp), device_serial
+            SELECT timestamp, device_serial
             FROM public.smart_device_readings
             WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
             AND (line_to_neutral_voltage_phase_a = 0 AND line_to_neutral_voltage_phase_b = 0 AND line_to_neutral_voltage_phase_c = 0)
             GROUP BY device_serial
-            ORDER BY COUNT(timestamp) DESC
+            ORDER BY timestamp ASC
         """
 
         df = self.read_sql(sql_query)
@@ -103,6 +104,8 @@ class OrganizationDeviceData(DeviceRules):
         """
 
         df = self.read_sql(sql_query)
+        if df['avg'][0] is None:
+            return 0
         return round(df['avg'][0], 2)
 
     def get_current_load(self) -> float:
@@ -113,6 +116,8 @@ class OrganizationDeviceData(DeviceRules):
         """
 
         df = self.read_sql(sql_query)
+        if df['avg'][0] is None:
+            return 0
         return round(df['avg'][0], 2)
 
     def get_avg_availability_and_power_cuts(self):
@@ -120,6 +125,7 @@ class OrganizationDeviceData(DeviceRules):
         sql_query = f"""
             SELECT timestamp, line_to_neutral_voltage_phase_a, line_to_neutral_voltage_phase_b, line_to_neutral_voltage_phase_c  FROM public.smart_device_readings
             WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
+            ORDER BY timestamp ASC
         """
 
         df = self.read_sql(sql_query)
@@ -153,8 +159,9 @@ class OrganizationDeviceData(DeviceRules):
 
         for device_id in self.device_ids:
             sql_query = f"""
-                SELECT active_power_overall_total FROM public.smart_device_readings
+                SELECT timestamp, active_power_overall_total FROM public.smart_device_readings
                 WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial = '{device_id}'
+                ORDER BY timestamp ASC
             """
             df = self.read_sql(sql_query)
             df['results'] = df['active_power_overall_total'] / Device.objects.get(id=device_id).asset_capacity

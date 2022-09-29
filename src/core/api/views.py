@@ -50,9 +50,9 @@ class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
         results = {
             "total_consumption": 0,
             "current_load": 0,
-            "avg_availability": 20,
-            "power_cuts": 5,
-            "overloaded_dts": 10,
+            "avg_availability": 0,
+            "power_cuts": 0,
+            "overloaded_dts": 0,
             "sites_under_maintenance": sites_under_maintenance,
         }
 
