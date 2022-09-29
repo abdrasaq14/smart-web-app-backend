@@ -1,3 +1,4 @@
+import random
 from typing import Any
 
 from django.core.management import BaseCommand, CommandParser
@@ -41,8 +42,8 @@ class Command(BaseCommand):
         generated = {
             'alerts': 0,
             'transaction_history': 0,
-            'sites': 0,
-            'devices': 0
+            'sites': 3,
+            'devices': 3
         }
 
         if clear:
@@ -52,22 +53,24 @@ class Command(BaseCommand):
             Site.objects.all().delete()
 
         # Sites
-        site = SiteFactory()
-        generated['sites'] += 1
+        site1 = SiteFactory()
+        site2 = SiteFactory()
+        site3 = SiteFactory()
 
         # Create objects
         for i in range(number):
             # Alerts
-            AlertFactory(site=site)
+            AlertFactory(site=random.choice([site1, site2, site3]))
             generated['alerts'] += 1
 
             # Transaction history
-            TransactionHistoryFactory(site=site)
+            TransactionHistoryFactory(site=random.choice([site1, site2, site3]))
             generated['transaction_history'] += 1
 
         # Devices
-        DeviceFactory(site=site, id='AH19141125')
-        generated['devices'] = 1
+        DeviceFactory(site=site1, id='AH19141125')
+        DeviceFactory(site=site2, id='AH19134411')
+        DeviceFactory(site=site3, id='AH19141207')
 
         for key in generated.keys():
             self.stdout.write(f"{generated[key]} {key} generated!")
