@@ -5,6 +5,7 @@ import numpy as np
 from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.db.models import Q
 from core.exceptions import GenericErrorException
 
 from core.models import Alert, Site, TransactionHistory
@@ -137,19 +138,42 @@ class OperationsSiteMonitoredApiView(GenericAPIView, GetSitesMixin):
         }, status=status.HTTP_200_OK)
 
 
-class AlertApiView(ListAPIView):
+class AlertApiView(ListAPIView, GetSitesMixin):
     serializer_class = AlertSerializer
-    queryset = Alert.objects.all().order_by('time')
+    queryset = Alert.objects.all().order_by('created_at')
     pagination_class = TablePagination
+
+    def get_queryset(self):
+        q = Q()
+        queryset = self.queryset
+        sites = self.get_sites(self.request)
+
+        start_date = self.request.query_params.get('start_date', None)
+        end_date = self.request.query_params.get('end_date', None)
+
+        if start_date and end_date:
+            q = Q(created_at__range=[start_date, end_date])
+        elif start_date and end_date is None:
+            q = Q(created_at__gte=start_date)
+        elif end_date and start_date is None:
+            q = Q(created_at__lte=end_date)
+
+        if sites:
+            q = q & Q(site__in=sites)
+
+        return queryset.filter(q)
 
 
 class TransactionHistoryApiView(ListAPIView):
     serializer_class = TransactionHistorySerializer
-    queryset = TransactionHistory.objects.all().order_by('time')
+    queryset = TransactionHistory.objects.all().order_by('created_at')
     pagination_class = TablePagination
 
 
-class SiteApiView(ListAPIView):
+class SiteApiView(ListAPIView, GetSitesMixin):
     serializer_class = SiteSerializer
-    queryset = Site.objects.all().order_by('time')
     pagination_class = TablePagination
+
+    def get_queryset(self):
+        sites = self.get_sites(self.request)
+        return sites.order_by('created_at')

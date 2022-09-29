@@ -23,7 +23,7 @@ class Alert(models.Model):
         default=AlertStatusType.PENDING.value
     )
 
-    time = models.DateTimeField()
+    created_at = models.DateTimeField()
 
     def __str__(self) -> str:
         return f"{self.alert_id} - {self.status}"
@@ -37,7 +37,7 @@ class TransactionHistory(models.Model):
     amount_bought = models.FloatField(default=0)
 
     duration_days = models.IntegerField()
-    time = models.DateTimeField()
+    created_at = models.DateTimeField()
 
 
 class Site(models.Model):
@@ -51,7 +51,7 @@ class Site(models.Model):
     under_maintenance = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
-    time = models.DateTimeField()
+    created_at = models.DateTimeField()
 
 
 class Device(models.Model):
