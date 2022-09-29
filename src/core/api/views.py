@@ -1,22 +1,78 @@
+import json
+from typing import List
+import awswrangler as wr
+import numpy as np
 from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.db.models import Q
+from core.exceptions import GenericErrorException
 
 from core.models import Alert, Site, TransactionHistory
 from core.api.serializers import AlertSerializer, SiteSerializer, TransactionHistorySerializer
 from core.pagination import TablePagination
+from core.calculations import DeviceRules, OrganizationDeviceData
+from core.types import AlertStatusType
+from main import ARC
 
 
-class OperationsCardsDataApiView(GenericAPIView):
+class GetSitesMixin:
+    def get_sites(self, request) -> List[Site]:
+        sites = request.query_params.get('sites', '')
+
+        if not sites:
+            return Site.objects.all()
+
+        site_ids = sites.split(',')
+        return self.search_sites(site_ids)
+
+    def search_sites(self, site_ids: List[str]) -> List[Site]:
+        sites = []
+
+        for site_id in site_ids:
+            try:
+                sites.append(Site.objects.get(id=int(site_id)))
+            except Site.DoesNotExist:
+                raise GenericErrorException(f'Site: {site_id} does not exist')
+
+        return sites
+
+
+class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
-        return Response({
-            "total_consumption": 32727658,
-            "current_load": 2727121,
-            "avg_availability": 20,
-            "power_cuts": 5,
-            "overloaded_dts": 10,
-            "sites_under_maintenance": Site.objects.filter(under_maintenance=True).count(),
-        }, status=status.HTTP_200_OK)
+        sites = self.get_sites(request)
+        start_date = request.query_params.get('start_date', None)
+        end_date = request.query_params.get('end_date', None)
+
+        sites_under_maintenance = 0
+        for site in sites:
+            sites_under_maintenance += site.alerts.filter(status=AlertStatusType.PENDING.value).count()
+
+        results = {
+            "total_consumption": 0,
+            "current_load": 0,
+            "avg_availability": 0,
+            "power_cuts": 0,
+            "overloaded_dts": 0,
+            "sites_under_maintenance": sites_under_maintenance,
+        }
+
+        try:
+            org_device_data = OrganizationDeviceData(sites, start_date, end_date)
+
+            results['total_consumption'] = org_device_data.get_total_consumption()
+            results['current_load'] = org_device_data.get_current_load()
+            active_power, inactive_power = org_device_data.get_avg_availability_and_power_cuts()
+
+            results['avg_availability'] = active_power
+            results['power_cuts'] = inactive_power
+
+            results['overloaded_dts'] = org_device_data.get_overloaded_dts()
+
+        except Exception as e:
+            raise e
+
+        return Response(results, status=status.HTTP_200_OK)
 
 
 class OperationsProfileChartApiView(GenericAPIView):
@@ -43,42 +99,81 @@ class OperationsProfileChartApiView(GenericAPIView):
 
 class OperationsPowerConsumptionChartApiView(GenericAPIView):
     def get(self, request, **kwargs):
-        return Response({
+        response = {
             "dataset": [
                 ['district', 'consumption'],
-                ['District E', 850],
-                ['District D', 200],
-                ['District C', 300],
-                ['District B', 500],
-                ['District A', 800]
-            ],
-        }, status=status.HTTP_200_OK)
+            ]
+        }
+        df = wr.data_api.rds.read_sql_query(
+            sql="SELECT * FROM public.test_table limit 1000",
+            con=ARC,
+        )
+        df['import_active_energy_overall_total'] = df['import_active_energy_overall_total'].astype('float')
+
+        group_by = json.loads(df.groupby('device_model').agg(Sum=('import_active_energy_overall_total', np.sum)).to_json())
+        group_by_sum = group_by['Sum']
+
+        for k, v in group_by_sum.items():
+            response["dataset"].append([k, v])
+
+        return Response(response, status=status.HTTP_200_OK)
 
 
-class OperationsSitesApiView(GenericAPIView):
+class OperationsSiteMonitoredApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
+        sites = self.get_sites(request)
+        start_date = request.query_params.get('start_date', None)
+        end_date = request.query_params.get('end_date', None)
+
+        device_rules = DeviceRules(sites, start_date, end_date)
+        dt_active_df = device_rules.dt_active()
+        dt_inactive_df = device_rules.dt_offline()
+
         return Response({
-            "total": 12000,
+            "total": Site.objects.all().count(),
             "dataset": [
-                {"key": 'active', "value": 40},
-                {"key": 'offline', "value": 60},
+                {"key": 'active', "value": len(dt_active_df.index)},
+                {"key": 'offline', "value": len(dt_inactive_df.index)},
             ],
         }, status=status.HTTP_200_OK)
 
 
-class AlertApiView(ListAPIView):
+class AlertApiView(ListAPIView, GetSitesMixin):
     serializer_class = AlertSerializer
-    queryset = Alert.objects.all().order_by('time')
+    queryset = Alert.objects.all().order_by('created_at')
     pagination_class = TablePagination
+
+    def get_queryset(self):
+        q = Q()
+        queryset = self.queryset
+        sites = self.get_sites(self.request)
+
+        start_date = self.request.query_params.get('start_date', None)
+        end_date = self.request.query_params.get('end_date', None)
+
+        if start_date and end_date:
+            q = Q(created_at__range=[start_date, end_date])
+        elif start_date and end_date is None:
+            q = Q(created_at__gte=start_date)
+        elif end_date and start_date is None:
+            q = Q(created_at__lte=end_date)
+
+        if sites:
+            q = q & Q(site__in=sites)
+
+        return queryset.filter(q)
 
 
 class TransactionHistoryApiView(ListAPIView):
     serializer_class = TransactionHistorySerializer
-    queryset = TransactionHistory.objects.all().order_by('time')
+    queryset = TransactionHistory.objects.all().order_by('created_at')
     pagination_class = TablePagination
 
 
-class SiteApiView(ListAPIView):
+class SiteApiView(ListAPIView, GetSitesMixin):
     serializer_class = SiteSerializer
-    queryset = Site.objects.all().order_by('time')
     pagination_class = TablePagination
+
+    def get_queryset(self):
+        sites = self.get_sites(self.request)
+        return sites.order_by('created_at')

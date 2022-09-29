@@ -1,0 +1,2 @@
+DEVICE_DATE_FORMAT = '%Y-%m-%d'
+DEVICE_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'

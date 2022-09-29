@@ -1,8 +1,9 @@
+import random
 from typing import Any
 
 from django.core.management import BaseCommand, CommandParser
-from core.models import Alert, Site, TransactionHistory
-from core.tests.factories import AlertFactory, SiteFactory, TransactionHistoryFactory
+from core.models import Alert, Device, Site, TransactionHistory
+from core.tests.factories import AlertFactory, DeviceFactory, SiteFactory, TransactionHistoryFactory
 
 
 class Command(BaseCommand):
@@ -41,28 +42,35 @@ class Command(BaseCommand):
         generated = {
             'alerts': 0,
             'transaction_history': 0,
-            'sites': 0
+            'sites': 3,
+            'devices': 3
         }
 
         if clear:
             Alert.objects.all().delete()
             TransactionHistory.objects.all().delete()
+            Device.objects.all().delete()
             Site.objects.all().delete()
+
+        # Sites
+        site1 = SiteFactory()
+        site2 = SiteFactory()
+        site3 = SiteFactory()
 
         # Create objects
         for i in range(number):
-            # Sites
-            site = SiteFactory()
-            generated['sites'] += 1
-
             # Alerts
-            AlertFactory(site=site)
+            AlertFactory(site=random.choice([site1, site2, site3]))
             generated['alerts'] += 1
 
             # Transaction history
-            TransactionHistoryFactory(site=site)
+            TransactionHistoryFactory(site=random.choice([site1, site2, site3]))
             generated['transaction_history'] += 1
 
-        self.stdout.write(f"{generated['alerts']} alerts generated!")
-        self.stdout.write(f"{generated['transaction_history']} transaction history objects generated!")
-        self.stdout.write(f"{generated['sites']} sites generated!")
+        # Devices
+        DeviceFactory(site=site1, id='AH19141125')
+        DeviceFactory(site=site2, id='AH19134411')
+        DeviceFactory(site=site3, id='AH19141207')
+
+        for key in generated.keys():
+            self.stdout.write(f"{generated[key]} {key} generated!")

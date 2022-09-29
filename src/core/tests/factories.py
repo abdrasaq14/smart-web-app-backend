@@ -3,7 +3,7 @@ from factory.fuzzy import FuzzyDateTime, FuzzyFloat, FuzzyInteger
 from datetime import datetime
 from pytz import UTC
 
-from core.models import Alert, Site, TransactionHistory
+from core.models import Alert, Device, Site, TransactionHistory
 from core.types import AlertStatusType
 
 
@@ -15,7 +15,7 @@ class SiteFactory(factory.django.DjangoModelFactory):
     asset_co_ordinate = factory.Sequence(lambda n: "#4312SDSA - %s" % n)
     asset_capacity = factory.Sequence(lambda n: "1234 KW - %s" % n)
 
-    time = FuzzyDateTime(datetime(2019, 1, 1, tzinfo=UTC))
+    created_at = FuzzyDateTime(datetime(2019, 1, 1, tzinfo=UTC))
 
     class Meta:
         model = Site
@@ -29,7 +29,7 @@ class TransactionHistoryFactory(factory.django.DjangoModelFactory):
     amount_bought = FuzzyFloat(0, 99999)
 
     duration_days = FuzzyInteger(0, 10)
-    time = FuzzyDateTime(datetime(2019, 1, 1, tzinfo=UTC))
+    created_at = FuzzyDateTime(datetime(2019, 1, 1, tzinfo=UTC))
 
     class Meta:
         model = TransactionHistory
@@ -44,7 +44,26 @@ class AlertFactory(factory.django.DjangoModelFactory):
     district = factory.Sequence(lambda n: "District - %s" % n)
     activity = factory.Sequence(lambda n: "Activity - %s" % n)
     status = AlertStatusType.PENDING.value
-    time = FuzzyDateTime(datetime(2008, 1, 1, tzinfo=UTC))
+    created_at = FuzzyDateTime(datetime(2008, 1, 1, tzinfo=UTC))
 
     class Meta:
         model = Alert
+
+
+class DeviceFactory(factory.django.DjangoModelFactory):
+    id = factory.Sequence(lambda n: "DEVICE-ABU-%s" % n)
+
+    site = factory.SubFactory(SiteFactory)
+
+    name = factory.Sequence(lambda n: "Device_%s" % n)
+    location = factory.Sequence(lambda n: "Location - %s" % n)
+    co_ordinate = factory.Sequence(lambda n: "Co ordinate - %s" % n)
+
+    company_name = factory.Sequence(lambda n: "Company - %s" % n)
+    company_district = factory.Sequence(lambda n: "District - %s" % n)
+    company_zone = factory.Sequence(lambda n: "Company zone - %s" % n)
+    asset_type = factory.Sequence(lambda n: "Asset type - %s" % n)
+    asset_capacity = FuzzyInteger(0, 900)
+
+    class Meta:
+        model = Device

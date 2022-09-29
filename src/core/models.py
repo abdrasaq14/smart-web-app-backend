@@ -3,11 +3,18 @@ from core.types import AlertStatusType
 
 
 class Alert(models.Model):
-    alert_id = models.CharField(max_length=120)  # Should be unique?
-    site = models.ForeignKey('core.Site', blank=False, null=False, on_delete=models.CASCADE)
+    alert_id = models.CharField(max_length=120)
+    site = models.ForeignKey(
+        'core.Site',
+        blank=False, null=False,
+        on_delete=models.CASCADE,
+        related_name='alerts'
+    )
+
     zone = models.CharField(max_length=120)
     district = models.CharField(max_length=120)
     activity = models.CharField(max_length=120)
+
     status = models.CharField(
         max_length=50,
         null=False,
@@ -16,7 +23,7 @@ class Alert(models.Model):
         default=AlertStatusType.PENDING.value
     )
 
-    time = models.DateTimeField()
+    created_at = models.DateTimeField()
 
     def __str__(self) -> str:
         return f"{self.alert_id} - {self.status}"
@@ -30,7 +37,7 @@ class TransactionHistory(models.Model):
     amount_bought = models.FloatField(default=0)
 
     duration_days = models.IntegerField()
-    time = models.DateTimeField()
+    created_at = models.DateTimeField()
 
 
 class Site(models.Model):
@@ -42,5 +49,32 @@ class Site(models.Model):
     asset_capacity = models.CharField(max_length=120)
 
     under_maintenance = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
 
-    time = models.DateTimeField()
+    created_at = models.DateTimeField()
+
+
+class Device(models.Model):
+    id = models.CharField(max_length=240, unique=True, primary_key=True)
+
+    name = models.CharField(max_length=120)
+    location = models.CharField(max_length=240)
+    co_ordinate = models.CharField(max_length=240)
+
+    # Should be relation in the future
+    company_name = models.CharField(max_length=120)
+    company_district = models.CharField(max_length=120)
+    company_zone = models.CharField(max_length=120)
+    asset_type = models.CharField(max_length=120)
+    asset_capacity = models.IntegerField()
+
+    tariff = models.CharField(max_length=120)
+
+    site = models.ForeignKey(
+        Site,
+        null=False, blank=False,
+        on_delete=models.CASCADE,
+        related_name='devices'
+    )
+
+    linked_at = models.DateTimeField(auto_now_add=True)

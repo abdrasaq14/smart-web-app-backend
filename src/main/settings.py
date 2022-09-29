@@ -176,3 +176,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "accounts.User"
 
 BYPASS_AUTH = env.bool("DJANGO_BYPASS_AUTH", default=False)
+
+
+AWS_ARN_RESOURCE = env.str("AWS_ARN_RESOURCE", "")
+AWS_SECRET_ARN = env.str("AWS_SECRET_ARN", "")
+AWS_RDS_DATABASE = env.str("AWS_RDS_DATABASE", "smartmeters")
