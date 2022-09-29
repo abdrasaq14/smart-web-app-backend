@@ -179,3 +179,97 @@ class SiteApiView(ListAPIView, GetSitesMixin):
     def get_queryset(self):
         sites = self.get_sites(self.request)
         return sites.order_by('time')
+
+
+class OperationsDashboardRevenueLossApiView(GenericAPIView, GetSitesMixin):
+    def get(self, request, **kwargs):
+        sites = self.get_sites(request)
+        start_date = request.query_params.get('start_date', None)
+        end_date = request.query_params.get('end_date', None)
+
+        response = {
+            "total": 200000,
+            "dataset": [
+                { "key": 'billing', "value": 60 },
+                { "key": 'collection', "value": 20 },
+                { "key": 'downtime', "value": 20 },
+            ],
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
+class OperationsDashboardKeyInsightsApiView(GenericAPIView, GetSitesMixin):
+    def get(self, request, **kwargs):
+        sites = self.get_sites(request)
+        start_date = request.query_params.get('start_date', None)
+        end_date = request.query_params.get('end_date', None)
+
+        response = {
+            "insights": [
+                'DT is overloaded between 9AM and 1PM',
+                'Recurring low PF (inspect industrial customers',
+                'No power cuts today',
+                '98% collection efficiency',
+            ],
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
+class OperationsDashboardEnergyChartApiView(GenericAPIView, GetSitesMixin):
+    def get(self, request, **kwargs):
+        sites = self.get_sites(request)
+        start_date = request.query_params.get('start_date', None)
+        end_date = request.query_params.get('end_date', None)
+
+        response = {
+            "dataset": [
+                ['month', 'energy'],
+                ['JAN', 420],
+                ['FEB', 740],
+                ['MAR', 600],
+                ['APR', 600],
+                ['MAY', 500],
+                ['JUN', 800],
+                ['JUL', 840],
+                ['AUG', 400],
+                ['SEP', 800],
+                ['OCT', 750],
+                ['NOV', 890],
+                ['DEC', 980],
+            ],
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
+class OperationsDashboardCardsDataApiView(GenericAPIView, GetSitesMixin):
+    def get(self, request, **kwargs):
+        sites = self.get_sites(request)
+        start_date = request.query_params.get('start_date', None)
+        end_date = request.query_params.get('end_date', None)
+
+        response = {
+            "gridHours": 32727658,
+            "tariffPlan": 23,
+            "noOfOutages": 1019591,
+            "downtime": 29019591,
+            "revenuePerHour": 32271658,
+            "untappedRevenue": 832658,
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
+class OperationsDashboardDTStatusApiView(GenericAPIView, GetSitesMixin):
+    def get(self, request, **kwargs):
+        sites = self.get_sites(request)
+        start_date = request.query_params.get('start_date', None)
+        end_date = request.query_params.get('end_date', None)
+
+        response = {
+            "dataset": { "percentageValue": 70, "humidity": 45, "temperature": 55 },
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
