@@ -57,12 +57,11 @@ class DeviceRules(BaseDeviceData):
 
     def dt_active(self) -> int:
         sql_query = f"""
-            SELECT timestamp, device_serial
+            SELECT device_serial
             FROM public.smart_device_readings
             WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
             AND (line_to_neutral_voltage_phase_a != 0 OR line_to_neutral_voltage_phase_b != 0 OR line_to_neutral_voltage_phase_c != 0)
             GROUP BY device_serial
-            ORDER BY timestamp ASC
         """
 
         df = self.read_sql(sql_query)
@@ -70,12 +69,11 @@ class DeviceRules(BaseDeviceData):
 
     def dt_offline(self):
         sql_query = f"""
-            SELECT timestamp, device_serial
+            SELECT device_serial
             FROM public.smart_device_readings
             WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
             AND (line_to_neutral_voltage_phase_a = 0 AND line_to_neutral_voltage_phase_b = 0 AND line_to_neutral_voltage_phase_c = 0)
             GROUP BY device_serial
-            ORDER BY timestamp ASC
         """
 
         df = self.read_sql(sql_query)
@@ -126,6 +124,7 @@ class OrganizationDeviceData(DeviceRules):
             SELECT timestamp, line_to_neutral_voltage_phase_a, line_to_neutral_voltage_phase_b, line_to_neutral_voltage_phase_c  FROM public.smart_device_readings
             WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
             ORDER BY timestamp ASC
+            LIMIT 10000
         """
 
         df = self.read_sql(sql_query)

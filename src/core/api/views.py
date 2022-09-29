@@ -1,7 +1,4 @@
-import json
 from typing import List
-import awswrangler as wr
-import numpy as np
 from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -13,7 +10,6 @@ from core.api.serializers import AlertSerializer, SiteSerializer, TransactionHis
 from core.pagination import TablePagination
 from core.calculations import DeviceRules, OrganizationDeviceData
 from core.types import AlertStatusType
-from main import ARC
 
 
 class GetSitesMixin:
