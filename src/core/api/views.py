@@ -8,7 +8,7 @@ from rest_framework import status
 from django.db.models import Q
 from core.exceptions import GenericErrorException
 
-from core.models import Alert, Site, TransactionHistory
+from core.models import Alert, Device, Site, TransactionHistory
 from core.api.serializers import AlertSerializer, SiteSerializer, TransactionHistorySerializer
 from core.pagination import TablePagination
 from core.calculations import DeviceRules, OrganizationDeviceData
@@ -97,24 +97,25 @@ class OperationsProfileChartApiView(GenericAPIView):
         }, status=status.HTTP_200_OK)
 
 
-class OperationsPowerConsumptionChartApiView(GenericAPIView):
+class OperationsPowerConsumptionChartApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
+        sites = self.get_sites(request)
+        start_date = request.query_params.get('start_date', None)
+        end_date = request.query_params.get('end_date', None)
+
+        districts = Device.objects.filter(site__in=sites).values_list('company_district', flat=True).distinct()
+
+        org_device_data = OrganizationDeviceData(sites, start_date, end_date)
+        by_district = org_device_data.get_power_consumption(districts)
+
         response = {
             "dataset": [
                 ['district', 'consumption'],
             ]
         }
-        df = wr.data_api.rds.read_sql_query(
-            sql="SELECT * FROM public.test_table limit 1000",
-            con=ARC,
-        )
-        df['import_active_energy_overall_total'] = df['import_active_energy_overall_total'].astype('float')
 
-        group_by = json.loads(df.groupby('device_model').agg(Sum=('import_active_energy_overall_total', np.sum)).to_json())
-        group_by_sum = group_by['Sum']
-
-        for k, v in group_by_sum.items():
-            response["dataset"].append([k, v])
+        for k, v in by_district.items():
+            response["dataset"].append([k, v.iloc[0]])
 
         return Response(response, status=status.HTTP_200_OK)
 
@@ -140,7 +141,7 @@ class OperationsSiteMonitoredApiView(GenericAPIView, GetSitesMixin):
 
 class AlertApiView(ListAPIView, GetSitesMixin):
     serializer_class = AlertSerializer
-    queryset = Alert.objects.all().order_by('created_at')
+    queryset = Alert.objects.all().order_by('time')
     pagination_class = TablePagination
 
     def get_queryset(self):
@@ -152,11 +153,11 @@ class AlertApiView(ListAPIView, GetSitesMixin):
         end_date = self.request.query_params.get('end_date', None)
 
         if start_date and end_date:
-            q = Q(created_at__range=[start_date, end_date])
+            q = Q(time__range=[start_date, end_date])
         elif start_date and end_date is None:
-            q = Q(created_at__gte=start_date)
+            q = Q(time__gte=start_date)
         elif end_date and start_date is None:
-            q = Q(created_at__lte=end_date)
+            q = Q(time__lte=end_date)
 
         if sites:
             q = q & Q(site__in=sites)
@@ -166,7 +167,7 @@ class AlertApiView(ListAPIView, GetSitesMixin):
 
 class TransactionHistoryApiView(ListAPIView):
     serializer_class = TransactionHistorySerializer
-    queryset = TransactionHistory.objects.all().order_by('created_at')
+    queryset = TransactionHistory.objects.all().order_by('time')
     pagination_class = TablePagination
 
 
@@ -176,4 +177,4 @@ class SiteApiView(ListAPIView, GetSitesMixin):
 
     def get_queryset(self):
         sites = self.get_sites(self.request)
-        return sites.order_by('created_at')
+        return sites.order_by('time')
