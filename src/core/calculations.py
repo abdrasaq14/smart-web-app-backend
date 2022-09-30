@@ -1,6 +1,7 @@
 import awswrangler as wr
 from datetime import datetime, timedelta
 from typing import List
+import numpy as np
 
 import pandas as pd
 
@@ -57,12 +58,11 @@ class DeviceRules(BaseDeviceData):
 
     def dt_active(self) -> int:
         sql_query = f"""
-            SELECT timestamp, device_serial
+            SELECT device_serial
             FROM public.smart_device_readings
             WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
             AND (line_to_neutral_voltage_phase_a != 0 OR line_to_neutral_voltage_phase_b != 0 OR line_to_neutral_voltage_phase_c != 0)
             GROUP BY device_serial
-            ORDER BY timestamp ASC
         """
 
         df = self.read_sql(sql_query)
@@ -70,12 +70,11 @@ class DeviceRules(BaseDeviceData):
 
     def dt_offline(self):
         sql_query = f"""
-            SELECT timestamp, device_serial
+            SELECT device_serial
             FROM public.smart_device_readings
             WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
             AND (line_to_neutral_voltage_phase_a = 0 AND line_to_neutral_voltage_phase_b = 0 AND line_to_neutral_voltage_phase_c = 0)
             GROUP BY device_serial
-            ORDER BY timestamp ASC
         """
 
         df = self.read_sql(sql_query)
@@ -126,6 +125,7 @@ class OrganizationDeviceData(DeviceRules):
             SELECT timestamp, line_to_neutral_voltage_phase_a, line_to_neutral_voltage_phase_b, line_to_neutral_voltage_phase_c  FROM public.smart_device_readings
             WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
             ORDER BY timestamp ASC
+            LIMIT 10000
         """
 
         df = self.read_sql(sql_query)
@@ -169,3 +169,44 @@ class OrganizationDeviceData(DeviceRules):
                 overloaded_dts += 1
 
         return overloaded_dts
+
+    def get_power_consumption(self, districts: List[str]):
+        # net(import_active_energy_overall_total) aggregated across all devices, filtered by district
+
+        sql_query = f"""
+            SELECT device_serial, AVG(import_active_energy_overall_total) FROM public.smart_device_readings
+            WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
+            GROUP BY device_serial
+        """
+
+        df = self.read_sql(sql_query)
+        by_district = {}
+
+        for device_serial in self.device_ids:
+            device = Device.objects.get(id=device_serial)
+
+            if device.company_district not in by_district:
+                by_district[device.company_district] = 0
+
+            device_avg = df.loc[df['device_serial'] == device_serial]['avg']
+            if not device_avg.empty:
+                by_district[device.company_district] += device_avg
+
+        return by_district
+
+    def get_load_profile(self):
+        sql_query = f"""
+            SELECT DISTINCT timestamp, active_power_overall_total, device_serial FROM public.smart_device_readings
+            WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
+            GROUP BY timestamp, active_power_overall_total, device_serial
+            ORDER BY timestamp ASC
+        """
+
+        df = self.read_sql(sql_query)
+
+        # Remove some data if we need.
+        df['timestamp'] = pd.to_datetime(df['timestamp'])
+        df = df[df['timestamp'].dt.second.eq(0)]
+        # df = df[df['timestamp'].dt.minute.eq(0) & df['timestamp'].dt.second.eq(0)]
+
+        return df, self.device_ids
