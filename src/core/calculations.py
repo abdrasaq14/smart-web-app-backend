@@ -200,6 +200,7 @@ class OrganizationDeviceData(DeviceRules):
             WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
             GROUP BY timestamp, active_power_overall_total, device_serial
             ORDER BY timestamp ASC
+            LIMIT 20000
         """
 
         df = self.read_sql(sql_query)
