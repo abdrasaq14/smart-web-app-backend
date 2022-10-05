@@ -1,12 +1,28 @@
 from rest_framework import serializers
 
-from core.models import Alert, Site, TransactionHistory
+from core.models import ActivityLog, Alert, EventLog, Site, TransactionHistory, UserLog
 
 
-class AlertSerializer(serializers.ModelSerializer):
+class ActivityLogSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Alert
+        model = ActivityLog
         fields = ['id', 'alert_id', 'site', 'zone', 'district', 'activity', 'status', 'time']
+
+
+class AlertSerializer(ActivityLogSerializer):
+    class Meta(ActivityLogSerializer.Meta):
+        model = Alert
+
+
+class EventLogSerializer(ActivityLogSerializer):
+    class Meta(ActivityLogSerializer.Meta):
+        model = EventLog
+
+
+class UserLogSerializer(ActivityLogSerializer):
+    class Meta(ActivityLogSerializer.Meta):
+        model = UserLog
+        fields = ActivityLogSerializer.Meta.fields + ['modified_by', 'employee_id', 'email_address']
 
 
 class TransactionHistorySerializer(serializers.ModelSerializer):
