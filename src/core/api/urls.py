@@ -1,6 +1,8 @@
 from django.urls import path
 from core.api.views import (
-    AlertApiView, OperationsCardsDataApiView, OperationsDashboardCardsDataApiView, OperationsDashboardDTStatusApiView, OperationsDashboardEnergyChartApiView, OperationsDashboardKeyInsightsApiView, OperationsDashboardRevenueLossApiView, OperationsPowerConsumptionChartApiView, OperationsProfileChartApiView,
+    AlertApiView, OperationsCardsDataApiView, OperationsDashboardCardsDataApiView, OperationsDashboardDTStatusApiView,
+    OperationsDashboardEnergyChartApiView, OperationsDashboardKeyInsightsApiView, OperationsDashboardRevenueLossApiView,
+    OperationsPowerConsumptionChartApiView, OperationsProfileChartApiView,
     OperationsSiteMonitoredApiView, SiteApiView, TransactionHistoryApiView
 )
 

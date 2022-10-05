@@ -18,9 +18,12 @@ from django.contrib import admin
 from django.urls import include, path, re_path
 from rest_framework import permissions
 
+from core.api.views import HealthCheckView
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(("core.api.urls", "core-apis"))),
+    path("health-check", HealthCheckView.as_view(), name="health-check"),
 ]
 
 # ADD Swagger

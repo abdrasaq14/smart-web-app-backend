@@ -12,6 +12,11 @@ from core.calculations import DeviceRules, OrganizationDeviceData
 from core.types import AlertStatusType
 
 
+class HealthCheckView(GenericAPIView):
+    def get(self, request, **kwargs):
+        return Response(status=status.HTTP_200_OK)
+
+
 class GetSitesMixin:
     def get_sites(self, request) -> List[Site]:
         sites = request.query_params.get('sites', '')
