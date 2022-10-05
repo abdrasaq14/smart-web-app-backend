@@ -1,7 +1,7 @@
 from typing import List
 from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status, filters
 from django.db.models import Q
 from core.exceptions import GenericErrorException
 
@@ -149,10 +149,12 @@ class AlertApiView(ListAPIView, GetSitesMixin):
     serializer_class = AlertSerializer
     queryset = Alert.objects.all().order_by('time')
     pagination_class = TablePagination
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['alert_id', 'zone', 'district', 'activity', 'status', 'time']
 
     def get_queryset(self):
         q = Q()
-        queryset = self.queryset
+        queryset = super().get_queryset()
         sites = self.get_sites(self.request)
 
         start_date = self.request.query_params.get('start_date', None)
