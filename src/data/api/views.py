@@ -2,7 +2,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from core.calculations import DeviceRules, OrganizationDeviceData
+from data.calculations import DeviceRules, OrganizationDeviceData
 from core.models import Device, Site
 from core.types import AlertStatusType
 from core.utils import GetSitesMixin
