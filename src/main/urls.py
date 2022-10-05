@@ -23,6 +23,7 @@ from core.api.views import HealthCheckView
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", include(("core.api.urls", "core-apis"))),
+    path("api/", include(("data.api.urls", "data-apis"))),
     path("health-check", HealthCheckView.as_view(), name="health-check"),
 ]
 
