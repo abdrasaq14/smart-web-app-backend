@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status, filters
 from django.db.models import Q
 
-from core.models import Alert, EventLog, TransactionHistory, UserLog
+from core.models import Alert, EventLog, Site, TransactionHistory, UserLog
 from core.api.serializers import AlertSerializer, EventLogSerializer, SiteSerializer, TransactionHistorySerializer, UserLogSerializer
 from core.pagination import TablePagination
 from core.utils import GetSitesMixin
@@ -17,7 +17,7 @@ class HealthCheckView(GenericAPIView):
 class BaseActivityLogView(ListAPIView, GetSitesMixin):
     pagination_class = TablePagination
     filter_backends = [filters.SearchFilter]
-    search_fields = ['alert_id', 'zone', 'district', 'activity', 'status', 'time']
+    search_fields = ['alert_id', 'zone', 'district', 'activity', 'status']
 
     def get_queryset(self):
         q = Q()
@@ -62,9 +62,19 @@ class TransactionHistoryApiView(ListAPIView):
 
 
 class SiteApiView(ListAPIView, GetSitesMixin):
+    queryset = Site.objects.all().order_by('time')
     serializer_class = SiteSerializer
     pagination_class = TablePagination
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['name', 'asset_name', 'asset_type', 'asset_co_ordinate', 'asset_capacity']
 
     def get_queryset(self):
-        sites = self.get_sites(self.request)
-        return sites.order_by('time')
+        queryset = super().get_queryset()
+        sites = self.request.query_params.get('sites', '')
+
+        if not sites:
+            return queryset
+
+        site_ids = sites.split(',')
+
+        return queryset.filter(id__in=site_ids)

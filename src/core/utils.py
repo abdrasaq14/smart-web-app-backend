@@ -11,9 +11,9 @@ class GetSitesMixin:
             return Site.objects.all()
 
         site_ids = sites.split(',')
-        return self.search_sites(site_ids)
+        return self._search_sites(site_ids)
 
-    def search_sites(self, site_ids: List[str]) -> List[Site]:
+    def _search_sites(self, site_ids: List[str]) -> List[Site]:
         sites = []
 
         for site_id in site_ids:
