@@ -196,7 +196,7 @@ class OrganizationDeviceData(DeviceRules):
         data_readings = SmartDeviceReadings.objects.filter(
             date__gte=self.start_date,
             date__lte=self.end_date,
-            device_serial__in=self.devices_query
+            device_serial__in=self.device_ids
         ).order_by('timestamp').values(
             'line_to_neutral_voltage_phase_a',
             'line_to_neutral_voltage_phase_b',
@@ -227,7 +227,9 @@ class OrganizationDeviceData(DeviceRules):
                 power_cuts += 1
 
         days_range = data_readings.last()['timestamp'] - data_readings.first()['timestamp']
-        return round(active_time / 60 / days_range.days, 2), power_cuts
+        if days_range.days > 0:
+            active_time = active_time / days_range.days
+        return round(active_time / 60, 2), power_cuts
 
     def get_overloaded_dts(self):
         # count (active_power_overall_total)/DT capacity > 0.75
