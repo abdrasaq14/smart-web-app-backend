@@ -20,4 +20,8 @@ WORKDIR /api
 COPY . .
 
 EXPOSE 8000
-CMD ["python", "src/manage.py", "runserver", "0.0.0.0:8000"]
+# CMD ["python", "src/manage.py", "runserver", "0.0.0.0:8000"] 
+ENTRYPOINT ["/bin/sh", "docker-entrypoint.sh"]
+# dont push dev
+# gunicorn for prod
+# port 80
