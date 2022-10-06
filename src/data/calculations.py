@@ -7,7 +7,7 @@ import pandas as pd
 
 from main import ARC
 from core.models import Device, Site
-from core.constants import DEVICE_DATE_FORMAT, DEVICE_DATETIME_FORMAT
+from core.constants import DAYS_IN_MONTH, DEVICE_DATE_FORMAT, DEVICE_DATETIME_FORMAT
 
 
 def get_last_month_date() -> str:
@@ -83,8 +83,18 @@ class DeviceRules(BaseDeviceData):
     def estimated_tariff():
         ...
 
-    def average_load():
-        ...
+    def average_load(self) -> float:
+        sql_query = f"""
+            SELECT AVG(active_power_overall_total) FROM public.smart_device_readings
+            WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
+        """
+
+        df = self.read_sql(sql_query)
+
+        try:
+            return df.iloc[0]
+        except AttributeError:
+            return 0
 
     def potential_consumption():
         ...
@@ -211,3 +221,19 @@ class OrganizationDeviceData(DeviceRules):
         # df = df[df['timestamp'].dt.minute.eq(0) & df['timestamp'].dt.second.eq(0)]
 
         return df, self.device_ids
+
+
+class OrganizationSiteData(DeviceRules):
+
+    def get_revenue_loss(self):
+        sql_query = f"""
+            SELECT AVG(active_power_overall_total) FROM public.smart_device_readings
+            WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
+        """
+
+        df = self.read_sql(sql_query)
+
+        avg_load = self.average_load()
+        value = avg_load * 24 * DAYS_IN_MONTH
+
+        

@@ -2,7 +2,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from data.calculations import DeviceRules, OrganizationDeviceData
+from data.calculations import DeviceRules, OrganizationDeviceData, OrganizationSiteData
 from core.models import Device, Site
 from core.types import AlertStatusType
 from core.utils import GetSitesMixin
@@ -126,6 +126,8 @@ class OperationsDashboardRevenueLossApiView(GenericAPIView, GetSitesMixin):
         sites = self.get_sites(request)
         start_date = request.query_params.get('start_date', None)
         end_date = request.query_params.get('end_date', None)
+
+        site_data = OrganizationSiteData(sites, start_date, end_date)
 
         response = {
             "total": 200000,
