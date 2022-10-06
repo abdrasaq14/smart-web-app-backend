@@ -1,6 +1,6 @@
 from django.urls import path
 from data.api.views import (
-    OperationsCardsDataApiView, OperationsDashboardCardsDataApiView, OperationsDashboardDTStatusApiView,
+    FinanceCardsDataApiView, FinanceCustomerBreakdownApiView, FinancePerformanceApiView, FinanceRevenueApiView, OperationsCardsDataApiView, OperationsDashboardCardsDataApiView, OperationsDashboardDTStatusApiView,
     OperationsDashboardEnergyChartApiView, OperationsDashboardKeyInsightsApiView, OperationsDashboardRevenueLossApiView,
     OperationsPowerConsumptionChartApiView, OperationsProfileChartApiView,
     OperationsSiteMonitoredApiView
@@ -19,5 +19,11 @@ urlpatterns = [
     path("operations-dashboard/energy-chart", OperationsDashboardEnergyChartApiView.as_view(), name="opd-energy-chart"),
     path("operations-dashboard/cards-data", OperationsDashboardCardsDataApiView.as_view(), name="opd-cards-data"),
     path("operations-dashboard/dt-status", OperationsDashboardDTStatusApiView.as_view(), name="opd-dt-status"),
+
+    # Finance Home
+    path("finance/revenue", FinanceRevenueApiView.as_view(), name="finance-revenue"),
+    path("finance/performance", FinancePerformanceApiView.as_view(), name="finance-performance"),
+    path("finance/customer-breakdown", FinanceCustomerBreakdownApiView.as_view(), name="finance-customer-breakdown"),
+    path("finance/cards-data", FinanceCardsDataApiView.as_view(), name="finance-cards-data"),
 
 ]
