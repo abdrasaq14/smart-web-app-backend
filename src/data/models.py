@@ -16,6 +16,7 @@ class SmartDeviceReadings(models.Model):
     active_power_overall_total = models.FloatField(blank=True, null=True)
     analog_input_channel_1 = models.FloatField(blank=True, null=True)
     analog_input_channel_2 = models.FloatField(blank=True, null=True)
+    # id = models.AutoField()
 
     class Meta:
         managed = False
