@@ -69,7 +69,8 @@ BASE_INSTALLED_APPS = [
 
 INSTALLED_APPS = [
     "core",
-    "accounts"
+    "accounts",
+    "data"
 ] + BASE_INSTALLED_APPS
 
 AUTHENTICATION_BACKENDS = [

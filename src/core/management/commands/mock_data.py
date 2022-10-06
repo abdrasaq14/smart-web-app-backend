@@ -2,8 +2,8 @@ import random
 from typing import Any
 
 from django.core.management import BaseCommand, CommandParser
-from core.models import Alert, Device, Site, TransactionHistory
-from core.tests.factories import AlertFactory, DeviceFactory, SiteFactory, TransactionHistoryFactory
+from core.models import ActivityLog, Alert, Device, EventLog, Site, TransactionHistory, UserLog
+from core.tests.factories import AlertFactory, DeviceFactory, EventLogFactory, SiteFactory, TransactionHistoryFactory, UserLogFactory
 
 
 class Command(BaseCommand):
@@ -41,12 +41,16 @@ class Command(BaseCommand):
         number = options["number"]
         generated = {
             'alerts': 0,
+            'user_logs': 0,
+            'event_logs': 0,
             'transaction_history': 0,
             'sites': 3,
             'devices': 3
         }
 
         if clear:
+            UserLog.objects.all().delete()
+            EventLog.objects.all().delete()
             Alert.objects.all().delete()
             TransactionHistory.objects.all().delete()
             Device.objects.all().delete()
@@ -62,6 +66,13 @@ class Command(BaseCommand):
             # Alerts
             AlertFactory(site=random.choice([site1, site2, site3]))
             generated['alerts'] += 1
+
+            # Alerts
+            EventLogFactory(site=random.choice([site1, site2, site3]))
+            generated['event_logs'] += 1
+            # Alerts
+            UserLogFactory(site=random.choice([site1, site2, site3]))
+            generated['user_logs'] += 1
 
             # Transaction history
             TransactionHistoryFactory(site=random.choice([site1, site2, site3]))

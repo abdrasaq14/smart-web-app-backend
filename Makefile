@@ -61,6 +61,14 @@ load: ## Load the env vars from .env
 mock: ## Create mock data
 	python src/manage.py mock_data --clear True --number 60
 
+.PHONY: reload_db
+reload_db: ## Reload database
+	docker compose down && \
+	docker volume rm api_postgres_smt_db_data && \
+	docker compose up -d && \
+	make migrate && \
+	make mock
+
 ifndef VERBOSE
 .SILENT:
 endif

@@ -3,7 +3,7 @@ from factory.fuzzy import FuzzyDateTime, FuzzyFloat, FuzzyInteger
 from datetime import datetime
 from pytz import UTC
 
-from core.models import Alert, Device, Site, TransactionHistory
+from core.models import Alert, Device, EventLog, Site, TransactionHistory, UserLog
 from core.types import AlertStatusType
 
 
@@ -35,7 +35,7 @@ class TransactionHistoryFactory(factory.django.DjangoModelFactory):
         model = TransactionHistory
 
 
-class AlertFactory(factory.django.DjangoModelFactory):
+class BaseActivityLogFactory(factory.django.DjangoModelFactory):
     alert_id = factory.Sequence(lambda n: "ABU-%s" % n)
 
     site = factory.SubFactory(SiteFactory)
@@ -46,8 +46,24 @@ class AlertFactory(factory.django.DjangoModelFactory):
     status = AlertStatusType.PENDING.value
     time = FuzzyDateTime(datetime(2022, 9, 10, tzinfo=UTC))
 
+
+class AlertFactory(BaseActivityLogFactory):
     class Meta:
         model = Alert
+
+
+class EventLogFactory(BaseActivityLogFactory):
+    class Meta:
+        model = EventLog
+
+
+class UserLogFactory(BaseActivityLogFactory):
+    modified_by = factory.Sequence(lambda n: "Modified by - %s" % n)
+    employee_id = factory.Sequence(lambda n: "Employee ID: - %s" % n)
+    email_address = factory.Sequence(lambda n: "%s@example.com" % n)
+
+    class Meta:
+        model = UserLog
 
 
 class DeviceFactory(factory.django.DjangoModelFactory):

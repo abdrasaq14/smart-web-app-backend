@@ -1,8 +1,9 @@
 from django.db import models
+from polymorphic.models import PolymorphicModel
 from core.types import AlertStatusType
 
 
-class Alert(models.Model):
+class ActivityLog(PolymorphicModel):
     alert_id = models.CharField(max_length=120)
     site = models.ForeignKey(
         'core.Site',
@@ -10,11 +11,9 @@ class Alert(models.Model):
         on_delete=models.CASCADE,
         related_name='alerts'
     )
-
     zone = models.CharField(max_length=120)
     district = models.CharField(max_length=120)
     activity = models.CharField(max_length=120)
-
     status = models.CharField(
         max_length=50,
         null=False,
@@ -22,8 +21,23 @@ class Alert(models.Model):
         choices=AlertStatusType.choices,
         default=AlertStatusType.PENDING.value
     )
-
     time = models.DateTimeField()
+
+
+class Alert(ActivityLog):
+    def __str__(self) -> str:
+        return f"{self.alert_id} - {self.status}"
+
+
+class EventLog(ActivityLog):
+    def __str__(self) -> str:
+        return f"{self.alert_id} - {self.status}"
+
+
+class UserLog(ActivityLog):
+    modified_by = models.CharField(max_length=120)
+    employee_id = models.CharField(max_length=120)
+    email_address = models.EmailField()
 
     def __str__(self) -> str:
         return f"{self.alert_id} - {self.status}"
