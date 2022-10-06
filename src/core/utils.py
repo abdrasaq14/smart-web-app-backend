@@ -8,7 +8,11 @@ class GetSitesMixin:
         sites = request.query_params.get('sites', '')
 
         if not sites:
-            return Site.objects.all()
+            sites = Site.objects.all()
+            if len(sites) < 1:
+                raise GenericErrorException('No devices linked!')
+
+            return sites
 
         site_ids = sites.split(',')
         return self._search_sites(site_ids)

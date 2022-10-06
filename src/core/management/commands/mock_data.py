@@ -2,7 +2,7 @@ import random
 from typing import Any
 
 from django.core.management import BaseCommand, CommandParser
-from core.models import ActivityLog, Alert, Device, Site, TransactionHistory
+from core.models import ActivityLog, Alert, Device, EventLog, Site, TransactionHistory, UserLog
 from core.tests.factories import AlertFactory, DeviceFactory, EventLogFactory, SiteFactory, TransactionHistoryFactory, UserLogFactory
 
 
@@ -49,7 +49,9 @@ class Command(BaseCommand):
         }
 
         if clear:
-            ActivityLog.objects.all().delete()
+            UserLog.objects.all().delete()
+            EventLog.objects.all().delete()
+            Alert.objects.all().delete()
             TransactionHistory.objects.all().delete()
             Device.objects.all().delete()
             Site.objects.all().delete()
