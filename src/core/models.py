@@ -37,7 +37,7 @@ class EventLog(ActivityLog):
 class UserLog(ActivityLog):
     modified_by = models.CharField(max_length=120)
     employee_id = models.CharField(max_length=120)
-    email_address = models.CharField(max_length=120)
+    email_address = models.EmailField()
 
     def __str__(self) -> str:
         return f"{self.alert_id} - {self.status}"

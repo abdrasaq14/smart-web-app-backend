@@ -3,8 +3,8 @@ from rest_framework.response import Response
 from rest_framework import status, filters
 from django.db.models import Q
 
-from core.models import Alert, TransactionHistory
-from core.api.serializers import AlertSerializer, SiteSerializer, TransactionHistorySerializer
+from core.models import Alert, EventLog, TransactionHistory, UserLog
+from core.api.serializers import AlertSerializer, EventLogSerializer, SiteSerializer, TransactionHistorySerializer, UserLogSerializer
 from core.pagination import TablePagination
 from core.utils import GetSitesMixin
 
@@ -14,9 +14,7 @@ class HealthCheckView(GenericAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class AlertApiView(ListAPIView, GetSitesMixin):
-    serializer_class = AlertSerializer
-    queryset = Alert.objects.all().order_by('time')
+class BaseActivityLogView(ListAPIView, GetSitesMixin):
     pagination_class = TablePagination
     filter_backends = [filters.SearchFilter]
     search_fields = ['alert_id', 'zone', 'district', 'activity', 'status', 'time']
@@ -40,6 +38,21 @@ class AlertApiView(ListAPIView, GetSitesMixin):
             q = q & Q(site__in=sites)
 
         return queryset.filter(q)
+
+
+class AlertApiView(BaseActivityLogView):
+    serializer_class = AlertSerializer
+    queryset = Alert.objects.all().order_by('time')
+
+
+class EventLogApiView(BaseActivityLogView):
+    serializer_class = EventLogSerializer
+    queryset = EventLog.objects.all().order_by('time')
+
+
+class UserLogApiView(BaseActivityLogView):
+    serializer_class = UserLogSerializer
+    queryset = UserLog.objects.all().order_by('time')
 
 
 class TransactionHistoryApiView(ListAPIView):
