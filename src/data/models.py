@@ -2,14 +2,13 @@ from django.db import models
 
 
 class SmartDeviceReadings(models.Model):
-    id = models.BigIntegerField(blank=False, null=False, primary_key=True)
-    date = models.TextField(blank=True, null=True)
-    timestamp = models.TextField(blank=True, null=True)
-    gateway_name = models.TextField(blank=True, null=True)
-    gateway_model = models.TextField(blank=True, null=True)
-    gateway_serial = models.TextField(blank=True, null=True)
-    device_name = models.TextField(blank=True, null=True)
-    device_serial = models.TextField(blank=True, null=True)
+    date = models.DateField(blank=True, null=True)
+    timestamp = models.DateTimeField(blank=True, null=True)
+    gateway_name = models.CharField(max_length=255, blank=True, null=True)
+    gateway_model = models.CharField(max_length=255, blank=True, null=True)
+    gateway_serial = models.CharField(max_length=255, blank=True, null=True)
+    device_name = models.CharField(max_length=255, blank=True, null=True)
+    device_serial = models.CharField(max_length=255, blank=True, null=True)
     line_to_neutral_voltage_phase_a = models.FloatField(blank=True, null=True)
     line_to_neutral_voltage_phase_b = models.FloatField(blank=True, null=True)
     line_to_neutral_voltage_phase_c = models.FloatField(blank=True, null=True)
