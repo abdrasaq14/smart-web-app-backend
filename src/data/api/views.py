@@ -33,10 +33,10 @@ class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
 
             results['total_consumption'] = org_device_data.get_total_consumption()
             results['current_load'] = org_device_data.get_current_load()
-            active_power, inactive_power = org_device_data.get_avg_availability_and_power_cuts()
+            active_power, power_cuts = org_device_data.get_avg_availability_and_power_cuts()
 
             results['avg_availability'] = active_power
-            results['power_cuts'] = inactive_power
+            results['power_cuts'] = power_cuts
 
             results['overloaded_dts'] = org_device_data.get_overloaded_dts()
 
