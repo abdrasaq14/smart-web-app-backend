@@ -24,8 +24,6 @@ class BaseDeviceData:
     start_date = None
     end_date = None
     device_ids: List[str] = []
-    # DEPRECATED
-    devices_query: str = None
 
     def __init__(self, sites: List[Site] = [], start_date=None, end_date=None) -> None:
         self.sites = sites
@@ -39,7 +37,6 @@ class BaseDeviceData:
             self.start_date = default_start_date.strftime(DEVICE_DATE_FORMAT)
 
         self.device_ids = self._devices_from_sites()
-        self.devices_query = self._devices_for_query()
 
     def _devices_from_sites(self) -> List[str]:
         # Extract all devices from our sites
@@ -47,15 +44,6 @@ class BaseDeviceData:
         for site in self.sites:
             device_ids = device_ids + list(site.devices.values_list('id', flat=True))
         return device_ids
-
-    def _devices_for_query(self) -> str:
-        if len(self.device_ids) > 1:
-            return tuple(self.device_ids)
-        return f"('{self.device_ids[0]}')"
-
-    def read_sql(self, sql_query) -> pd.DataFrame:
-        print(sql_query)
-        return wr.data_api.rds.read_sql_query(sql=sql_query, con=ARC)
 
 
 class DeviceRules(BaseDeviceData):
@@ -92,18 +80,14 @@ class DeviceRules(BaseDeviceData):
     def estimated_tariff():
         ...
 
-    def average_load(self) -> float:
-        sql_query = f"""
-            SELECT AVG(active_power_overall_total) FROM public.smart_device_readings
-            WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
-        """
+    def average_load(self, device_serial: str) -> float:
+        avg_power_total = SmartDeviceReadings.objects.filter(
+            date__gte=self.start_date,
+            date__lte=self.end_date,
+            device_serial=device_serial
+        ).aggregate(avg_power_total=Avg('active_power_overall_total'))
 
-        df = self.read_sql(sql_query)
-
-        try:
-            return df.iloc[0]
-        except AttributeError:
-            return 0
+        return avg_power_total['avg_power_total']
 
     def potential_consumption():
         ...
@@ -262,14 +246,27 @@ class OrganizationDeviceData(DeviceRules):
 class OrganizationSiteData(DeviceRules):
 
     def get_revenue_loss(self):
-        sql_query = f"""
-            SELECT AVG(active_power_overall_total) FROM public.smart_device_readings
-            WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
-        """
+        readings = SmartDeviceReadings.objects.filter(
+            date__gte=self.start_date,
+            date__lte=self.end_date,
+            device_serial__in=self.device_ids
+        ).order_by('-timestamp').values('timestamp', 'device_serial', 'import_active_energy_overall_total').distinct()
 
-        df = self.read_sql(sql_query)
+        results = {
+            'total_value': 0,
+            'consumption': 0
+        }
 
-        avg_load = self.average_load()
-        value = avg_load * 24 * DAYS_IN_MONTH
+        for device_serial in self.device_ids:
+            device_avg_load = self.average_load(device_serial)
 
-        
+            first_entry = readings.filter(device_serial=device_serial).first()
+            last_entry = readings.filter(device_serial=device_serial).last()
+
+            date_diff = first_entry['timestamp'] - last_entry['timestamp']
+            number_of_days = date_diff.days if date_diff.days > 0 else 1
+
+            results['total_value'] += device_avg_load * 24 * number_of_days
+            results['consumption'] += first_entry['import_active_energy_overall_total'] - last_entry['import_active_energy_overall_total']
+
+        return results

@@ -110,13 +110,14 @@ class OperationsDashboardRevenueLossApiView(GenericAPIView, GetSitesMixin):
         end_date = request.query_params.get('end_date', None)
 
         site_data = OrganizationSiteData(sites, start_date, end_date)
+        revenue_loss = site_data.get_revenue_loss()
 
         response = {
-            "total": 200000,
+            "total": revenue_loss['total_value'] + revenue_loss['consumption'],
             "dataset": [
-                { "key": 'billing', "value": 60 },
-                { "key": 'collection', "value": 20 },
-                { "key": 'downtime', "value": 20 },
+                { "key": 'billing', "value": revenue_loss['total_value'] },
+                { "key": 'collection', "value": revenue_loss['consumption'] },
+                { "key": 'downtime', "value": revenue_loss['total_value'] - revenue_loss['consumption'] },
             ],
         }
 
