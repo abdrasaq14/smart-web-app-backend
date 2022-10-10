@@ -110,23 +110,13 @@ class OrganizationDeviceData(DeviceRules):
 
     def get_total_consumption(self) -> float:
         # Total Consumption
-        # sql_query = f"""
-        #     SELECT AVG(import_active_energy_overall_total) FROM public.smart_device_readings
-        #     WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
-        # """
-
-        # df = self.read_sql(sql_query)
-        # if df['avg'][0] is None:
-        #     return 0
-        # return round(df['avg'][0], 2)
-
         net_device_data = []
         for device_id in self.device_ids:
             readings = SmartDeviceReadings.objects.filter(
                 date__gte=self.start_date,
                 date__lte=self.end_date,
                 device_serial=device_id
-            ).values('import_active_energy_overall_total')
+            ).order_by('timestamp').values('import_active_energy_overall_total')
 
             net_device_data.append(
                 readings.last()['import_active_energy_overall_total'] -
@@ -136,61 +126,19 @@ class OrganizationDeviceData(DeviceRules):
 
     def get_current_load(self) -> float:
         # Current Load (kw)
-        # sql_query = f"""
-        #     SELECT AVG(active_power_overall_total) FROM public.smart_device_readings
-        #     WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
-        # """
-
-        # df = self.read_sql(sql_query)
-        # if df['avg'][0] is None:
-        #     return 0
-        # return round(df['avg'][0], 2)
         device_values = []
         for device_id in self.device_ids:
             real_time_data = SmartDeviceReadings.objects.filter(
                 date__gte=self.start_date,
                 date__lte=self.end_date,
                 device_serial=device_id
-            ).order_by('timestamp').first()
+            ).order_by('-timestamp').first()
 
             device_values.append(real_time_data.active_power_overall_total)
 
         return round(np.sum(device_values), 2)
 
     def get_avg_availability_and_power_cuts(self):
-        # AVG availability - Sum for active time
-        # sql_query = f"""
-        #     SELECT timestamp, line_to_neutral_voltage_phase_a, line_to_neutral_voltage_phase_b, line_to_neutral_voltage_phase_c  FROM public.smart_device_readings
-        #     WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
-        #     ORDER BY timestamp ASC
-        #     LIMIT 10000
-        # """
-
-        # df = self.read_sql(sql_query)
-        # active_time = inactive_time = 0
-
-        # for idx, row in df.iterrows():
-        #     volt_a = row['line_to_neutral_voltage_phase_a']
-        #     volt_b = row['line_to_neutral_voltage_phase_b']
-        #     volt_c = row['line_to_neutral_voltage_phase_c']
-
-        #     try:
-        #         nxt = df.iloc[[idx + 1]]
-        #     except IndexError:
-        #         break
-
-        #     nxt_datetime = datetime.strptime(nxt['timestamp'][idx + 1], DEVICE_DATETIME_FORMAT)
-        #     now_datetime = datetime.strptime(row['timestamp'], DEVICE_DATETIME_FORMAT)
-        #     diff_time = nxt_datetime - now_datetime
-        #     diff_minutes = diff_time.total_seconds() / 60
-
-        #     if volt_a != 0 or volt_b != 0 or volt_c != 0:
-        #         active_time += diff_minutes
-        #     elif volt_a == 0 and volt_b == 0 and volt_c == 0:
-        #         inactive_time += diff_minutes
-
-        # return int(active_time / 60), int(inactive_time / 60)
-
         active_time = power_cuts = 0
 
         data_readings = SmartDeviceReadings.objects.filter(
@@ -221,9 +169,9 @@ class OrganizationDeviceData(DeviceRules):
             diff_time = nxt_data['timestamp'] - data['timestamp']
             diff_minutes = diff_time.total_seconds() / 60
 
-            if volt_a or volt_b or volt_c:
+            if volt_a != 0 or volt_b != 0 or volt_c != 0:
                 active_time += diff_minutes
-            elif (volt_a == 0 and volt_b == 0 and volt_c == 0) and (nxt_volt_a or nxt_volt_b or nxt_volt_c):
+            elif (volt_a == 0 and volt_b == 0 and volt_c == 0) and (nxt_volt_a != 0 or nxt_volt_b != 0 or nxt_volt_c != 0):
                 power_cuts += 1
 
         days_range = data_readings.last()['timestamp'] - data_readings.first()['timestamp']
@@ -232,29 +180,17 @@ class OrganizationDeviceData(DeviceRules):
         return round(active_time / 60, 2), power_cuts
 
     def get_overloaded_dts(self):
-        # count (active_power_overall_total)/DT capacity > 0.75
         overloaded_dts = 0
-
-        # for device_id in self.device_ids:
-        #     sql_query = f"""
-        #         SELECT timestamp, active_power_overall_total FROM public.smart_device_readings
-        #         WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial = '{device_id}'
-        #         ORDER BY timestamp ASC
-        #     """
-        #     df = self.read_sql(sql_query)
-        #     df['results'] = df['active_power_overall_total'] / Device.objects.get(id=device_id).asset_capacity * 0.85
-        #     if not df[df['results'] > 0.75].empty:
-        #         overloaded_dts += 1
 
         for device_id in self.device_ids:
             data_readings = SmartDeviceReadings.objects.filter(
                 date__gte=self.start_date,
                 date__lte=self.end_date,
                 device_serial=device_id
-            ).values('timestamp', 'active_power_overall_total')
+            ).order_by('timestamp').values('timestamp', 'active_power_overall_total')
 
             df = pd.DataFrame(data_readings)
-            df['results'] = df['active_power_overall_total'] / Device.objects.get(id=device_id).asset_capacity * 0.85
+            df['results'] = df['active_power_overall_total'] / Device.objects.get(id=device_id).asset_capacity * 0.8
             if not df[df['results'] > 0.75].empty:
                 overloaded_dts += 1
 
