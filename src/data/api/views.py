@@ -78,12 +78,7 @@ class OperationsPowerConsumptionChartApiView(GenericAPIView, GetSitesMixin):
         }
 
         for k, v in by_district.items():
-            try:
-                value = v.iloc[0]
-            except AttributeError:
-                value = 0
-
-            response["dataset"].append([k, value])
+            response["dataset"].append([k, round(v, 2)])
 
         return Response(response, status=status.HTTP_200_OK)
 
