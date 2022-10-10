@@ -53,24 +53,11 @@ class OperationsProfileChartApiView(GenericAPIView, GetSitesMixin):
         end_date = request.query_params.get('end_date', None)
 
         org_device_data = OrganizationDeviceData(sites, start_date, end_date)
-        df, device_ids = org_device_data.get_load_profile()
-        pivoted_df = df.pivot_table(index="timestamp", columns="device_serial", values="active_power_overall_total")
-        pivoted_df = pivoted_df.fillna(0)
+        profile_chart_dataset = org_device_data.get_load_profile()
 
-        # response = {"dataset": [["day"]]}
-        response = {"dataset": []}
-        data_dict = []
-        # data_dict = [list(pivoted_df.index)]
-
-        for column in device_ids:
-            # response['dataset'][0].append(column)
-            try:
-                data_dict.append(list(pivoted_df[column]))
-            except KeyError:
-                pass
-
-        response['dataset'] = response['dataset'] + [list(x) for x in zip(*data_dict)]
-        return Response(response, status=status.HTTP_200_OK)
+        return Response({
+            "dataset": profile_chart_dataset
+        }, status=status.HTTP_200_OK)
 
 
 class OperationsPowerConsumptionChartApiView(GenericAPIView, GetSitesMixin):

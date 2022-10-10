@@ -4,7 +4,7 @@ import awswrangler as wr
 
 from typing import List
 from datetime import datetime, timedelta
-from django.db.models import Avg
+from django.db.models import Avg, Q, Count
 
 from data.models import SmartDeviceReadings
 
@@ -24,6 +24,7 @@ class BaseDeviceData:
     start_date = None
     end_date = None
     device_ids: List[str] = []
+    # DEPRECATED
     devices_query: str = None
 
     def __init__(self, sites: List[Site] = [], start_date=None, end_date=None) -> None:
@@ -60,28 +61,33 @@ class BaseDeviceData:
 class DeviceRules(BaseDeviceData):
 
     def dt_active(self) -> int:
-        sql_query = f"""
-            SELECT device_serial
-            FROM public.smart_device_readings
-            WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
-            AND (line_to_neutral_voltage_phase_a != 0 OR line_to_neutral_voltage_phase_b != 0 OR line_to_neutral_voltage_phase_c != 0)
-            GROUP BY device_serial
-        """
+        q = Q(date__gte=self.start_date, date__lte=self.end_date, device_serial__in=self.device_ids)
+        q = q & Q(
+            ~Q(line_to_neutral_voltage_phase_a=0)
+            | ~Q(line_to_neutral_voltage_phase_b=0)
+            | ~Q(line_to_neutral_voltage_phase_c=0)
+        )
 
-        df = self.read_sql(sql_query)
-        return df
+        readings = SmartDeviceReadings.objects.filter(q).values(
+            'device_serial').annotate(
+                total=Count('device_serial')).filter(total__gt=0)
+
+        return pd.DataFrame(readings)
 
     def dt_offline(self):
-        sql_query = f"""
-            SELECT device_serial
-            FROM public.smart_device_readings
-            WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
-            AND (line_to_neutral_voltage_phase_a = 0 AND line_to_neutral_voltage_phase_b = 0 AND line_to_neutral_voltage_phase_c = 0)
-            GROUP BY device_serial
-        """
+        q = Q(
+            date__gte=self.start_date,
+            date__lte=self.end_date,
+            device_serial__in=self.device_ids,
+            line_to_neutral_voltage_phase_a=0,
+            line_to_neutral_voltage_phase_b=0,
+            line_to_neutral_voltage_phase_c=0
+        )
+        readings = SmartDeviceReadings.objects.filter(q).values(
+            'device_serial').annotate(
+                total=Count('device_serial')).filter(total__gt=0)
 
-        df = self.read_sql(sql_query)
-        return df
+        return pd.DataFrame(readings)
 
     def estimated_tariff():
         ...
@@ -221,22 +227,39 @@ class OrganizationDeviceData(DeviceRules):
         return by_district
 
     def get_load_profile(self):
-        sql_query = f"""
-            SELECT DISTINCT timestamp, active_power_overall_total, device_serial FROM public.smart_device_readings
-            WHERE date > '{self.start_date}' AND date < '{self.end_date}' AND device_serial IN {self.devices_query}
-            GROUP BY timestamp, active_power_overall_total, device_serial
-            ORDER BY timestamp ASC
-            LIMIT 20000
-        """
+        readings = SmartDeviceReadings.objects.filter(
+            date__gte=self.start_date,
+            date__lte=self.end_date,
+            device_serial__in=self.device_ids
+        ).order_by('timestamp').values('timestamp', 'active_power_overall_total', 'device_serial').distinct()
 
-        df = self.read_sql(sql_query)
-
-        # Remove some data if we need.
+        df = pd.DataFrame(readings)
+        # Parse date
         df['timestamp'] = pd.to_datetime(df['timestamp'])
-        df = df[df['timestamp'].dt.second.eq(0)]
-        # df = df[df['timestamp'].dt.minute.eq(0) & df['timestamp'].dt.second.eq(0)]
 
-        return df, self.device_ids
+        profile_chart_dataset = []
+        minutes_intervals = [[0, 14], [15, 29], [30, 44], [45, 59]]
+
+        for i in range(0, 24):
+            # Filter by hour and minute interval
+            for minute_interval in minutes_intervals:
+                interval_devices_data = 0
+                for device_id in self.device_ids:
+                    device_df = df[df['device_serial'] == device_id]
+                    device_df = device_df[device_df['timestamp'].dt.hour == i]
+                    device_df = device_df[device_df['timestamp'].dt.minute >= minute_interval[0]]
+                    device_df = device_df[device_df['timestamp'].dt.minute <= minute_interval[1]]
+
+                    avg_df = device_df[['active_power_overall_total']].mean(skipna=True)
+
+                    if not avg_df.isnull().values.any():
+                        interval_devices_data += avg_df[0]
+
+                profile_chart_dataset.append(
+                    [i, f"{minute_interval[0]}-{minute_interval[1]}", interval_devices_data]
+                )
+
+        return profile_chart_dataset
 
 
 class OrganizationSiteData(DeviceRules):
