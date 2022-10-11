@@ -40,4 +40,7 @@ jobs:
         echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:latest"
         echo "Pushing image to ECR with GITHUB RUN ID $GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT tag"
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$GITHUB_RUN_ID-$GITHUB_RUN_ATTEMPT
-        
+
+    - name: Update ECS service
+      id: update-ecs-service
+      run: aws ecs update-service --cluster main_dev --service api_service --force-new-deployment
