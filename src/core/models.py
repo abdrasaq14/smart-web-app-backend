@@ -68,6 +68,15 @@ class Site(models.Model):
     time = models.DateTimeField()
 
 
+class DeviceTariff(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+    price = models.FloatField()
+    daily_availability = models.TextField()
+
+    def __str__(self) -> str:
+        return f"{self.name}: {self.price}"
+
+
 class Device(models.Model):
     id = models.CharField(max_length=240, unique=True, primary_key=True)
 
@@ -82,7 +91,13 @@ class Device(models.Model):
     asset_type = models.CharField(max_length=120)
     asset_capacity = models.IntegerField()
 
-    tariff = models.CharField(max_length=120)
+    # tariff = models.CharField(
+    #     max_length=50,
+    #     null=False,
+    #     blank=False,
+    #     choices=AlertStatusType.choices,
+    #     default=AlertStatusType.PENDING.value
+    # )
 
     site = models.ForeignKey(
         Site,
