@@ -175,6 +175,8 @@ class OperationsDashboardCardsDataApiView(GenericAPIView, GetSitesMixin):
         start_date = request.query_params.get('start_date', None)
         end_date = request.query_params.get('end_date', None)
 
+        site_data = OrganizationSiteData(sites, start_date, end_date)
+
         response = {
             "gridHours": 32727658,
             "tariffPlan": 23,
