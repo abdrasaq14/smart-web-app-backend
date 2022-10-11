@@ -193,11 +193,12 @@ class OperationsDashboardDTStatusApiView(GenericAPIView, GetSitesMixin):
         start_date = request.query_params.get('start_date', None)
         end_date = request.query_params.get('end_date', None)
 
-        response = {
-            "dataset": { "percentageValue": 70, "humidity": 45, "temperature": 55 },
-        }
+        site_data = OrganizationSiteData(sites, start_date, end_date)
+        dt_status = site_data.get_dt_status()
 
-        return Response(response, status=status.HTTP_200_OK)
+        return Response({
+            "dataset": dt_status
+        }, status=status.HTTP_200_OK)
 
 
 # Finance Home Data

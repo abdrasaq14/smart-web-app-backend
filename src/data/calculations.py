@@ -180,7 +180,7 @@ class OrganizationDeviceData(DeviceRules):
             ).order_by('timestamp').values('timestamp', 'active_power_overall_total')
 
             df = pd.DataFrame(data_readings)
-            df['results'] = df['active_power_overall_total'] / Device.objects.get(id=device_id).asset_capacity * 0.8
+            df['results'] = df['active_power_overall_total'] / (Device.objects.get(id=device_id).asset_capacity * 0.8)
             if not df[df['results'] > 0.75].empty:
                 overloaded_dts += 1
 
@@ -250,7 +250,7 @@ class OrganizationSiteData(DeviceRules):
             date__gte=self.start_date,
             date__lte=self.end_date,
             device_serial__in=self.device_ids
-        ).order_by('-timestamp').values('timestamp', 'device_serial', 'import_active_energy_overall_total').distinct()
+        ).order_by('-timestamp').values('timestamp', 'device_serial', 'import_active_energy_overall_total')
 
         results = {
             'total_value': 0,
@@ -270,3 +270,26 @@ class OrganizationSiteData(DeviceRules):
             results['consumption'] += first_entry['import_active_energy_overall_total'] - last_entry['import_active_energy_overall_total']
 
         return results
+
+    def get_dt_status(self):
+        dt_status = {
+            'percentageValue': 0,
+            'humidity': 0,
+            'temperature': 0
+        }
+
+        for device_id in self.device_ids:
+            real_time_data = SmartDeviceReadings.objects.filter(
+                date__gte=self.start_date,
+                date__lte=self.end_date,
+                device_serial=device_id
+            ).order_by('-timestamp').first()
+
+            dt_status['percentageValue'] += real_time_data.active_power_overall_total / (Device.objects.get(id=device_id).asset_capacity * 0.8)
+            dt_status['humidity'] += real_time_data.analog_input_channel_2 * 4.108
+            dt_status['temperature'] += real_time_data.analog_input_channel_1 * 1.833
+
+        for key in dt_status.keys():
+            dt_status[key] = round(dt_status[key], 2)
+
+        return dt_status
