@@ -91,13 +91,11 @@ class Device(models.Model):
     asset_type = models.CharField(max_length=120)
     asset_capacity = models.IntegerField()
 
-    # tariff = models.CharField(
-    #     max_length=50,
-    #     null=False,
-    #     blank=False,
-    #     choices=AlertStatusType.choices,
-    #     default=AlertStatusType.PENDING.value
-    # )
+    tariff = models.ForeignKey(
+        DeviceTariff,
+        blank=False, null=False,
+        on_delete=models.CASCADE
+    )
 
     site = models.ForeignKey(
         Site,
