@@ -169,7 +169,7 @@ class DeviceData(DeviceRules):
 
         return round(mean(active_power_list) / 60, 2), total_power_cuts
 
-    def get_overloaded_dts(self):
+    def get_overloaded_dts(self) -> int:
         overloaded_dts = 0
 
         for device_id in self.device_ids:
@@ -186,7 +186,7 @@ class DeviceData(DeviceRules):
 
         return overloaded_dts
 
-    def get_power_consumption(self, districts: List[str]):
+    def get_power_consumption(self, districts: List[str]) -> dict:
         readings = SmartDeviceReadings.objects.filter(
             date__gte=self.start_date,
             date__lte=self.end_date,
@@ -338,8 +338,23 @@ class DeviceData(DeviceRules):
 
         return grid_hours
 
-    def get_revenue_per_hour(self):
+    def get_revenue_per_hour(self, avg_availability=None) -> float:
         # Revenue (Total consumption * Tariff Band) divided by the hours of DT active 
 
-        # revenue = self.get_total_consumption() * Device
-        ...
+        if not avg_availability:
+            avg_availability = self.get_avg_availability_and_power_cuts()[0]
+
+        net_device_data = []
+        for device_id in self.device_ids:
+            readings = SmartDeviceReadings.objects.filter(
+                date__gte=self.start_date,
+                date__lte=self.end_date,
+                device_serial=device_id
+            ).order_by('timestamp').values('import_active_energy_overall_total')
+
+            net_device_data.append(
+                (readings.last()['import_active_energy_overall_total'] -
+                readings.first()['import_active_energy_overall_total']) * Device.objects.get(id=device_id).tariff.price
+            )
+        revenue = round(np.sum(net_device_data), 2)
+        return revenue / avg_availability

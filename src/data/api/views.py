@@ -177,14 +177,15 @@ class OperationsDashboardCardsDataApiView(GenericAPIView, GetSitesMixin):
 
         device_data = DeviceData(sites, start_date, end_date)
         avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
+        revenue_per_hour = device_data.get_revenue_per_hour(avg_availability)
 
         response = {
             "gridHours": avg_availability,
             "tariffPlan": 23,
             "noOfOutages": power_cuts,
             "downtime": device_data.get_current_load(),
-            "revenuePerHour": 32271658,
-            "untappedRevenue": 832658,
+            "revenuePerHour": revenue_per_hour,
+            "untappedRevenue": 0,
         }
 
         return Response(response, status=status.HTTP_200_OK)
