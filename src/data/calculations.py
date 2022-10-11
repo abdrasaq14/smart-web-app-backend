@@ -78,9 +78,6 @@ class DeviceRules(BaseDeviceData):
 
         return pd.DataFrame(readings)
 
-    def estimated_tariff():
-        ...
-
     def average_load(self, device_serial: str) -> float:
         avg_power_total = SmartDeviceReadings.objects.filter(
             date__gte=self.start_date,
@@ -90,14 +87,8 @@ class DeviceRules(BaseDeviceData):
 
         return avg_power_total['avg_power_total']
 
-    def potential_consumption():
-        ...
 
-    def dt_capacity():
-        ...
-
-
-class OrganizationDeviceData(DeviceRules):
+class DeviceData(DeviceRules):
 
     def get_total_consumption(self) -> float:
         # Total Consumption
@@ -251,10 +242,7 @@ class OrganizationDeviceData(DeviceRules):
 
         return profile_chart_dataset
 
-
-class OrganizationSiteData(DeviceRules):
-
-    def get_revenue_loss(self):
+    def get_revenue_loss(self) -> dict:
         readings = SmartDeviceReadings.objects.filter(
             date__gte=self.start_date,
             date__lte=self.end_date,
@@ -280,7 +268,7 @@ class OrganizationSiteData(DeviceRules):
 
         return results
 
-    def get_dt_status(self):
+    def get_dt_status(self) -> dict:
         dt_status = {
             'percentageValue': 0,
             'humidity': 0,
@@ -303,5 +291,55 @@ class OrganizationSiteData(DeviceRules):
 
         return dt_status
 
-    def get_cards_data():
+    def get_grid_hours(self) -> float:
+        grid_hours = 0
+
+        for device_id in self.device_ids:
+            active_time = power_cuts = 0
+
+            data_readings = SmartDeviceReadings.objects.filter(
+                date__gte=self.start_date,
+                date__lte=self.end_date,
+                device_serial=device_id
+            ).order_by('timestamp').values(
+                'line_to_neutral_voltage_phase_a',
+                'line_to_neutral_voltage_phase_b',
+                'line_to_neutral_voltage_phase_c',
+                'timestamp'
+            )
+
+            for idx, data in enumerate(data_readings):
+                try:
+                    nxt_data = data_readings[idx + 1]
+                except IndexError:
+                    break
+
+                volt_a = data['line_to_neutral_voltage_phase_a']
+                volt_b = data['line_to_neutral_voltage_phase_b']
+                volt_c = data['line_to_neutral_voltage_phase_c']
+
+                nxt_volt_a = nxt_data['line_to_neutral_voltage_phase_a']
+                nxt_volt_b = nxt_data['line_to_neutral_voltage_phase_b']
+                nxt_volt_c = nxt_data['line_to_neutral_voltage_phase_c']
+
+                diff_time = nxt_data['timestamp'] - data['timestamp']
+                diff_minutes = diff_time.total_seconds() / 60
+
+                if volt_a != 0 or volt_b != 0 or volt_c != 0:
+                    active_time += diff_minutes
+                elif (volt_a == 0 and volt_b == 0 and volt_c == 0) and (nxt_volt_a != 0 or nxt_volt_b != 0 or nxt_volt_c != 0):
+                    power_cuts += 1
+
+            days_range = data_readings.last()['timestamp'] - data_readings.first()['timestamp']
+            if days_range.days > 0:
+                active_time = active_time / days_range.days
+
+            grid_hours += active_time / 60
+
+        return grid_hours
+
+    def get_revenue_per_hour(self):
+        # Revenue (Total consumption * Tariff Band) divided by the hours of DT active 
+
+        # revenue = self.get_total_consumption() * Device
         ...

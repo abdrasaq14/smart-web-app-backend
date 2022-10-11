@@ -2,7 +2,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from data.calculations import DeviceRules, OrganizationDeviceData, OrganizationSiteData
+from data.calculations import DeviceData, DeviceRules
 from core.models import Device, Site
 from core.types import AlertStatusType
 from core.utils import GetSitesMixin
@@ -29,7 +29,7 @@ class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
         }
 
         try:
-            org_device_data = OrganizationDeviceData(sites, start_date, end_date)
+            org_device_data = DeviceData(sites, start_date, end_date)
 
             results['total_consumption'] = org_device_data.get_total_consumption()
             results['current_load'] = org_device_data.get_current_load()
@@ -52,7 +52,7 @@ class OperationsProfileChartApiView(GenericAPIView, GetSitesMixin):
         start_date = request.query_params.get('start_date', None)
         end_date = request.query_params.get('end_date', None)
 
-        org_device_data = OrganizationDeviceData(sites, start_date, end_date)
+        org_device_data = DeviceData(sites, start_date, end_date)
         profile_chart_dataset = org_device_data.get_load_profile()
 
         return Response({
@@ -68,7 +68,7 @@ class OperationsPowerConsumptionChartApiView(GenericAPIView, GetSitesMixin):
 
         districts = Device.objects.filter(site__in=sites).values_list('company_district', flat=True).distinct()
 
-        org_device_data = OrganizationDeviceData(sites, start_date, end_date)
+        org_device_data = DeviceData(sites, start_date, end_date)
         by_district = org_device_data.get_power_consumption(districts)
 
         response = {
@@ -109,7 +109,7 @@ class OperationsDashboardRevenueLossApiView(GenericAPIView, GetSitesMixin):
         start_date = request.query_params.get('start_date', None)
         end_date = request.query_params.get('end_date', None)
 
-        site_data = OrganizationSiteData(sites, start_date, end_date)
+        site_data = DeviceData(sites, start_date, end_date)
         revenue_loss = site_data.get_revenue_loss()
 
         response = {
@@ -175,13 +175,14 @@ class OperationsDashboardCardsDataApiView(GenericAPIView, GetSitesMixin):
         start_date = request.query_params.get('start_date', None)
         end_date = request.query_params.get('end_date', None)
 
-        site_data = OrganizationSiteData(sites, start_date, end_date)
+        device_data = DeviceData(sites, start_date, end_date)
+        avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
 
         response = {
-            "gridHours": 32727658,
+            "gridHours": avg_availability,
             "tariffPlan": 23,
-            "noOfOutages": 1019591,
-            "downtime": 29019591,
+            "noOfOutages": power_cuts,
+            "downtime": device_data.get_current_load(),
             "revenuePerHour": 32271658,
             "untappedRevenue": 832658,
         }
@@ -195,7 +196,7 @@ class OperationsDashboardDTStatusApiView(GenericAPIView, GetSitesMixin):
         start_date = request.query_params.get('start_date', None)
         end_date = request.query_params.get('end_date', None)
 
-        site_data = OrganizationSiteData(sites, start_date, end_date)
+        site_data = DeviceData(sites, start_date, end_date)
         dt_status = site_data.get_dt_status()
 
         return Response({
