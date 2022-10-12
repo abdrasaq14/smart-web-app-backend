@@ -434,7 +434,9 @@ class DeviceData(DeviceRules):
                 * Device.objects.get(id=device_id).tariff.price
             )
         revenue = round(np.sum(net_device_data), 2)
-        return revenue / avg_availability
+        if np.isnan(revenue / avg_availability):
+            return 0
+        return (revenue / avg_availability)
 
     def get_traffic_plan(self):
         traffic_prices = Device.objects.filter(id__in=self.device_ids).values_list('tariff__price', flat=True)
