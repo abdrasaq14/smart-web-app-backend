@@ -1,6 +1,7 @@
+from datetime import datetime
+
 import factory
 from factory.fuzzy import FuzzyDateTime, FuzzyFloat, FuzzyInteger
-from datetime import datetime
 from pytz import UTC
 
 from core.models import Alert, Device, EventLog, Site, TransactionHistory, UserLog

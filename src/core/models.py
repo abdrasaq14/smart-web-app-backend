@@ -1,15 +1,17 @@
 from django.db import models
 from polymorphic.models import PolymorphicModel
+
 from core.types import AlertStatusType
 
 
 class ActivityLog(PolymorphicModel):
     alert_id = models.CharField(max_length=120)
     site = models.ForeignKey(
-        'core.Site',
-        blank=False, null=False,
+        "core.Site",
+        blank=False,
+        null=False,
         on_delete=models.CASCADE,
-        related_name='alerts'
+        related_name="alerts",
     )
     zone = models.CharField(max_length=120)
     district = models.CharField(max_length=120)
@@ -19,7 +21,7 @@ class ActivityLog(PolymorphicModel):
         null=False,
         blank=False,
         choices=AlertStatusType.choices,
-        default=AlertStatusType.PENDING.value
+        default=AlertStatusType.PENDING.value,
     )
     time = models.DateTimeField()
 
@@ -44,7 +46,9 @@ class UserLog(ActivityLog):
 
 
 class TransactionHistory(models.Model):
-    site = models.ForeignKey('core.Site', blank=False, null=False, on_delete=models.CASCADE)
+    site = models.ForeignKey(
+        "core.Site", blank=False, null=False, on_delete=models.CASCADE
+    )
     subscription = models.CharField(max_length=120)
 
     amount_billed = models.FloatField(default=0)
@@ -92,16 +96,11 @@ class Device(models.Model):
     asset_capacity = models.IntegerField()
 
     tariff = models.ForeignKey(
-        DeviceTariff,
-        blank=False, null=False,
-        on_delete=models.CASCADE
+        DeviceTariff, blank=False, null=False, on_delete=models.CASCADE
     )
 
     site = models.ForeignKey(
-        Site,
-        null=False, blank=False,
-        on_delete=models.CASCADE,
-        related_name='devices'
+        Site, null=False, blank=False, on_delete=models.CASCADE, related_name="devices"
     )
 
     linked_at = models.DateTimeField(auto_now_add=True)

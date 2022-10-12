@@ -1,10 +1,16 @@
-from rest_framework.generics import ListAPIView, GenericAPIView
-from rest_framework.response import Response
-from rest_framework import status, filters
 from django.db.models import Q
+from rest_framework import filters, status
+from rest_framework.generics import GenericAPIView, ListAPIView
+from rest_framework.response import Response
 
+from core.api.serializers import (
+    AlertSerializer,
+    EventLogSerializer,
+    SiteSerializer,
+    TransactionHistorySerializer,
+    UserLogSerializer,
+)
 from core.models import Alert, EventLog, Site, TransactionHistory, UserLog
-from core.api.serializers import AlertSerializer, EventLogSerializer, SiteSerializer, TransactionHistorySerializer, UserLogSerializer
 from core.pagination import TablePagination
 from core.utils import GetSitesMixin
 
@@ -17,15 +23,15 @@ class HealthCheckView(GenericAPIView):
 class BaseActivityLogView(ListAPIView, GetSitesMixin):
     pagination_class = TablePagination
     filter_backends = [filters.SearchFilter]
-    search_fields = ['alert_id', 'zone', 'district', 'activity', 'status']
+    search_fields = ["alert_id", "zone", "district", "activity", "status"]
 
     def get_queryset(self):
         q = Q()
         queryset = super().get_queryset()
         sites = self.get_sites(self.request)
 
-        start_date = self.request.query_params.get('start_date', None)
-        end_date = self.request.query_params.get('end_date', None)
+        start_date = self.request.query_params.get("start_date", None)
+        end_date = self.request.query_params.get("end_date", None)
 
         if start_date and end_date:
             q = Q(time__range=[start_date, end_date])
@@ -42,39 +48,45 @@ class BaseActivityLogView(ListAPIView, GetSitesMixin):
 
 class AlertApiView(BaseActivityLogView):
     serializer_class = AlertSerializer
-    queryset = Alert.objects.all().order_by('time')
+    queryset = Alert.objects.all().order_by("time")
 
 
 class EventLogApiView(BaseActivityLogView):
     serializer_class = EventLogSerializer
-    queryset = EventLog.objects.all().order_by('time')
+    queryset = EventLog.objects.all().order_by("time")
 
 
 class UserLogApiView(BaseActivityLogView):
     serializer_class = UserLogSerializer
-    queryset = UserLog.objects.all().order_by('time')
+    queryset = UserLog.objects.all().order_by("time")
 
 
 class TransactionHistoryApiView(ListAPIView):
     serializer_class = TransactionHistorySerializer
-    queryset = TransactionHistory.objects.all().order_by('time')
+    queryset = TransactionHistory.objects.all().order_by("time")
     pagination_class = TablePagination
 
 
 class SiteApiView(ListAPIView, GetSitesMixin):
-    queryset = Site.objects.all().order_by('time')
+    queryset = Site.objects.all().order_by("time")
     serializer_class = SiteSerializer
     pagination_class = TablePagination
     filter_backends = [filters.SearchFilter]
-    search_fields = ['name', 'asset_name', 'asset_type', 'asset_co_ordinate', 'asset_capacity']
+    search_fields = [
+        "name",
+        "asset_name",
+        "asset_type",
+        "asset_co_ordinate",
+        "asset_capacity",
+    ]
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        sites = self.request.query_params.get('sites', '')
+        sites = self.request.query_params.get("sites", "")
 
         if not sites:
             return queryset
 
-        site_ids = sites.split(',')
+        site_ids = sites.split(",")
 
         return queryset.filter(id__in=site_ids)
