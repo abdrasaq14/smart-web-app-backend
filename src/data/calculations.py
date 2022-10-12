@@ -2,15 +2,13 @@ from datetime import datetime, timedelta
 from statistics import mean
 from typing import List
 
-import awswrangler as wr
 import numpy as np
 import pandas as pd
 from django.db.models import Avg, Count, Q
 
-from core.constants import DAYS_IN_MONTH, DEVICE_DATE_FORMAT, DEVICE_DATETIME_FORMAT
+from core.constants import DEVICE_DATE_FORMAT
 from core.models import Device, Site
 from data.models import SmartDeviceReadings
-from main import ARC
 
 
 def get_last_month_date() -> str:
