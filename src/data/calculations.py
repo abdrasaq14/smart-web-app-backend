@@ -265,34 +265,18 @@ class DeviceData(DeviceRules):
         df["timestamp"] = pd.to_datetime(df["timestamp"])
 
         profile_chart_dataset = []
-        minutes_intervals = [[0, 14], [15, 29], [30, 44], [45, 59]]
 
         for i in range(0, 24):
-            # Filter by hour and minute interval
-            for minute_interval in minutes_intervals:
-                interval_devices_data = 0
-                for device_id in self.device_ids:
-                    device_df = df[df["device_serial"] == device_id]
-                    device_df = device_df[device_df["timestamp"].dt.hour == i]
-                    device_df = device_df[
-                        device_df["timestamp"].dt.minute >= minute_interval[0]
-                    ]
-                    device_df = device_df[
-                        device_df["timestamp"].dt.minute <= minute_interval[1]
-                    ]
+            interval_devices_data = 0
+            for device_id in self.device_ids:
+                device_df = df[df["device_serial"] == device_id]
+                device_df = device_df[device_df["timestamp"].dt.hour == i]
+                avg_df = device_df[["active_power_overall_total"]].mean(skipna=True)
 
-                    avg_df = device_df[["active_power_overall_total"]].mean(skipna=True)
+                if not avg_df.isnull().values.any():
+                    interval_devices_data += avg_df[0]
 
-                    if not avg_df.isnull().values.any():
-                        interval_devices_data += avg_df[0]
-
-                profile_chart_dataset.append(
-                    [
-                        i,
-                        f"{minute_interval[0]}-{minute_interval[1]}",
-                        interval_devices_data,
-                    ]
-                )
+            profile_chart_dataset.append([i, interval_devices_data])
 
         return profile_chart_dataset
 
