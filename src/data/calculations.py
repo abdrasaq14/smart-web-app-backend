@@ -249,36 +249,25 @@ class DeviceData(DeviceRules):
         return by_district
 
     def get_load_profile(self):
-        readings = (
-            SmartDeviceReadings.objects.filter(
-                date__gte=self.start_date,
-                date__lte=self.end_date,
-                device_serial__in=self.device_ids,
-            )
-            .order_by("timestamp")
-            .values("timestamp", "active_power_overall_total", "device_serial")
-            .distinct()
-        )
-
-        df = pd.DataFrame(readings)
-        # Parse date
-        df["timestamp"] = pd.to_datetime(df["timestamp"])
-
-        profile_chart_dataset = []
+        daily_chart_dataset = []
 
         for i in range(0, 24):
             interval_devices_data = 0
+
             for device_id in self.device_ids:
-                device_df = df[df["device_serial"] == device_id]
-                device_df = device_df[device_df["timestamp"].dt.hour == i]
-                avg_df = device_df[["active_power_overall_total"]].mean(skipna=True)
+                device_mean = SmartDeviceReadings.objects.filter(
+                    date__gte=self.start_date,
+                    date__lte=self.end_date,
+                    device_serial=device_id,
+                    timestamp__hour=i
+                ).aggregate(active_power_mean=Avg("active_power_overall_total"))
 
-                if not avg_df.isnull().values.any():
-                    interval_devices_data += avg_df[0]
+                if device_mean["active_power_mean"]:
+                    interval_devices_data += device_mean["active_power_mean"]
 
-            profile_chart_dataset.append([i, interval_devices_data])
+            daily_chart_dataset.append([i, interval_devices_data])
 
-        return profile_chart_dataset
+        return daily_chart_dataset
 
     def get_revenue_loss(self) -> dict:
         readings = (
@@ -449,3 +438,55 @@ class DeviceData(DeviceRules):
                     - old_entry.import_active_energy_overall_total
                 )
         return by_month
+
+    def get_daily_voltage(self):
+        return self._average_daily(
+            red_phase_key="line_to_neutral_voltage_phase_a",
+            yellow_phase_key="line_to_neutral_voltage_phase_b",
+            blue_phase_key="line_to_neutral_voltage_phase_c"
+        )
+
+    def get_daily_load(self):
+        return self._average_daily(
+            red_phase_key="active_power_overall_phase_a",
+            yellow_phase_key="active_power_overall_phase_b",
+            blue_phase_key="active_power_overall_phase_c"
+        )
+
+    def get_daily_power_factor(self):
+        return self._average_daily(
+            red_phase_key="power_factor_overall_phase_a",
+            yellow_phase_key="power_factor_overall_phase_b",
+            blue_phase_key="power_factor_overall_phase_c"
+        )
+
+    def _average_daily(self, red_phase_key, yellow_phase_key, blue_phase_key):
+        daily_chart_dataset = []
+
+        for i in range(0, 24):
+            red_phase = yellow_phase = blue_phase = 0
+
+            for device_id in self.device_ids:
+                voltage_mean = SmartDeviceReadings.objects.filter(
+                    date__gte=self.start_date,
+                    date__lte=self.end_date,
+                    device_serial=device_id,
+                    timestamp__hour=i
+                ).aggregate(
+                    red_phase_mean=Avg(red_phase_key),
+                    yellow_phase_mean=Avg(yellow_phase_key),
+                    blue_phase_mean=Avg(blue_phase_key)
+                )
+
+                if voltage_mean["red_phase_mean"]:
+                    red_phase += voltage_mean["red_phase_mean"]
+
+                if voltage_mean["yellow_phase_mean"]:
+                    yellow_phase += voltage_mean["yellow_phase_mean"]
+
+                if voltage_mean["blue_phase_mean"]:
+                    blue_phase += voltage_mean["blue_phase_mean"]
+
+            daily_chart_dataset.append([i, red_phase, yellow_phase, blue_phase])
+
+        return daily_chart_dataset

@@ -219,6 +219,60 @@ class OperationsDashboardDTStatusApiView(GenericAPIView, GetSitesMixin):
         return Response({"dataset": dt_status}, status=status.HTTP_200_OK)
 
 
+class OperationsDashboardAverageDailyLoadApiView(GenericAPIView, GetSitesMixin):
+    def get(self, request, **kwargs):
+        sites = self.get_sites(request)
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
+
+        device_data = DeviceData(sites, start_date, end_date)
+        daily_load = device_data.get_daily_load()
+
+        response = {
+            "dataset": [
+                ['date', 'red_phase', 'yellow_phase', 'blue_phase'],
+            ] + daily_load,
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
+class OperationsDashboardAverageDailyPFApiView(GenericAPIView, GetSitesMixin):
+    def get(self, request, **kwargs):
+        sites = self.get_sites(request)
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
+
+        device_data = DeviceData(sites, start_date, end_date)
+        daily_pf = device_data.get_daily_power_factor()
+
+        response = {
+            "dataset": [
+                ['date', 'red_phase', 'yellow_phase', 'blue_phase'],
+            ] + daily_pf,
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
+class OperationsDashboardAverageDailyVoltageApiView(GenericAPIView, GetSitesMixin):
+    def get(self, request, **kwargs):
+        sites = self.get_sites(request)
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
+
+        device_data = DeviceData(sites, start_date, end_date)
+        daily_voltage = device_data.get_daily_voltage()
+
+        response = {
+            "dataset": [
+                ['date', 'red_phase', 'yellow_phase', 'blue_phase'],
+            ] + daily_voltage,
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
 # Finance Home Data
 class FinanceRevenueApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
