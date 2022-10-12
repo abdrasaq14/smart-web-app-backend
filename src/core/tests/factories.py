@@ -4,7 +4,7 @@ import factory
 from factory.fuzzy import FuzzyDateTime, FuzzyFloat, FuzzyInteger
 from pytz import UTC
 
-from core.models import Alert, Device, EventLog, Site, TransactionHistory, UserLog
+from core.models import Alert, Device, DeviceTariff, EventLog, Site, TransactionHistory, UserLog
 from core.types import AlertStatusType
 
 
@@ -67,10 +67,21 @@ class UserLogFactory(BaseActivityLogFactory):
         model = UserLog
 
 
+class DeviceTariffFactory(factory.django.DjangoModelFactory):
+    name = "Band A"
+    price = 54.08
+    daily_availability = "minimum 20hrs"
+
+    class Meta:
+        model = DeviceTariff
+        django_get_or_create = ('name', 'price', 'daily_availability')
+
+
 class DeviceFactory(factory.django.DjangoModelFactory):
     id = factory.Sequence(lambda n: "DEVICE-ABU-%s" % n)
 
     site = factory.SubFactory(SiteFactory)
+    tariff = factory.SubFactory(DeviceTariffFactory)
 
     name = factory.Sequence(lambda n: "Device_%s" % n)
     location = factory.Sequence(lambda n: "Location - %s" % n)

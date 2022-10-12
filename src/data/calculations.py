@@ -9,6 +9,7 @@ from django.db.models import Avg, Count, Q
 from core.constants import DEVICE_DATE_FORMAT
 from core.models import Device, Site
 from data.models import SmartDeviceReadings
+from core.exceptions import GenericErrorException
 
 
 def get_last_month_date() -> str:
@@ -43,6 +44,10 @@ class BaseDeviceData:
         device_ids = list()
         for site in self.sites:
             device_ids = device_ids + list(site.devices.values_list("id", flat=True))
+
+        if len(device_ids) < 1:
+            raise GenericErrorException('No linked devices!')
+
         return device_ids
 
 
