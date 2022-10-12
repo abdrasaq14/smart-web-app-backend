@@ -440,6 +440,27 @@ class DeviceData(DeviceRules):
         return by_month
 
     def get_daily_voltage(self):
+        return self._average_daily(
+            red_phase_key="line_to_neutral_voltage_phase_a",
+            yellow_phase_key="line_to_neutral_voltage_phase_b",
+            blue_phase_key="line_to_neutral_voltage_phase_c"
+        )
+
+    def get_daily_load(self):
+        return self._average_daily(
+            red_phase_key="active_power_overall_phase_a",
+            yellow_phase_key="active_power_overall_phase_b",
+            blue_phase_key="active_power_overall_phase_c"
+        )
+
+    def get_daily_power_factor(self):
+        return self._average_daily(
+            red_phase_key="power_factor_overall_phase_a",
+            yellow_phase_key="power_factor_overall_phase_b",
+            blue_phase_key="power_factor_overall_phase_c"
+        )
+
+    def _average_daily(self, red_phase_key, yellow_phase_key, blue_phase_key):
         daily_chart_dataset = []
 
         for i in range(0, 24):
@@ -452,9 +473,9 @@ class DeviceData(DeviceRules):
                     device_serial=device_id,
                     timestamp__hour=i
                 ).aggregate(
-                    red_phase_mean=Avg("line_to_neutral_voltage_phase_a"),
-                    yellow_phase_mean=Avg("line_to_neutral_voltage_phase_b"),
-                    blue_phase_mean=Avg("line_to_neutral_voltage_phase_c")
+                    red_phase_mean=Avg(red_phase_key),
+                    yellow_phase_mean=Avg(yellow_phase_key),
+                    blue_phase_mean=Avg(blue_phase_key)
                 )
 
                 if voltage_mean["red_phase_mean"]:

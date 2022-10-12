@@ -225,25 +225,13 @@ class OperationsDashboardAverageDailyLoadApiView(GenericAPIView, GetSitesMixin):
         start_date = request.query_params.get("start_date", None)
         end_date = request.query_params.get("end_date", None)
 
-        site_data = DeviceData(sites, start_date, end_date)
+        device_data = DeviceData(sites, start_date, end_date)
+        daily_load = device_data.get_daily_load()
 
         response = {
             "dataset": [
                 ['date', 'red_phase', 'yellow_phase', 'blue_phase'],
-                [0, 17, 14, 30],
-                [2, 15, 13, 50],
-                [4, 12, 12, 55],
-                [6, 13, 11, 55],
-                [8, 14, 12, 40],
-                [10, 16, 13, 30],
-                [12, 14, 10, 5],
-                [14, 20, 12, 10],
-                [16, 19, 9, 2],
-                [18, 18, 10, 4],
-                [20, 17, 11, 25],
-                [22, 22, 10, 30],
-                [24, 24, 13, 50],
-            ],
+            ] + daily_load,
         }
 
         return Response(response, status=status.HTTP_200_OK)
@@ -255,25 +243,13 @@ class OperationsDashboardAverageDailyPFApiView(GenericAPIView, GetSitesMixin):
         start_date = request.query_params.get("start_date", None)
         end_date = request.query_params.get("end_date", None)
 
-        site_data = DeviceData(sites, start_date, end_date)
+        device_data = DeviceData(sites, start_date, end_date)
+        daily_pf = device_data.get_daily_power_factor()
 
         response = {
             "dataset": [
                 ['date', 'red_phase', 'yellow_phase', 'blue_phase'],
-                [0, 17, 14, 30],
-                [2, 15, 13, 50],
-                [4, 12, 12, 55],
-                [6, 13, 11, 55],
-                [8, 14, 12, 40],
-                [10, 16, 13, 30],
-                [12, 14, 10, 5],
-                [14, 20, 12, 10],
-                [16, 19, 9, 2],
-                [18, 18, 10, 4],
-                [20, 17, 11, 25],
-                [22, 22, 10, 30],
-                [24, 24, 13, 50],
-            ],
+            ] + daily_pf,
         }
 
         return Response(response, status=status.HTTP_200_OK)
