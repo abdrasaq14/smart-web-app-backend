@@ -137,7 +137,7 @@ class DeviceData(DeviceRules):
 
     def get_avg_availability_and_power_cuts(self):
         total_power_cuts = 0
-        active_power_list = []
+        active_power_list = [0]
 
         for device_id in self.device_ids:
             active_time = power_cuts = 0
