@@ -441,3 +441,27 @@ class DeviceData(DeviceRules):
     def get_traffic_plan(self):
         traffic_prices = Device.objects.filter(id__in=self.device_ids).values_list('tariff__price', flat=True)
         return mean(traffic_prices)
+
+    def get_energy_consumption(self):
+        by_month = []
+
+        for device_id in self.device_ids:
+            for i in range(1, 13):
+                q = Q(
+                    date__gte=self.start_date,
+                    date__lte=self.end_date,
+                    date__month=i,
+                    device_serial=device_id
+                )
+                old_entry = SmartDeviceReadings.objects.filter(q).order_by('timestamp').first()
+                real_time_entry = SmartDeviceReadings.objects.filter(q).order_by('timestamp').last()
+
+                if not old_entry or not real_time_entry:
+                    by_month.append(0)
+                    continue
+
+                by_month.append(
+                    real_time_entry.import_active_energy_overall_total
+                    - old_entry.import_active_energy_overall_total
+                )
+        return by_month
