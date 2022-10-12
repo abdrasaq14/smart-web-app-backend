@@ -1,10 +1,10 @@
 from django.contrib.auth import models as auth_models
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from loguru import logger
 
 from accounts.types import UserLevelAccess
 from accounts.utils import assign_user_perm
-from loguru import logger
 
 
 class User(auth_models.AbstractUser):

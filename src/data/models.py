@@ -21,7 +21,6 @@ class SmartDeviceReadings(models.Model):
     analog_input_channel_2 = models.FloatField(blank=True, null=True)
     # id = models.AutoField()
 
-
     class Meta:
         managed = False
-        db_table = 'smart_device_readings'
+        db_table = "smart_device_readings"

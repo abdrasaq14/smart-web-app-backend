@@ -1,23 +1,25 @@
+from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
-from rest_framework import status
 
-from data.calculations import DeviceData, DeviceRules
 from core.models import Device, Site
 from core.types import AlertStatusType
 from core.utils import GetSitesMixin
+from data.calculations import DeviceData, DeviceRules
 
 
 # Operations Dashboard
 class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
-        start_date = request.query_params.get('start_date', None)
-        end_date = request.query_params.get('end_date', None)
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
 
         sites_under_maintenance = 0
         for site in sites:
-            sites_under_maintenance += site.alerts.filter(status=AlertStatusType.PENDING.value).count()
+            sites_under_maintenance += site.alerts.filter(
+                status=AlertStatusType.PENDING.value
+            ).count()
 
         results = {
             "total_consumption": 0,
@@ -31,14 +33,17 @@ class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
         try:
             org_device_data = DeviceData(sites, start_date, end_date)
 
-            results['total_consumption'] = org_device_data.get_total_consumption()
-            results['current_load'] = org_device_data.get_current_load()
-            active_power, power_cuts = org_device_data.get_avg_availability_and_power_cuts()
+            results["total_consumption"] = org_device_data.get_total_consumption()
+            results["current_load"] = org_device_data.get_current_load()
+            (
+                active_power,
+                power_cuts,
+            ) = org_device_data.get_avg_availability_and_power_cuts()
 
-            results['avg_availability'] = active_power
-            results['power_cuts'] = power_cuts
+            results["avg_availability"] = active_power
+            results["power_cuts"] = power_cuts
 
-            results['overloaded_dts'] = org_device_data.get_overloaded_dts()
+            results["overloaded_dts"] = org_device_data.get_overloaded_dts()
 
         except Exception as e:
             raise e
@@ -49,31 +54,33 @@ class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
 class OperationsProfileChartApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
-        start_date = request.query_params.get('start_date', None)
-        end_date = request.query_params.get('end_date', None)
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
 
         org_device_data = DeviceData(sites, start_date, end_date)
         profile_chart_dataset = org_device_data.get_load_profile()
 
-        return Response({
-            "dataset": profile_chart_dataset
-        }, status=status.HTTP_200_OK)
+        return Response({"dataset": profile_chart_dataset}, status=status.HTTP_200_OK)
 
 
 class OperationsPowerConsumptionChartApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
-        start_date = request.query_params.get('start_date', None)
-        end_date = request.query_params.get('end_date', None)
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
 
-        districts = Device.objects.filter(site__in=sites).values_list('company_district', flat=True).distinct()
+        districts = (
+            Device.objects.filter(site__in=sites)
+            .values_list("company_district", flat=True)
+            .distinct()
+        )
 
         org_device_data = DeviceData(sites, start_date, end_date)
         by_district = org_device_data.get_power_consumption(districts)
 
         response = {
             "dataset": [
-                ['district', 'consumption'],
+                ["district", "consumption"],
             ]
         }
 
@@ -86,38 +93,44 @@ class OperationsPowerConsumptionChartApiView(GenericAPIView, GetSitesMixin):
 class OperationsSiteMonitoredApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
-        start_date = request.query_params.get('start_date', None)
-        end_date = request.query_params.get('end_date', None)
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
 
         device_rules = DeviceRules(sites, start_date, end_date)
         dt_active_df = device_rules.dt_active()
         dt_inactive_df = device_rules.dt_offline()
 
-        return Response({
-            "total": Site.objects.all().count(),
-            "dataset": [
-                {"key": 'active', "value": len(dt_active_df.index)},
-                {"key": 'offline', "value": len(dt_inactive_df.index)},
-            ],
-        }, status=status.HTTP_200_OK)
+        return Response(
+            {
+                "total": Site.objects.all().count(),
+                "dataset": [
+                    {"key": "active", "value": len(dt_active_df.index)},
+                    {"key": "offline", "value": len(dt_inactive_df.index)},
+                ],
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 # Operations Site Dashboard
 class OperationsDashboardRevenueLossApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
-        start_date = request.query_params.get('start_date', None)
-        end_date = request.query_params.get('end_date', None)
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
 
         site_data = DeviceData(sites, start_date, end_date)
         revenue_loss = site_data.get_revenue_loss()
 
         response = {
-            "total": revenue_loss['total_value'] + revenue_loss['consumption'],
+            "total": revenue_loss["total_value"] + revenue_loss["consumption"],
             "dataset": [
-                { "key": 'billing', "value": revenue_loss['total_value'] },
-                { "key": 'collection', "value": revenue_loss['consumption'] },
-                { "key": 'downtime', "value": revenue_loss['total_value'] - revenue_loss['consumption'] },
+                {"key": "billing", "value": revenue_loss["total_value"]},
+                {"key": "collection", "value": revenue_loss["consumption"]},
+                {
+                    "key": "downtime",
+                    "value": revenue_loss["total_value"] - revenue_loss["consumption"],
+                },
             ],
         }
 
@@ -127,15 +140,15 @@ class OperationsDashboardRevenueLossApiView(GenericAPIView, GetSitesMixin):
 class OperationsDashboardKeyInsightsApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
-        start_date = request.query_params.get('start_date', None)
-        end_date = request.query_params.get('end_date', None)
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
 
         response = {
             "insights": [
-                'DT is overloaded between 9AM and 1PM',
-                'Recurring low PF (inspect industrial customers',
-                'No power cuts today',
-                '98% collection efficiency',
+                "DT is overloaded between 9AM and 1PM",
+                "Recurring low PF (inspect industrial customers",
+                "No power cuts today",
+                "98% collection efficiency",
             ],
         }
 
@@ -145,24 +158,24 @@ class OperationsDashboardKeyInsightsApiView(GenericAPIView, GetSitesMixin):
 class OperationsDashboardEnergyChartApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
-        start_date = request.query_params.get('start_date', None)
-        end_date = request.query_params.get('end_date', None)
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
 
         response = {
             "dataset": [
-                ['month', 'energy'],
-                ['JAN', 420],
-                ['FEB', 740],
-                ['MAR', 600],
-                ['APR', 600],
-                ['MAY', 500],
-                ['JUN', 800],
-                ['JUL', 840],
-                ['AUG', 400],
-                ['SEP', 800],
-                ['OCT', 750],
-                ['NOV', 890],
-                ['DEC', 980],
+                ["month", "energy"],
+                ["JAN", 420],
+                ["FEB", 740],
+                ["MAR", 600],
+                ["APR", 600],
+                ["MAY", 500],
+                ["JUN", 800],
+                ["JUL", 840],
+                ["AUG", 400],
+                ["SEP", 800],
+                ["OCT", 750],
+                ["NOV", 890],
+                ["DEC", 980],
             ],
         }
 
@@ -172,8 +185,8 @@ class OperationsDashboardEnergyChartApiView(GenericAPIView, GetSitesMixin):
 class OperationsDashboardCardsDataApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
-        start_date = request.query_params.get('start_date', None)
-        end_date = request.query_params.get('end_date', None)
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
 
         device_data = DeviceData(sites, start_date, end_date)
         avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
@@ -194,32 +207,30 @@ class OperationsDashboardCardsDataApiView(GenericAPIView, GetSitesMixin):
 class OperationsDashboardDTStatusApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
-        start_date = request.query_params.get('start_date', None)
-        end_date = request.query_params.get('end_date', None)
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
 
         site_data = DeviceData(sites, start_date, end_date)
         dt_status = site_data.get_dt_status()
 
-        return Response({
-            "dataset": dt_status
-        }, status=status.HTTP_200_OK)
+        return Response({"dataset": dt_status}, status=status.HTTP_200_OK)
 
 
 # Finance Home Data
 class FinanceRevenueApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
-        start_date = request.query_params.get('start_date', None)
-        end_date = request.query_params.get('end_date', None)
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
 
         response = {
             "dataset": [
-                ['district', 'revenue'],
-                ['District E', 850],
-                ['District D', 200],
-                ['District C', 300],
-                ['District B', 500],
-                ['District A', 800],
+                ["district", "revenue"],
+                ["District E", 850],
+                ["District D", 200],
+                ["District C", 300],
+                ["District B", 500],
+                ["District A", 800],
             ],
         }
 
@@ -229,12 +240,12 @@ class FinanceRevenueApiView(GenericAPIView, GetSitesMixin):
 class FinancePerformanceApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
-        start_date = request.query_params.get('start_date', None)
-        end_date = request.query_params.get('end_date', None)
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
 
         response = {
             "dataset": [
-                ['day', 'collection', 'billedEnergy'],
+                ["day", "collection", "billedEnergy"],
                 [0, 17, 14],
                 [2, 15, 13],
                 [4, 12, 12],
@@ -257,14 +268,14 @@ class FinancePerformanceApiView(GenericAPIView, GetSitesMixin):
 class FinanceCustomerBreakdownApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
-        start_date = request.query_params.get('start_date', None)
-        end_date = request.query_params.get('end_date', None)
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
 
         response = {
             "total": 720000,
             "dataset": [
-                { "key": 'paying', "value": 40 },
-                { "key": 'defaulting', "value": 60 },
+                {"key": "paying", "value": 40},
+                {"key": "defaulting", "value": 60},
             ],
         }
 
@@ -274,8 +285,8 @@ class FinanceCustomerBreakdownApiView(GenericAPIView, GetSitesMixin):
 class FinanceCardsDataApiView(GenericAPIView, GetSitesMixin):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
-        start_date = request.query_params.get('start_date', None)
-        end_date = request.query_params.get('end_date', None)
+        start_date = request.query_params.get("start_date", None)
+        end_date = request.query_params.get("end_date", None)
 
         response = {
             "total_revenue": 32727658,
