@@ -1,10 +1,10 @@
 from django.urls import path
 from data.api.views import (
     FinanceCardsDataApiView, FinanceCustomerBreakdownApiView, FinancePerformanceApiView, FinanceRevenueApiView,
-    OperationsCardsDataApiView, OperationsDashboardCardsDataApiView, OperationsDashboardDTStatusApiView,
-    OperationsDashboardEnergyChartApiView, OperationsDashboardKeyInsightsApiView, OperationsDashboardRevenueLossApiView,
-    OperationsPowerConsumptionChartApiView, OperationsProfileChartApiView,
-    OperationsSiteMonitoredApiView
+    OperationsCardsDataApiView, OperationsDashboardAverageDailyLoadApiView, OperationsDashboardAverageDailyPFApiView,
+    OperationsDashboardAverageDailyVoltageApiView, OperationsDashboardCardsDataApiView, OperationsSiteMonitoredApiView,
+    OperationsDashboardDTStatusApiView, OperationsDashboardEnergyChartApiView, OperationsDashboardKeyInsightsApiView,
+    OperationsDashboardRevenueLossApiView, OperationsPowerConsumptionChartApiView, OperationsProfileChartApiView,
 )
 
 urlpatterns = [
@@ -20,6 +20,10 @@ urlpatterns = [
     path("operations-dashboard/energy-chart", OperationsDashboardEnergyChartApiView.as_view(), name="opd-energy-chart"),
     path("operations-dashboard/cards-data", OperationsDashboardCardsDataApiView.as_view(), name="opd-cards-data"),
     path("operations-dashboard/dt-status", OperationsDashboardDTStatusApiView.as_view(), name="opd-dt-status"),
+
+    path("operations-dashboard/average-daily-voltage", OperationsDashboardAverageDailyVoltageApiView.as_view(), name="opd-daily-voltage"),
+    path("operations-dashboard/average-daily-pf", OperationsDashboardAverageDailyPFApiView.as_view(), name="opd-daily-pf"),
+    path("operations-dashboard/average-daily-load", OperationsDashboardAverageDailyLoadApiView.as_view(), name="opd-daily-load"),
 
     # Finance Home
     path("finance/revenue", FinanceRevenueApiView.as_view(), name="finance-revenue"),

@@ -449,3 +449,34 @@ class DeviceData(DeviceRules):
                     - old_entry.import_active_energy_overall_total
                 )
         return by_month
+
+    def get_daily_voltage(self):
+        daily_chart_dataset = []
+
+        for i in range(0, 24):
+            red_phase = yellow_phase = blue_phase = 0
+
+            for device_id in self.device_ids:
+                voltage_mean = SmartDeviceReadings.objects.filter(
+                    date__gte=self.start_date,
+                    date__lte=self.end_date,
+                    device_serial=device_id,
+                    timestamp__hour=i
+                ).aggregate(
+                    red_phase_mean=Avg("line_to_neutral_voltage_phase_a"),
+                    yellow_phase_mean=Avg("line_to_neutral_voltage_phase_b"),
+                    blue_phase_mean=Avg("line_to_neutral_voltage_phase_c")
+                )
+
+                if voltage_mean["red_phase_mean"]:
+                    red_phase += voltage_mean["red_phase_mean"]
+
+                if voltage_mean["yellow_phase_mean"]:
+                    yellow_phase += voltage_mean["yellow_phase_mean"]
+
+                if voltage_mean["blue_phase_mean"]:
+                    blue_phase += voltage_mean["blue_phase_mean"]
+
+            daily_chart_dataset.append([i, red_phase, yellow_phase, blue_phase])
+
+        return daily_chart_dataset
