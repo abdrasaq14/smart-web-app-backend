@@ -249,37 +249,6 @@ class DeviceData(DeviceRules):
         return by_district
 
     def get_load_profile(self):
-        # readings = (
-        #     SmartDeviceReadings.objects.filter(
-        #         date__gte=self.start_date,
-        #         date__lte=self.end_date,
-        #         device_serial__in=self.device_ids,
-        #     )
-        #     .order_by("timestamp")
-        #     .values("timestamp", "active_power_overall_total", "device_serial")
-        #     .distinct()
-        # )
-
-        # df = pd.DataFrame(readings)
-        # # Parse date
-        # df["timestamp"] = pd.to_datetime(df["timestamp"])
-
-        # profile_chart_dataset = []
-
-        # for i in range(0, 24):
-        #     interval_devices_data = 0
-        #     for device_id in self.device_ids:
-        #         device_df = df[df["device_serial"] == device_id]
-        #         device_df = device_df[device_df["timestamp"].dt.hour == i]
-        #         avg_df = device_df[["active_power_overall_total"]].mean(skipna=True)
-
-        #         if not avg_df.isnull().values.any():
-        #             interval_devices_data += avg_df[0]
-
-        #     profile_chart_dataset.append([i, interval_devices_data])
-
-        # return profile_chart_dataset
-
         daily_chart_dataset = []
 
         for i in range(0, 24):
@@ -299,10 +268,6 @@ class DeviceData(DeviceRules):
             daily_chart_dataset.append([i, interval_devices_data])
 
         return daily_chart_dataset
-
-
-
-
 
     def get_revenue_loss(self) -> dict:
         readings = (
