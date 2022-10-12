@@ -161,21 +161,24 @@ class OperationsDashboardEnergyChartApiView(GenericAPIView, GetSitesMixin):
         start_date = request.query_params.get("start_date", None)
         end_date = request.query_params.get("end_date", None)
 
+        device_data = DeviceData(sites, start_date, end_date)
+        by_month = device_data.get_energy_consumption()
+
         response = {
             "dataset": [
                 ["month", "energy"],
-                ["JAN", 420],
-                ["FEB", 740],
-                ["MAR", 600],
-                ["APR", 600],
-                ["MAY", 500],
-                ["JUN", 800],
-                ["JUL", 840],
-                ["AUG", 400],
-                ["SEP", 800],
-                ["OCT", 750],
-                ["NOV", 890],
-                ["DEC", 980],
+                ["JAN", by_month[0]],
+                ["FEB", by_month[1]],
+                ["MAR", by_month[2]],
+                ["APR", by_month[3]],
+                ["MAY", by_month[4]],
+                ["JUN", by_month[5]],
+                ["JUL", by_month[6]],
+                ["AUG", by_month[7]],
+                ["SEP", by_month[8]],
+                ["OCT", by_month[9]],
+                ["NOV", by_month[10]],
+                ["DEC", by_month[11]],
             ],
         }
 
@@ -194,7 +197,7 @@ class OperationsDashboardCardsDataApiView(GenericAPIView, GetSitesMixin):
 
         response = {
             "gridHours": avg_availability,
-            "tariffPlan": 23,
+            "tariffPlan": device_data.get_traffic_plan(),
             "noOfOutages": power_cuts,
             "downtime": device_data.get_current_load(),
             "revenuePerHour": revenue_per_hour,

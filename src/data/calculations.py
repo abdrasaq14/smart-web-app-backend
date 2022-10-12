@@ -265,34 +265,18 @@ class DeviceData(DeviceRules):
         df["timestamp"] = pd.to_datetime(df["timestamp"])
 
         profile_chart_dataset = []
-        minutes_intervals = [[0, 14], [15, 29], [30, 44], [45, 59]]
 
         for i in range(0, 24):
-            # Filter by hour and minute interval
-            for minute_interval in minutes_intervals:
-                interval_devices_data = 0
-                for device_id in self.device_ids:
-                    device_df = df[df["device_serial"] == device_id]
-                    device_df = device_df[device_df["timestamp"].dt.hour == i]
-                    device_df = device_df[
-                        device_df["timestamp"].dt.minute >= minute_interval[0]
-                    ]
-                    device_df = device_df[
-                        device_df["timestamp"].dt.minute <= minute_interval[1]
-                    ]
+            interval_devices_data = 0
+            for device_id in self.device_ids:
+                device_df = df[df["device_serial"] == device_id]
+                device_df = device_df[device_df["timestamp"].dt.hour == i]
+                avg_df = device_df[["active_power_overall_total"]].mean(skipna=True)
 
-                    avg_df = device_df[["active_power_overall_total"]].mean(skipna=True)
+                if not avg_df.isnull().values.any():
+                    interval_devices_data += avg_df[0]
 
-                    if not avg_df.isnull().values.any():
-                        interval_devices_data += avg_df[0]
-
-                profile_chart_dataset.append(
-                    [
-                        i,
-                        f"{minute_interval[0]}-{minute_interval[1]}",
-                        interval_devices_data,
-                    ]
-                )
+            profile_chart_dataset.append([i, interval_devices_data])
 
         return profile_chart_dataset
 
@@ -434,4 +418,34 @@ class DeviceData(DeviceRules):
                 * Device.objects.get(id=device_id).tariff.price
             )
         revenue = round(np.sum(net_device_data), 2)
-        return revenue / avg_availability
+        if np.isnan(revenue / avg_availability):
+            return 0
+        return (revenue / avg_availability)
+
+    def get_traffic_plan(self):
+        traffic_prices = Device.objects.filter(id__in=self.device_ids).values_list('tariff__price', flat=True)
+        return mean(traffic_prices)
+
+    def get_energy_consumption(self):
+        by_month = []
+
+        for device_id in self.device_ids:
+            for i in range(1, 13):
+                q = Q(
+                    date__gte=self.start_date,
+                    date__lte=self.end_date,
+                    date__month=i,
+                    device_serial=device_id
+                )
+                old_entry = SmartDeviceReadings.objects.filter(q).order_by('timestamp').first()
+                real_time_entry = SmartDeviceReadings.objects.filter(q).order_by('timestamp').last()
+
+                if not old_entry or not real_time_entry:
+                    by_month.append(0)
+                    continue
+
+                by_month.append(
+                    real_time_entry.import_active_energy_overall_total
+                    - old_entry.import_active_energy_overall_total
+                )
+        return by_month
