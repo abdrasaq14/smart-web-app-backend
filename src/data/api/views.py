@@ -2,7 +2,7 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from data.calculations import DeviceRules, OrganizationDeviceData, OrganizationSiteData
+from data.calculations import DeviceData, DeviceRules
 from core.models import Device, Site
 from core.types import AlertStatusType
 from core.utils import GetSitesMixin
@@ -29,7 +29,7 @@ class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
         }
 
         try:
-            org_device_data = OrganizationDeviceData(sites, start_date, end_date)
+            org_device_data = DeviceData(sites, start_date, end_date)
 
             results['total_consumption'] = org_device_data.get_total_consumption()
             results['current_load'] = org_device_data.get_current_load()
@@ -52,25 +52,12 @@ class OperationsProfileChartApiView(GenericAPIView, GetSitesMixin):
         start_date = request.query_params.get('start_date', None)
         end_date = request.query_params.get('end_date', None)
 
-        org_device_data = OrganizationDeviceData(sites, start_date, end_date)
-        df, device_ids = org_device_data.get_load_profile()
-        pivoted_df = df.pivot_table(index="timestamp", columns="device_serial", values="active_power_overall_total")
-        pivoted_df = pivoted_df.fillna(0)
+        org_device_data = DeviceData(sites, start_date, end_date)
+        profile_chart_dataset = org_device_data.get_load_profile()
 
-        # response = {"dataset": [["day"]]}
-        response = {"dataset": []}
-        data_dict = []
-        # data_dict = [list(pivoted_df.index)]
-
-        for column in device_ids:
-            # response['dataset'][0].append(column)
-            try:
-                data_dict.append(list(pivoted_df[column]))
-            except KeyError:
-                pass
-
-        response['dataset'] = response['dataset'] + [list(x) for x in zip(*data_dict)]
-        return Response(response, status=status.HTTP_200_OK)
+        return Response({
+            "dataset": profile_chart_dataset
+        }, status=status.HTTP_200_OK)
 
 
 class OperationsPowerConsumptionChartApiView(GenericAPIView, GetSitesMixin):
@@ -81,7 +68,7 @@ class OperationsPowerConsumptionChartApiView(GenericAPIView, GetSitesMixin):
 
         districts = Device.objects.filter(site__in=sites).values_list('company_district', flat=True).distinct()
 
-        org_device_data = OrganizationDeviceData(sites, start_date, end_date)
+        org_device_data = DeviceData(sites, start_date, end_date)
         by_district = org_device_data.get_power_consumption(districts)
 
         response = {
@@ -91,12 +78,7 @@ class OperationsPowerConsumptionChartApiView(GenericAPIView, GetSitesMixin):
         }
 
         for k, v in by_district.items():
-            try:
-                value = v.iloc[0]
-            except AttributeError:
-                value = 0
-
-            response["dataset"].append([k, value])
+            response["dataset"].append([k, round(v, 2)])
 
         return Response(response, status=status.HTTP_200_OK)
 
@@ -127,14 +109,15 @@ class OperationsDashboardRevenueLossApiView(GenericAPIView, GetSitesMixin):
         start_date = request.query_params.get('start_date', None)
         end_date = request.query_params.get('end_date', None)
 
-        site_data = OrganizationSiteData(sites, start_date, end_date)
+        site_data = DeviceData(sites, start_date, end_date)
+        revenue_loss = site_data.get_revenue_loss()
 
         response = {
-            "total": 200000,
+            "total": revenue_loss['total_value'] + revenue_loss['consumption'],
             "dataset": [
-                { "key": 'billing', "value": 60 },
-                { "key": 'collection', "value": 20 },
-                { "key": 'downtime', "value": 20 },
+                { "key": 'billing', "value": revenue_loss['total_value'] },
+                { "key": 'collection', "value": revenue_loss['consumption'] },
+                { "key": 'downtime', "value": revenue_loss['total_value'] - revenue_loss['consumption'] },
             ],
         }
 
@@ -192,13 +175,17 @@ class OperationsDashboardCardsDataApiView(GenericAPIView, GetSitesMixin):
         start_date = request.query_params.get('start_date', None)
         end_date = request.query_params.get('end_date', None)
 
+        device_data = DeviceData(sites, start_date, end_date)
+        avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
+        revenue_per_hour = device_data.get_revenue_per_hour(avg_availability)
+
         response = {
-            "gridHours": 32727658,
+            "gridHours": avg_availability,
             "tariffPlan": 23,
-            "noOfOutages": 1019591,
-            "downtime": 29019591,
-            "revenuePerHour": 32271658,
-            "untappedRevenue": 832658,
+            "noOfOutages": power_cuts,
+            "downtime": device_data.get_current_load(),
+            "revenuePerHour": revenue_per_hour,
+            "untappedRevenue": 0,
         }
 
         return Response(response, status=status.HTTP_200_OK)
@@ -210,11 +197,12 @@ class OperationsDashboardDTStatusApiView(GenericAPIView, GetSitesMixin):
         start_date = request.query_params.get('start_date', None)
         end_date = request.query_params.get('end_date', None)
 
-        response = {
-            "dataset": { "percentageValue": 70, "humidity": 45, "temperature": 55 },
-        }
+        site_data = DeviceData(sites, start_date, end_date)
+        dt_status = site_data.get_dt_status()
 
-        return Response(response, status=status.HTTP_200_OK)
+        return Response({
+            "dataset": dt_status
+        }, status=status.HTTP_200_OK)
 
 
 # Finance Home Data
