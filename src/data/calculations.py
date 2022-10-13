@@ -128,9 +128,7 @@ class DeviceData(DeviceRules):
         for device_id in self.device_ids:
             real_time_data = (
                 SmartDeviceReadings.objects.filter(
-                    date__gte=self.start_date,
-                    date__lte=self.end_date,
-                    device_serial=device_id,
+                    device_serial=device_id
                 )
                 .order_by("-timestamp")
                 .first()
@@ -142,7 +140,7 @@ class DeviceData(DeviceRules):
 
     def get_avg_availability_and_power_cuts(self):
         total_power_cuts = 0
-        active_power_list = [0]
+        active_power_list = []
 
         for device_id in self.device_ids:
             active_time = power_cuts = 0
@@ -186,16 +184,17 @@ class DeviceData(DeviceRules):
                 ):
                     power_cuts += 1
 
-            days_range = (
-                data_readings.last()["timestamp"] - data_readings.first()["timestamp"]
-            )
+            last_date = datetime.strptime(self.end_date, DEVICE_DATE_FORMAT)
+            first_date = datetime.strptime(self.start_date, DEVICE_DATE_FORMAT)
+
+            days_range = (last_date - first_date)
             if days_range.days > 0:
                 active_time = active_time / days_range.days
 
             total_power_cuts += power_cuts
-            active_power_list.append(active_time)
+            active_power_list.append(active_time / 60)
 
-        return round(mean(active_power_list) / 60, 2), total_power_cuts
+        return round(mean(active_power_list), 2), total_power_cuts
 
     def get_overloaded_dts(self) -> int:
         overloaded_dts = 0
@@ -317,7 +316,8 @@ class DeviceData(DeviceRules):
                 "percentageValue"
             ] += real_time_data.active_power_overall_total / (
                 Device.objects.get(id=device_id).asset_capacity * 0.8
-            )
+            ) * 100
+
             dt_status["humidity"] += real_time_data.analog_input_channel_2 * 4.108
             dt_status["temperature"] += real_time_data.analog_input_channel_1 * 1.833
 

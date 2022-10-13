@@ -197,7 +197,7 @@ class OperationsDashboardCardsDataApiView(GenericAPIView, GetSitesMixin):
 
         response = {
             "gridHours": avg_availability,
-            "tariffPlan": device_data.get_traffic_plan(),
+            "tariffPlan": device_data.get_total_consumption(),
             "noOfOutages": power_cuts,
             "downtime": device_data.get_current_load(),
             "revenuePerHour": revenue_per_hour,
