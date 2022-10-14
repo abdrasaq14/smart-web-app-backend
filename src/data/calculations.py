@@ -175,10 +175,13 @@ class DeviceData(DeviceRules):
                 nxt_volt_c = nxt_data["line_to_neutral_voltage_phase_c"]
 
                 diff_time = nxt_data["timestamp"] - data["timestamp"]
-                diff_minutes = diff_time.total_seconds() / 60
+                diff_seconds = diff_time.total_seconds()
 
-                if volt_a != 0 or volt_b != 0 or volt_c != 0:
-                    active_time += diff_minutes
+                if volt_a != 0 or volt_b != 0 or volt_c != 0 and (
+                    nxt_volt_a != 0 or nxt_volt_b != 0 or nxt_volt_c != 0
+                ):
+                    active_time += diff_seconds
+
                 elif (volt_a == 0 and volt_b == 0 and volt_c == 0) and (
                     nxt_volt_a != 0 or nxt_volt_b != 0 or nxt_volt_c != 0
                 ):
@@ -189,12 +192,13 @@ class DeviceData(DeviceRules):
 
             days_range = (last_date - first_date)
             if days_range.days > 0:
-                active_time = active_time / days_range.days
+                active_time = active_time / (days_range.days + 1)
 
             total_power_cuts += power_cuts
-            active_power_list.append(active_time / 60)
+            active_power_list.append(active_time)
 
-        return round(mean(active_power_list), 2), total_power_cuts
+        avg_power_seconds_mean = mean(active_power_list)
+        return round(avg_power_seconds_mean / 3600, 2), total_power_cuts
 
     def get_overloaded_dts(self) -> int:
         overloaded_dts = 0
