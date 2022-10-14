@@ -331,8 +331,8 @@ class FinanceCustomerBreakdownApiView(GenericAPIView, GetSitesMixin):
         response = {
             "total": 720000,
             "dataset": [
-                {"key": "paying", "value": 40},
-                {"key": "defaulting", "value": 60},
+                {"key": "paying", "value": 288000},
+                {"key": "defaulting", "value": 432000},
             ],
         }
 
