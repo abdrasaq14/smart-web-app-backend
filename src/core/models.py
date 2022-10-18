@@ -128,10 +128,12 @@ class Device(models.Model):
     location = models.CharField(max_length=240)
     co_ordinate = models.CharField(max_length=240)
 
-    # Should be relation in the future
-    company_name = models.CharField(max_length=120)
-    company_district = models.CharField(max_length=120)
-    company_zone = models.CharField(max_length=120)
+    company = models.ForeignKey(
+        Company,
+        null=False, blank=False,
+        on_delete=models.CASCADE
+    )
+
     asset_type = models.CharField(max_length=120)
     asset_capacity = models.IntegerField()
 
