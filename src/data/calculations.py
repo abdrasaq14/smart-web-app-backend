@@ -325,6 +325,7 @@ class DeviceData(DeviceRules):
             dt_status["humidity"] += real_time_data.analog_input_channel_2 * 4.108
             dt_status["temperature"] += real_time_data.analog_input_channel_1 * 1.833
 
+        dt_status["percentageValue"] = dt_status["percentageValue"] / len(self.device_ids)
         for key in dt_status.keys():
             dt_status[key] = round(dt_status[key], 2)
 
