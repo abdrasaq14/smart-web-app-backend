@@ -1,16 +1,17 @@
 from django.db.models import Q
 from rest_framework import filters, status
-from rest_framework.generics import GenericAPIView, ListAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, CreateAPIView
 from rest_framework.response import Response
 
 from core.api.serializers import (
     AlertSerializer,
+    CompanySerializer,
     EventLogSerializer,
     SiteSerializer,
     TransactionHistorySerializer,
     UserLogSerializer,
 )
-from core.models import Alert, EventLog, Site, TransactionHistory, UserLog
+from core.models import Alert, Company, EventLog, Site, TransactionHistory, UserLog
 from core.pagination import TablePagination
 from core.utils import GetSitesMixin
 
@@ -90,3 +91,8 @@ class SiteApiView(ListAPIView, GetSitesMixin):
         site_ids = sites.split(",")
 
         return queryset.filter(id__in=site_ids)
+
+
+class CompanyApiView(ListAPIView, CreateAPIView, GetSitesMixin):
+    queryset = Company.objects.all()
+    serializer_class = CompanySerializer

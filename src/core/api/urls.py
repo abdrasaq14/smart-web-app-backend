@@ -1,6 +1,6 @@
 from django.urls import path
 from core.api.views import (
-    AlertApiView, EventLogApiView, SiteApiView, TransactionHistoryApiView, UserLogApiView
+    AlertApiView, CompanyApiView, EventLogApiView, SiteApiView, TransactionHistoryApiView, UserLogApiView
 )
 
 urlpatterns = [
@@ -9,4 +9,5 @@ urlpatterns = [
     path("user-logs", UserLogApiView.as_view(), name="user-logs"),
     path("sites", SiteApiView.as_view(), name="sites"),
     path("transaction-history", TransactionHistoryApiView.as_view(), name="transaction-history"),
+    path("companies", CompanyApiView.as_view(), name="companies"),
 ]
