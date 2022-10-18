@@ -4,12 +4,26 @@ import factory
 from factory.fuzzy import FuzzyDateTime, FuzzyFloat, FuzzyInteger
 from pytz import UTC
 
-from core.models import Alert, Device, DeviceTariff, EventLog, Site, TransactionHistory, UserLog
+from core.models import Alert, Company, Device, DeviceTariff, EventLog, Site, TransactionHistory, UserLog
 from core.types import AlertStatusType
+
+
+class CompanyFactory(factory.django.DjangoModelFactory):
+    name = "KBG Russia"
+
+    phone_number = factory.Sequence(lambda n: "041243123%s" % n)
+    email = factory.Sequence(lambda n: "%s@company.com" % n)
+    address = factory.Sequence(lambda n: "Address - %s" % n)
+    renewal_date = FuzzyDateTime(datetime(2022, 9, 12, tzinfo=UTC))
+
+    class Meta:
+        model = Company
+        django_get_or_create = ('name',)
 
 
 class SiteFactory(factory.django.DjangoModelFactory):
     name = factory.Sequence(lambda n: "Site - %s" % n)
+    company = factory.SubFactory(CompanyFactory)
 
     asset_name = factory.Sequence(lambda n: "Asset name - %s" % n)
     asset_type = factory.Sequence(lambda n: "AType - %s" % n)
