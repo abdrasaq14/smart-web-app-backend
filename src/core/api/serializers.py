@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from core.models import ActivityLog, Alert, Company, EventLog, Site, TransactionHistory, UserLog
+from core.models import ActivityLog, Alert, Company, Device, DeviceTariff, EventLog, Site, TransactionHistory, UserLog
 
 
 class CompanySerializer(serializers.ModelSerializer):
@@ -66,3 +66,21 @@ class TransactionHistorySerializer(serializers.ModelSerializer):
 
     def get_days(self, obj):
         return obj.duration_days or 0
+
+
+class DeviceTariffSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DeviceTariff
+        fields = ("id", "name", "price", "daily_availability")
+
+
+class DeviceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Device
+        fields = ["id", "name", "location", "co_ordinate", "company", "asset_type",
+                  "asset_capacity", "tariff", "site", "linked_at"]
+
+
+class ListDeviceSerializer(DeviceSerializer):
+    company = CompanySerializer(many=False)
+    tariff = DeviceTariffSerializer(many=False)

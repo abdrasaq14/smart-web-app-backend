@@ -6,12 +6,15 @@ from rest_framework.response import Response
 from core.api.serializers import (
     AlertSerializer,
     CompanySerializer,
+    DeviceSerializer,
     EventLogSerializer,
+    ListDeviceSerializer,
     SiteSerializer,
     TransactionHistorySerializer,
     UserLogSerializer,
+    DeviceTariffSerializer
 )
-from core.models import Alert, Company, EventLog, Site, TransactionHistory, UserLog
+from core.models import Alert, Company, Device, EventLog, Site, TransactionHistory, UserLog, DeviceTariff
 from core.pagination import TablePagination
 from core.utils import GetSitesMixin
 
@@ -96,3 +99,21 @@ class SiteApiView(ListAPIView, GetSitesMixin):
 class CompanyApiView(ListAPIView, CreateAPIView, GetSitesMixin):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
+
+
+class DeviceApiView(ListAPIView, CreateAPIView, GetSitesMixin):
+    queryset = Device.objects.all()
+    serializer_class = ListDeviceSerializer
+    action_serializer_class = DeviceSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.action_serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class DeviceTariffApiView(ListAPIView, GetSitesMixin):
+    queryset = DeviceTariff.objects.all()
+    serializer_class = DeviceTariffSerializer
