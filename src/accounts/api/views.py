@@ -12,6 +12,6 @@ class CurrentUserView(ListAPIView):
         return self.request.user
 
 
-class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView):
+class UserApiView(ListAPIView, CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
