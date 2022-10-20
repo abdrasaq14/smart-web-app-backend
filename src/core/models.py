@@ -1,7 +1,41 @@
 from django.db import models
 from polymorphic.models import PolymorphicModel
 
-from core.types import AlertStatusType
+from core.types import AlertStatusType, CompanyType, ServiceType
+
+
+class Company(models.Model):
+    name = models.CharField(max_length=120)
+    company_type = models.CharField(
+        max_length=50,
+        null=False,
+        blank=False,
+        choices=CompanyType.choices,
+        default=CompanyType.CAR_ENERGY.value,
+    )
+
+    service_type = models.CharField(
+        max_length=50,
+        null=False,
+        blank=False,
+        choices=ServiceType.choices,
+        default=ServiceType.ENERGY_MONITORING.value,
+    )
+
+    phone_number = models.CharField(max_length=20)
+    email = models.EmailField()
+    address = models.CharField(max_length=255)
+    renewal_date = models.DateField()
+
+    users = models.ManyToManyField(
+        "accounts.User",
+        null=True
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        return f"{self.name}"
 
 
 class ActivityLog(PolymorphicModel):
@@ -61,6 +95,12 @@ class TransactionHistory(models.Model):
 class Site(models.Model):
     name = models.CharField(max_length=120)
 
+    company = models.ForeignKey(
+        Company,
+        null=False, blank=False,
+        on_delete=models.CASCADE
+    )
+
     asset_name = models.CharField(max_length=240)
     asset_type = models.CharField(max_length=120)
     asset_co_ordinate = models.CharField(max_length=120)
@@ -88,10 +128,13 @@ class Device(models.Model):
     location = models.CharField(max_length=240)
     co_ordinate = models.CharField(max_length=240)
 
-    # Should be relation in the future
-    company_name = models.CharField(max_length=120)
+    company = models.ForeignKey(
+        Company,
+        null=False, blank=False,
+        on_delete=models.CASCADE
+    )
+
     company_district = models.CharField(max_length=120)
-    company_zone = models.CharField(max_length=120)
     asset_type = models.CharField(max_length=120)
     asset_capacity = models.IntegerField()
 
