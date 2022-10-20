@@ -256,6 +256,9 @@ class DeviceData(DeviceRules):
             first_value = readings.filter(device_serial=device_id).first()
             last_value = readings.filter(device_serial=device_id).last()
 
+            if not first_value or not last_value:
+                continue
+
             if device.company_district not in by_district:
                 by_district[device.company_district] = 0
 

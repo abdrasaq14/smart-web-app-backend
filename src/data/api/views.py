@@ -66,20 +66,19 @@ class OperationsProfileChartApiView(BaseDeviceDataApiView):
         return Response({"dataset": profile_chart_dataset}, status=status.HTTP_200_OK)
 
 
-class OperationsPowerConsumptionChartApiView(GenericAPIView, GetSitesMixin):
+class OperationsPowerConsumptionChartApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
-        start_date = request.query_params.get("start_date", None)
-        end_date = request.query_params.get("end_date", None)
+        companies = self.get_companies(request)
 
         districts = (
-            Device.objects.filter(site__in=sites)
+            Device.objects.filter(site__in=sites, company__in=companies)
             .values_list("company_district", flat=True)
             .distinct()
         )
 
-        org_device_data = DeviceData(sites, start_date, end_date)
-        by_district = org_device_data.get_power_consumption(districts)
+        device_data = self.device_data_manager()
+        by_district = device_data.get_power_consumption(districts)
 
         response = {
             "dataset": [
@@ -93,15 +92,11 @@ class OperationsPowerConsumptionChartApiView(GenericAPIView, GetSitesMixin):
         return Response(response, status=status.HTTP_200_OK)
 
 
-class OperationsSiteMonitoredApiView(GenericAPIView, GetSitesMixin):
+class OperationsSiteMonitoredApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
-        sites = self.get_sites(request)
-        start_date = request.query_params.get("start_date", None)
-        end_date = request.query_params.get("end_date", None)
-
-        device_rules = DeviceRules(sites, start_date, end_date)
-        dt_active_df = device_rules.dt_active()
-        dt_inactive_df = device_rules.dt_offline()
+        device_data = self.device_data_manager()
+        dt_active_df = device_data.dt_active()
+        dt_inactive_df = device_data.dt_offline()
 
         return Response(
             {
