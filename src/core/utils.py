@@ -6,10 +6,6 @@ from core.exceptions import GenericErrorException
 from core.models import Company, Site
 
 
-class GetSitesMixin:
-    ...
-
-
 class CompanySiteFiltersMixin:
     def get_sites(self, request) -> List[Site]:
         sites = request.query_params.get("sites", "")

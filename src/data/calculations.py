@@ -522,3 +522,62 @@ class DeviceData(DeviceRules):
             daily_chart_dataset.append([i, red_phase, yellow_phase, blue_phase])
 
         return daily_chart_dataset
+
+    def get_revenue_by_district(self, districts: List[str]) -> dict:
+        readings = (
+            SmartDeviceReadings.objects.filter(
+                date__gte=self.start_date,
+                date__lte=self.end_date,
+                device_serial__in=self.device_ids,
+            )
+            .order_by("-timestamp")
+            .values("device_serial", "import_active_energy_overall_total")
+        )
+
+        by_district = {}
+
+        for device_id in self.device_ids:
+            device = Device.objects.get(id=device_id)
+            first_value = readings.filter(device_serial=device_id).first()
+            last_value = readings.filter(device_serial=device_id).last()
+
+            if not first_value or not last_value:
+                continue
+
+            if device.company_district not in by_district:
+                by_district[device.company_district] = 0
+
+            by_district[device.company_district] += (
+                first_value["import_active_energy_overall_total"]
+                - last_value["import_active_energy_overall_total"]
+            ) * device.tariff.price
+
+        return by_district
+
+    def get_total_revenue_finance(self):
+        readings = (
+            SmartDeviceReadings.objects.filter(
+                date__gte=self.start_date,
+                date__lte=self.end_date,
+                device_serial__in=self.device_ids,
+            )
+            .order_by("-timestamp")
+            .values("device_serial", "import_active_energy_overall_total")
+        )
+
+        total_revenue = 0
+
+        for device_id in self.device_ids:
+            device = Device.objects.get(id=device_id)
+            first_value = readings.filter(device_serial=device_id).first()
+            last_value = readings.filter(device_serial=device_id).last()
+
+            if not first_value or not last_value:
+                continue
+
+            total_revenue += (
+                first_value["import_active_energy_overall_total"]
+                - last_value["import_active_energy_overall_total"]
+            ) * device.tariff.price
+
+        return total_revenue
