@@ -244,22 +244,28 @@ class OperationsDashboardAverageDailyVoltageApiView(BaseDeviceDataApiView):
 
 
 # Finance Home Data
-class FinanceRevenueApiView(GenericAPIView, GetSitesMixin):
+class FinanceRevenueApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
-        start_date = request.query_params.get("start_date", None)
-        end_date = request.query_params.get("end_date", None)
+        companies = self.get_companies(request)
+
+        districts = (
+            Device.objects.filter(site__in=sites, company__in=companies)
+            .values_list("company_district", flat=True)
+            .distinct()
+        )
+
+        device_data = self.device_data_manager()
+        by_district = device_data.get_revenue_by_district(districts)
 
         response = {
             "dataset": [
                 ["district", "revenue"],
-                ["District E", 850],
-                ["District D", 200],
-                ["District C", 300],
-                ["District B", 500],
-                ["District A", 800],
-            ],
+            ]
         }
+
+        for k, v in by_district.items():
+            response["dataset"].append([k, round(v, 2)])
 
         return Response(response, status=status.HTTP_200_OK)
 
