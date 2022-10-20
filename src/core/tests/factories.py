@@ -102,6 +102,7 @@ class DeviceFactory(factory.django.DjangoModelFactory):
     location = factory.Sequence(lambda n: "Location - %s" % n)
     co_ordinate = factory.Sequence(lambda n: "Co ordinate - %s" % n)
 
+    company_district = factory.Sequence(lambda n: "District %s" % n)
     asset_type = factory.Sequence(lambda n: "Asset type - %s" % n)
     asset_capacity = FuzzyInteger(0, 900)
 
