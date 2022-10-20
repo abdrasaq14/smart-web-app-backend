@@ -69,12 +69,14 @@ class SiteApiView(ListAPIView, CompanySiteDateQuerysetMixin):
 class CompanyApiView(ListAPIView, CreateAPIView):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
+    pagination_class = TablePagination
 
 
 class DeviceApiView(ListAPIView, CreateAPIView, CompanySiteDateQuerysetMixin):
     queryset = Device.objects.all()
     serializer_class = ListDeviceSerializer
     action_serializer_class = DeviceSerializer
+    pagination_class = TablePagination
 
     site_related_field = 'site'
     company_related_field = 'company'

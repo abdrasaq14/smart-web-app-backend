@@ -1,6 +1,7 @@
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from accounts.models import User
+from core.pagination import TablePagination
 from .serializers import UserSerializer
 
 
@@ -15,3 +16,4 @@ class CurrentUserView(ListAPIView):
 class UserApiView(ListAPIView, CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    pagination_class = TablePagination
