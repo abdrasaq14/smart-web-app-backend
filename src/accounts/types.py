@@ -3,6 +3,6 @@ from django.utils.translation import gettext_lazy as _
 
 
 class UserLevelAccess(models.TextChoices):
-    ADMIN = "admin", _("Admin")
-    USER = "user", _("User")
-    VIEWER = "viewer", _("Viewer")
+    ADMIN = "superuser", _("Super user")
+    OPERATION = "operation", _("Operation")
+    FINANCE = "finance", _("Finance")

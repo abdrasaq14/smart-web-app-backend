@@ -29,7 +29,8 @@ class Company(models.Model):
 
     users = models.ManyToManyField(
         "accounts.User",
-        null=True
+        null=True,
+        related_name='companies'
     )
 
     created_at = models.DateTimeField(auto_now_add=True)

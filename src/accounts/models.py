@@ -13,14 +13,17 @@ class User(auth_models.AbstractUser):
         null=False,
         blank=False,
         choices=UserLevelAccess.choices,
-        default=UserLevelAccess.USER.value,
+        default=UserLevelAccess.OPERATION.value,
     )
 
     email = models.EmailField(_("email address"), blank=True, unique=True)
+    employee_id = models.CharField(blank=True, null=True, max_length=120)
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email"]
+
+    time = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         """
@@ -29,7 +32,7 @@ class User(auth_models.AbstractUser):
 
         permissions = (
             (UserLevelAccess.ADMIN.value, UserLevelAccess.ADMIN.label),
-            (UserLevelAccess.USER.value, UserLevelAccess.USER.label),
+            (UserLevelAccess.OPERATION.value, UserLevelAccess.OPERATION.label),
         )
 
     def __str__(self):
@@ -60,15 +63,15 @@ class User(auth_models.AbstractUser):
         access_level = (
             UserLevelAccess.ADMIN.value
             if permission == UserLevelAccess.ADMIN.value
-            else UserLevelAccess.USER.value
+            else UserLevelAccess.OPERATION.value
         )
         User.objects.filter(pk=user.pk).update(access_level=access_level)
 
         # MAKING SURE THAT AN ADMIN IS ADMIN AND NOT GUTTED WITH MORE THAN ONE LIKE USER
         if access_level == UserLevelAccess.ADMIN.value:
-            assign_user_perm(UserLevelAccess.USER.value, user, obj, True)
+            assign_user_perm(UserLevelAccess.OPERATION.value, user, obj, True)
 
-        if access_level == UserLevelAccess.USER.value:
+        if access_level == UserLevelAccess.OPERATION.value:
             assign_user_perm(UserLevelAccess.ADMIN.value, user, obj, True)
 
         assign_user_perm(permission, user, obj, revoke)
