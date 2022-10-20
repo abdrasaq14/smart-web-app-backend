@@ -70,8 +70,13 @@ class CompanySiteDateQuerysetMixin(GenericAPIView, CompanySiteFiltersMixin):
         q = Q()
         queryset = super().get_queryset()
 
-        sites = self.get_sites(self.request)
-        companies = self.get_companies(self.request)
+        site_ids = [x.id for x in self.get_sites(self.request)]
+        company_ids = [x.id for x in self.get_companies(self.request)]
+
+        if self.site_related_field:
+            self.site_related_field += '__'
+        if self.company_related_field:
+            self.company_related_field += '__'
 
         start_date = self.request.query_params.get("start_date", None)
         end_date = self.request.query_params.get("end_date", None)
@@ -83,11 +88,10 @@ class CompanySiteDateQuerysetMixin(GenericAPIView, CompanySiteFiltersMixin):
         elif end_date and start_date is None:
             q = Q(**{f'{self.time_related_field}__lte': end_date})
 
-        if companies:
-            q = q & Q(**{f'{self.company_related_field}__in': companies})
+        if company_ids:
+            q = q & Q(**{f'{self.company_related_field}id__in': company_ids})
 
-        if sites:
-            q = q & Q(site__in=sites)
-            q = q & Q(**{f'{self.site_related_field}__in': sites})
+        if site_ids:
+            q = q & Q(**{f'{self.site_related_field}id__in': site_ids})
 
         return queryset.filter(q)
