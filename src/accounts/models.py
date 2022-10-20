@@ -23,7 +23,7 @@ class User(auth_models.AbstractUser):
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["email"]
 
-    time = models.DateTimeField(auto_now_add=True)
+    time = models.DateTimeField()
 
     class Meta:
         """
