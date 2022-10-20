@@ -4,10 +4,10 @@ from typing import List
 
 import numpy as np
 import pandas as pd
-from django.db.models import Avg, Count, Q
+from django.db.models import Avg, Count, Q, Sum
 
 from core.constants import DEVICE_DATE_FORMAT
-from core.models import Company, Device, Site
+from core.models import Company, Device, Site, TransactionHistory
 from data.models import SmartDeviceReadings
 from core.exceptions import GenericErrorException
 
@@ -581,3 +581,94 @@ class DeviceData(DeviceRules):
             ) * device.tariff.price
 
         return total_revenue
+
+    def get_atc_losses(self, total_revenue):
+        total_amount = 0
+
+        for site in self.sites:
+            amount = TransactionHistory.objects.filter(site=site).aggregate(total=Sum("amount_bought"))
+            total_amount += amount['total'] if amount['total'] else 0
+
+        if not total_revenue:
+            return 0
+        return 1 - (total_amount / total_revenue)
+
+    def get_dt_offline_hours(self):
+        offline_hours_list = []
+
+        for device_id in self.device_ids:
+            offline_time = 0
+
+            data_readings = (
+                SmartDeviceReadings.objects.filter(
+                    date__gte=self.start_date,
+                    date__lte=self.end_date,
+                    device_serial=device_id,
+                )
+                .order_by("timestamp")
+                .values(
+                    "line_to_neutral_voltage_phase_a",
+                    "line_to_neutral_voltage_phase_b",
+                    "line_to_neutral_voltage_phase_c",
+                    "timestamp",
+                )
+            )
+
+            for idx, data in enumerate(data_readings):
+                try:
+                    nxt_data = data_readings[idx + 1]
+                except IndexError:
+                    break
+
+                volt_a = data["line_to_neutral_voltage_phase_a"]
+                volt_b = data["line_to_neutral_voltage_phase_b"]
+                volt_c = data["line_to_neutral_voltage_phase_c"]
+
+                nxt_volt_a = nxt_data["line_to_neutral_voltage_phase_a"]
+                nxt_volt_b = nxt_data["line_to_neutral_voltage_phase_b"]
+                nxt_volt_c = nxt_data["line_to_neutral_voltage_phase_c"]
+
+                diff_time = nxt_data["timestamp"] - data["timestamp"]
+                diff_seconds = diff_time.total_seconds()
+
+                if (volt_a == 0 and volt_b == 0 and volt_c == 0) and (
+                    nxt_volt_a == 0 or nxt_volt_b == 0 or nxt_volt_c == 0
+                ):
+                    offline_time += diff_seconds
+
+            last_date = datetime.strptime(self.end_date, DEVICE_DATE_FORMAT)
+            first_date = datetime.strptime(self.start_date, DEVICE_DATE_FORMAT)
+
+            # days_range = (last_date - first_date)
+            # if days_range.days > 0:
+            #     offline_time = offline_time / (days_range.days + 1)
+
+            offline_hours_list.append(offline_time)
+
+        avg_offline_mean = sum(offline_hours_list)
+        return round(avg_offline_mean / 3600, 2)
+
+    def get_customer_breakdown(self) -> float:
+        paying = 0
+        defaulting = 0
+
+        for device_id in self.device_ids:
+            readings = (
+                SmartDeviceReadings.objects.filter(
+                    date__gte=self.start_date,
+                    date__lte=self.end_date,
+                    device_serial=device_id,
+                )
+                .order_by("timestamp")
+                .values("import_active_energy_overall_total")
+            )
+
+            if not readings:
+                continue
+            diff = readings.last()["import_active_energy_overall_total"] - readings.first()["import_active_energy_overall_total"]
+            if diff <= 20:
+                paying += 1
+            elif diff > 20:
+                defaulting += 1
+
+        return paying, defaulting

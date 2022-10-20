@@ -300,15 +300,14 @@ class FinancePerformanceApiView(BaseDeviceDataApiView):
 
 class FinanceCustomerBreakdownApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
-        sites = self.get_sites(request)
-        start_date = request.query_params.get("start_date", None)
-        end_date = request.query_params.get("end_date", None)
+        device_data = self.device_data_manager()
+        paying, defaulting = device_data.get_customer_breakdown()
 
         response = {
             "total": 720000,
             "dataset": [
-                {"key": "paying", "value": 288000},
-                {"key": "defaulting", "value": 432000},
+                {"key": "paying", "value": paying},
+                {"key": "defaulting", "value": defaulting},
             ],
         }
 
@@ -318,14 +317,16 @@ class FinanceCustomerBreakdownApiView(BaseDeviceDataApiView):
 class FinanceCardsDataApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
+        total_revenue = device_data.get_total_revenue_finance()
+        avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
 
         response = {
-            "total_revenue": device_data.get_total_revenue_finance(),
-            "atc_losses": 23,
-            "downtime_losses": 1019591,
+            "total_revenue": total_revenue,
+            "atc_losses": device_data.get_atc_losses(total_revenue),
+            "downtime_losses": total_revenue / device_data.get_dt_offline_hours(),
             "tarrif_losses": 29019591,
-            "highest_losses": 10000000,
-            "highest_revenue": 20000000,
+            "highest_losses": total_revenue / avg_availability,
+            "highest_revenue": total_revenue / len(device_data.device_ids),
         }
 
         return Response(response, status=status.HTTP_200_OK)
