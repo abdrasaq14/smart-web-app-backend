@@ -4,16 +4,25 @@ from rest_framework.response import Response
 
 from core.models import Device, Site
 from core.types import AlertStatusType
-from core.utils import GetSitesMixin
+from core.utils import GetSitesMixin, CompanySiteFiltersMixin
 from data.calculations import DeviceData, DeviceRules
 
 
+class BaseDeviceDataApiView(GenericAPIView, CompanySiteFiltersMixin):
+    def device_data_manager(self) -> DeviceData:
+        companies = self.get_companies(self.request)
+        sites = self.get_sites(self.request)
+        start_date = self.request.query_params.get("start_date", None)
+        end_date = self.request.query_params.get("end_date", None)
+
+        device_data = DeviceData(companies, sites, start_date, end_date)
+        return device_data
+
+
 # Operations Dashboard
-class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
+class OperationsCardsDataApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
-        start_date = request.query_params.get("start_date", None)
-        end_date = request.query_params.get("end_date", None)
 
         sites_under_maintenance = 0
         for site in sites:
@@ -31,19 +40,17 @@ class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
         }
 
         try:
-            org_device_data = DeviceData(sites, start_date, end_date)
+            device_data = self.device_data_manager()
 
-            results["total_consumption"] = org_device_data.get_total_consumption()
-            results["current_load"] = org_device_data.get_current_load()
             (
                 active_power,
                 power_cuts,
-            ) = org_device_data.get_avg_availability_and_power_cuts()
-
+            ) = device_data.get_avg_availability_and_power_cuts()
             results["avg_availability"] = active_power
             results["power_cuts"] = power_cuts
-
-            results["overloaded_dts"] = org_device_data.get_overloaded_dts()
+            results["total_consumption"] = device_data.get_total_consumption()
+            results["current_load"] = device_data.get_current_load()
+            results["overloaded_dts"] = device_data.get_overloaded_dts()
 
         except Exception as e:
             raise e
@@ -51,14 +58,10 @@ class OperationsCardsDataApiView(GenericAPIView, GetSitesMixin):
         return Response(results, status=status.HTTP_200_OK)
 
 
-class OperationsProfileChartApiView(GenericAPIView, GetSitesMixin):
+class OperationsProfileChartApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
-        sites = self.get_sites(request)
-        start_date = request.query_params.get("start_date", None)
-        end_date = request.query_params.get("end_date", None)
-
-        org_device_data = DeviceData(sites, start_date, end_date)
-        profile_chart_dataset = org_device_data.get_load_profile()
+        device_data = self.device_data_manager()
+        profile_chart_dataset = device_data.get_load_profile()
 
         return Response({"dataset": profile_chart_dataset}, status=status.HTTP_200_OK)
 
