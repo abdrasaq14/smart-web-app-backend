@@ -4,7 +4,7 @@ from rest_framework.response import Response
 
 from core.models import Device, Site
 from core.types import AlertStatusType
-from core.utils import GetSitesMixin, CompanySiteFiltersMixin
+from core.utils import CompanySiteFiltersMixin
 from data.calculations import DeviceData, DeviceRules
 
 
@@ -270,7 +270,7 @@ class FinanceRevenueApiView(BaseDeviceDataApiView):
         return Response(response, status=status.HTTP_200_OK)
 
 
-class FinancePerformanceApiView(GenericAPIView, GetSitesMixin):
+class FinancePerformanceApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
         start_date = request.query_params.get("start_date", None)
@@ -298,7 +298,7 @@ class FinancePerformanceApiView(GenericAPIView, GetSitesMixin):
         return Response(response, status=status.HTTP_200_OK)
 
 
-class FinanceCustomerBreakdownApiView(GenericAPIView, GetSitesMixin):
+class FinanceCustomerBreakdownApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
         start_date = request.query_params.get("start_date", None)
@@ -315,14 +315,12 @@ class FinanceCustomerBreakdownApiView(GenericAPIView, GetSitesMixin):
         return Response(response, status=status.HTTP_200_OK)
 
 
-class FinanceCardsDataApiView(GenericAPIView, GetSitesMixin):
+class FinanceCardsDataApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
-        sites = self.get_sites(request)
-        start_date = request.query_params.get("start_date", None)
-        end_date = request.query_params.get("end_date", None)
+        device_data = self.device_data_manager()
 
         response = {
-            "total_revenue": 32727658,
+            "total_revenue": device_data.get_total_revenue_finance(),
             "atc_losses": 23,
             "downtime_losses": 1019591,
             "tarrif_losses": 29019591,
