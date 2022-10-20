@@ -111,14 +111,10 @@ class OperationsSiteMonitoredApiView(BaseDeviceDataApiView):
 
 
 # Operations Site Dashboard
-class OperationsDashboardRevenueLossApiView(GenericAPIView, GetSitesMixin):
+class OperationsDashboardRevenueLossApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
-        sites = self.get_sites(request)
-        start_date = request.query_params.get("start_date", None)
-        end_date = request.query_params.get("end_date", None)
-
-        site_data = DeviceData(sites, start_date, end_date)
-        revenue_loss = site_data.get_revenue_loss()
+        device_data = self.device_data_manager()
+        revenue_loss = device_data.get_revenue_loss()
 
         response = {
             "total": revenue_loss["total_value"] + revenue_loss["consumption"],
@@ -135,7 +131,7 @@ class OperationsDashboardRevenueLossApiView(GenericAPIView, GetSitesMixin):
         return Response(response, status=status.HTTP_200_OK)
 
 
-class OperationsDashboardKeyInsightsApiView(GenericAPIView, GetSitesMixin):
+class OperationsDashboardKeyInsightsApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
         start_date = request.query_params.get("start_date", None)
@@ -153,13 +149,9 @@ class OperationsDashboardKeyInsightsApiView(GenericAPIView, GetSitesMixin):
         return Response(response, status=status.HTTP_200_OK)
 
 
-class OperationsDashboardEnergyChartApiView(GenericAPIView, GetSitesMixin):
+class OperationsDashboardEnergyChartApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
-        sites = self.get_sites(request)
-        start_date = request.query_params.get("start_date", None)
-        end_date = request.query_params.get("end_date", None)
-
-        device_data = DeviceData(sites, start_date, end_date)
+        device_data = self.device_data_manager()
         by_month = device_data.get_energy_consumption()
 
         response = {
@@ -183,13 +175,9 @@ class OperationsDashboardEnergyChartApiView(GenericAPIView, GetSitesMixin):
         return Response(response, status=status.HTTP_200_OK)
 
 
-class OperationsDashboardCardsDataApiView(GenericAPIView, GetSitesMixin):
+class OperationsDashboardCardsDataApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
-        sites = self.get_sites(request)
-        start_date = request.query_params.get("start_date", None)
-        end_date = request.query_params.get("end_date", None)
-
-        device_data = DeviceData(sites, start_date, end_date)
+        device_data = self.device_data_manager()
         avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
         revenue_per_hour = device_data.get_revenue_per_hour(avg_availability)
 
@@ -205,25 +193,17 @@ class OperationsDashboardCardsDataApiView(GenericAPIView, GetSitesMixin):
         return Response(response, status=status.HTTP_200_OK)
 
 
-class OperationsDashboardDTStatusApiView(GenericAPIView, GetSitesMixin):
+class OperationsDashboardDTStatusApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
-        sites = self.get_sites(request)
-        start_date = request.query_params.get("start_date", None)
-        end_date = request.query_params.get("end_date", None)
-
-        site_data = DeviceData(sites, start_date, end_date)
+        site_data = self.device_data_manager()
         dt_status = site_data.get_dt_status()
 
         return Response({"dataset": dt_status}, status=status.HTTP_200_OK)
 
 
-class OperationsDashboardAverageDailyLoadApiView(GenericAPIView, GetSitesMixin):
+class OperationsDashboardAverageDailyLoadApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
-        sites = self.get_sites(request)
-        start_date = request.query_params.get("start_date", None)
-        end_date = request.query_params.get("end_date", None)
-
-        device_data = DeviceData(sites, start_date, end_date)
+        device_data = self.device_data_manager()
         daily_load = device_data.get_daily_load()
 
         response = {
@@ -235,13 +215,9 @@ class OperationsDashboardAverageDailyLoadApiView(GenericAPIView, GetSitesMixin):
         return Response(response, status=status.HTTP_200_OK)
 
 
-class OperationsDashboardAverageDailyPFApiView(GenericAPIView, GetSitesMixin):
+class OperationsDashboardAverageDailyPFApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
-        sites = self.get_sites(request)
-        start_date = request.query_params.get("start_date", None)
-        end_date = request.query_params.get("end_date", None)
-
-        device_data = DeviceData(sites, start_date, end_date)
+        device_data = self.device_data_manager()
         daily_pf = device_data.get_daily_power_factor()
 
         response = {
@@ -253,13 +229,9 @@ class OperationsDashboardAverageDailyPFApiView(GenericAPIView, GetSitesMixin):
         return Response(response, status=status.HTTP_200_OK)
 
 
-class OperationsDashboardAverageDailyVoltageApiView(GenericAPIView, GetSitesMixin):
+class OperationsDashboardAverageDailyVoltageApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
-        sites = self.get_sites(request)
-        start_date = request.query_params.get("start_date", None)
-        end_date = request.query_params.get("end_date", None)
-
-        device_data = DeviceData(sites, start_date, end_date)
+        device_data = self.device_data_manager()
         daily_voltage = device_data.get_daily_voltage()
 
         response = {

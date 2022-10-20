@@ -309,6 +309,9 @@ class DeviceData(DeviceRules):
             first_entry = readings.filter(device_serial=device_serial).first()
             last_entry = readings.filter(device_serial=device_serial).last()
 
+            if not first_entry or not last_entry:
+                continue
+
             date_diff = first_entry["timestamp"] - last_entry["timestamp"]
             number_of_days = date_diff.days if date_diff.days > 0 else 1
 
@@ -333,6 +336,9 @@ class DeviceData(DeviceRules):
                 .order_by("-timestamp")
                 .first()
             )
+
+            if not real_time_data:
+                continue
 
             dt_status[
                 "percentageValue"
@@ -421,6 +427,9 @@ class DeviceData(DeviceRules):
                 .order_by("timestamp")
                 .values("import_active_energy_overall_total")
             )
+
+            if not readings:
+                continue
 
             net_device_data.append(
                 (
