@@ -7,7 +7,7 @@ import pandas as pd
 from django.db.models import Avg, Count, Q
 
 from core.constants import DEVICE_DATE_FORMAT
-from core.models import Device, Site
+from core.models import Company, Device, Site
 from data.models import SmartDeviceReadings
 from core.exceptions import GenericErrorException
 
@@ -19,12 +19,14 @@ def get_last_month_date() -> str:
 
 
 class BaseDeviceData:
+    companies: List[Company] = []
     sites: List[Site] = []
     start_date = None
     end_date = None
     device_ids: List[str] = []
 
-    def __init__(self, sites: List[Site] = [], start_date=None, end_date=None) -> None:
+    def __init__(self, companies: List[Company] = [], sites: List[Site] = [], start_date=None, end_date=None) -> None:
+        self.companies = companies
         self.sites = sites
         self.start_date = start_date
         self.end_date = end_date
@@ -43,12 +45,16 @@ class BaseDeviceData:
         # Extract all devices from our sites
         device_ids = list()
         for site in self.sites:
-            device_ids = device_ids + list(site.devices.values_list("id", flat=True))
+            device_ids = device_ids + list(Device.objects.filter(
+                site__in=self.sites,
+                company__in=self.companies
+            ).values_list("id", flat=True))
 
         if len(device_ids) < 1:
             raise GenericErrorException('No linked devices!')
 
-        return device_ids
+        device_set = set(device_ids)
+        return list(device_set)
 
 
 class DeviceRules(BaseDeviceData):
@@ -116,6 +122,9 @@ class DeviceData(DeviceRules):
                 .values("import_active_energy_overall_total")
             )
 
+            if not readings:
+                continue
+
             net_device_data.append(
                 readings.last()["import_active_energy_overall_total"]
                 - readings.first()["import_active_energy_overall_total"]
@@ -133,6 +142,9 @@ class DeviceData(DeviceRules):
                 .order_by("-timestamp")
                 .first()
             )
+
+            if not real_time_data:
+                continue
 
             device_values.append(real_time_data.active_power_overall_total)
 
@@ -214,6 +226,9 @@ class DeviceData(DeviceRules):
                 .values("timestamp", "active_power_overall_total")
             )
 
+            if not data_readings:
+                continue
+
             df = pd.DataFrame(data_readings)
             df["results"] = df["active_power_overall_total"] / (
                 Device.objects.get(id=device_id).asset_capacity * 0.8
@@ -240,6 +255,9 @@ class DeviceData(DeviceRules):
             device = Device.objects.get(id=device_id)
             first_value = readings.filter(device_serial=device_id).first()
             last_value = readings.filter(device_serial=device_id).last()
+
+            if not first_value or not last_value:
+                continue
 
             if device.company_district not in by_district:
                 by_district[device.company_district] = 0
@@ -291,6 +309,9 @@ class DeviceData(DeviceRules):
             first_entry = readings.filter(device_serial=device_serial).first()
             last_entry = readings.filter(device_serial=device_serial).last()
 
+            if not first_entry or not last_entry:
+                continue
+
             date_diff = first_entry["timestamp"] - last_entry["timestamp"]
             number_of_days = date_diff.days if date_diff.days > 0 else 1
 
@@ -315,6 +336,9 @@ class DeviceData(DeviceRules):
                 .order_by("-timestamp")
                 .first()
             )
+
+            if not real_time_data:
+                continue
 
             dt_status[
                 "percentageValue"
@@ -403,6 +427,9 @@ class DeviceData(DeviceRules):
                 .order_by("timestamp")
                 .values("import_active_energy_overall_total")
             )
+
+            if not readings:
+                continue
 
             net_device_data.append(
                 (

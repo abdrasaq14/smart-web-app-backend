@@ -134,6 +134,7 @@ class Device(models.Model):
         on_delete=models.CASCADE
     )
 
+    company_district = models.CharField(max_length=120)
     asset_type = models.CharField(max_length=120)
     asset_capacity = models.IntegerField()
 

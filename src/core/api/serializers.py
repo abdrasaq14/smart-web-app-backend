@@ -77,7 +77,7 @@ class DeviceTariffSerializer(serializers.ModelSerializer):
 class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Device
-        fields = ["id", "name", "location", "co_ordinate", "company", "asset_type",
+        fields = ["id", "name", "location", "co_ordinate", "company", "company_district", "asset_type",
                   "asset_capacity", "tariff", "site", "linked_at"]
 
 
