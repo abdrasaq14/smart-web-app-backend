@@ -1,9 +1,18 @@
 from rest_framework import serializers
-
+from accounts.models import User
 from core.models import ActivityLog, Alert, Company, Device, DeviceTariff, EventLog, Site, TransactionHistory, UserLog
 
 
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('id', 'access_level', 'email', 'first_name', 'last_name', 'employee_id', 'time',
+                  'phone_number')
+
+
 class CompanySerializer(serializers.ModelSerializer):
+    users = UserSerializer(many=True)
+
     class Meta:
         model = Company
         fields = ["id", "name", "company_type", "service_type", "phone_number", "email", "address",
