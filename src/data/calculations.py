@@ -450,8 +450,9 @@ class DeviceData(DeviceRules):
     def get_energy_consumption(self):
         by_month = []
 
-        for device_id in self.device_ids:
-            for i in range(1, 13):
+        for i in range(1, 13):
+            device_sum = 0
+            for device_id in self.device_ids:
                 q = Q(
                     date__gte=self.start_date,
                     date__lte=self.end_date,
@@ -462,13 +463,11 @@ class DeviceData(DeviceRules):
                 real_time_entry = SmartDeviceReadings.objects.filter(q).order_by('timestamp').last()
 
                 if not old_entry or not real_time_entry:
-                    by_month.append(0)
                     continue
 
-                by_month.append(
-                    real_time_entry.import_active_energy_overall_total
-                    - old_entry.import_active_energy_overall_total
-                )
+                device_sum += real_time_entry.import_active_energy_overall_total - old_entry.import_active_energy_overall_total
+
+            by_month.append(device_sum)
         return by_month
 
     def get_daily_voltage(self):
@@ -582,7 +581,9 @@ class DeviceData(DeviceRules):
 
         return total_revenue
 
-    def get_atc_losses(self, total_revenue):
+    def get_atc_losses(self, total_revenue=None):
+        if not total_revenue:
+            total_revenue = self.get_total_revenue_finance()
         total_amount = 0
 
         for site in self.sites:
@@ -672,3 +673,51 @@ class DeviceData(DeviceRules):
                 defaulting += 1
 
         return paying, defaulting
+
+    def get_finance_performance_by_month(self):
+        by_month = []
+
+        for i in range(1, 13):
+            month_entry = [i, 0, 0]
+
+            for device_id in self.device_ids:
+                device = Device.objects.get(id=device_id)
+                amount = TransactionHistory.objects.filter(
+                    site=device.site,
+                    time__gte=self.start_date,
+                    time__lte=self.end_date,
+                    time__month=i
+                ).aggregate(
+                    total_bought=Sum("amount_bought"),
+                    total_billed=Sum("amount_billed")
+                )
+
+                month_entry[1] += amount['total_bought'] if amount['total_bought'] else 0
+                month_entry[2] += amount['total_billed'] if amount['total_billed'] else 0
+
+            by_month.append(month_entry)
+        return by_month
+
+    def get_finance_performance_by_day(self):
+        by_day = []
+
+        for i in range(1, 32):
+            month_entry = [i, 0, 0]
+
+            for device_id in self.device_ids:
+                device = Device.objects.get(id=device_id)
+                amount = TransactionHistory.objects.filter(
+                    site=device.site,
+                    time__gte=self.start_date,
+                    time__lte=self.end_date,
+                    time__day=i
+                ).aggregate(
+                    total_bought=Sum("amount_bought"),
+                    total_billed=Sum("amount_billed")
+                )
+
+                month_entry[1] += amount['total_bought'] if amount['total_bought'] else 0
+                month_entry[2] += amount['total_billed'] if amount['total_billed'] else 0
+
+            by_day.append(month_entry)
+        return by_day

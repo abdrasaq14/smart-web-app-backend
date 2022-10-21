@@ -272,27 +272,17 @@ class FinanceRevenueApiView(BaseDeviceDataApiView):
 
 class FinancePerformanceApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
-        sites = self.get_sites(request)
-        start_date = request.query_params.get("start_date", None)
-        end_date = request.query_params.get("end_date", None)
+        device_data = self.device_data_manager()
+        data_by = self.request.query_params.get("by", "month")
+        if data_by == "month":
+            by_dataset = device_data.get_finance_performance_by_month()
+        else:
+            by_dataset = device_data.get_finance_performance_by_day()
 
         response = {
             "dataset": [
-                ["day", "collection", "billedEnergy"],
-                [0, 17, 14],
-                [2, 15, 13],
-                [4, 12, 12],
-                [6, 13, 11],
-                [8, 14, 12],
-                [10, 16, 13],
-                [12, 14, 10],
-                [14, 20, 12],
-                [16, 19, 9],
-                [18, 18, 10],
-                [20, 17, 11],
-                [22, 22, 10],
-                [24, 24, 13],
-            ],
+                ["month", "collection", "billedEnergy"],
+            ] + by_dataset,
         }
 
         return Response(response, status=status.HTTP_200_OK)
@@ -304,7 +294,7 @@ class FinanceCustomerBreakdownApiView(BaseDeviceDataApiView):
         paying, defaulting = device_data.get_customer_breakdown()
 
         response = {
-            "total": 720000,
+            "total": paying + defaulting,
             "dataset": [
                 {"key": "paying", "value": paying},
                 {"key": "defaulting", "value": defaulting},
