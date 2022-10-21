@@ -1,5 +1,5 @@
 from rest_framework import filters, status
-from rest_framework.generics import GenericAPIView, ListAPIView, CreateAPIView, UpdateAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.response import Response
 
 from core.api.serializers import (
@@ -72,7 +72,7 @@ class CompanyApiView(ListAPIView, CreateAPIView):
     pagination_class = TablePagination
 
 
-class DeviceApiView(ListAPIView, CreateAPIView, CompanySiteDateQuerysetMixin):
+class DeviceApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView, CompanySiteDateQuerysetMixin):
     queryset = Device.objects.all()
     serializer_class = ListDeviceSerializer
     action_serializer_class = DeviceSerializer
@@ -88,6 +88,14 @@ class DeviceApiView(ListAPIView, CreateAPIView, CompanySiteDateQuerysetMixin):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.action_serializer_class(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
 
 
 class DeviceTariffApiView(ListAPIView):
