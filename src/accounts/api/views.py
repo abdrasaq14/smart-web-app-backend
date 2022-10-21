@@ -1,4 +1,4 @@
-from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView
+from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
@@ -15,7 +15,7 @@ class CurrentUserView(ListAPIView):
         return self.request.user
 
 
-class UserApiView(ListAPIView, CreateAPIView):
+class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
     queryset = User.objects.all()
     serializer_class = ListUserSerializer
     action_serializer_class = UserSerializer
@@ -27,3 +27,11 @@ class UserApiView(ListAPIView, CreateAPIView):
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.action_serializer_class(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        return Response(serializer.data)
