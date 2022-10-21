@@ -18,6 +18,7 @@ class User(auth_models.AbstractUser):
 
     email = models.EmailField(_("email address"), blank=True, unique=True)
     employee_id = models.CharField(blank=True, null=True, max_length=120)
+    phone_number = models.CharField(blank=True, null=True, max_length=120)
 
     EMAIL_FIELD = "email"
     USERNAME_FIELD = "username"
