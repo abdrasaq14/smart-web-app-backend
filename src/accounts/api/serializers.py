@@ -1,7 +1,14 @@
 from rest_framework import serializers
 
 from accounts.models import User
-from core.api.serializers import CompanySerializer
+from core.models import Company
+
+
+class CompanySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Company
+        fields = ["id", "name", "company_type", "service_type", "phone_number", "email", "address",
+                  "renewal_date"]
 
 
 class UserSerializer(serializers.ModelSerializer):
