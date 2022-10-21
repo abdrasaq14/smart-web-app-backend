@@ -1,5 +1,5 @@
 from rest_framework import filters, status
-from rest_framework.generics import GenericAPIView, ListAPIView, CreateAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, CreateAPIView, UpdateAPIView
 from rest_framework.response import Response
 
 from core.api.serializers import (
@@ -23,7 +23,7 @@ class HealthCheckView(GenericAPIView):
         return Response(status=status.HTTP_200_OK)
 
 
-class BaseActivityLogView(ListAPIView, CompanySiteDateQuerysetMixin):
+class BaseActivityLogView(ListAPIView, UpdateAPIView, CompanySiteDateQuerysetMixin):
     pagination_class = TablePagination
     filter_backends = [filters.SearchFilter]
     search_fields = ["alert_id", "zone", "district", "activity", "status"]
