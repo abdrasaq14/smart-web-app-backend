@@ -1,5 +1,5 @@
 from rest_framework import filters, status
-from rest_framework.generics import GenericAPIView, ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView, RetrieveAPIView
 from rest_framework.response import Response
 
 from core.api.serializers import (
@@ -70,6 +70,11 @@ class CompanyApiView(ListAPIView, CreateAPIView):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
     pagination_class = TablePagination
+
+
+class CompanyDetailsApiView(RetrieveAPIView):
+    queryset = Company.objects.all()
+    serializer_class = CompanySerializer
 
 
 class DeviceApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView, CompanySiteDateQuerysetMixin):
