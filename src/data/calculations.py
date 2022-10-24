@@ -721,3 +721,24 @@ class DeviceData(DeviceRules):
 
             by_day.append(month_entry)
         return by_day
+
+    def get_tariff_losses(self, avg_availability=None, total_consumption=None):
+        # (Estimated Tariff - Tariff Band) * Total Consumption
+        if not avg_availability:
+            avg_availability, power_cuts = self.get_avg_availability_and_power_cuts()
+
+        if not total_consumption:
+            total_consumption = self.get_total_consumption()
+
+        total_tariff = 0
+        for device_id in self.device_ids:
+            total_tariff += Device.objects.get(id=device_id).tariff.price
+        total_tariff_avg = total_tariff / len(self.device_ids)
+
+        return (avg_availability - total_tariff_avg) * total_consumption
+
+    def get_untapped_revenue(self, avg_availability=None):
+        if not avg_availability:
+            avg_availability, power_cuts = self.get_avg_availability_and_power_cuts()
+
+        return avg_availability * 30 + self.get_tariff_losses(avg_availability)

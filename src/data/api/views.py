@@ -187,7 +187,7 @@ class OperationsDashboardCardsDataApiView(BaseDeviceDataApiView):
             "noOfOutages": power_cuts,
             "downtime": device_data.get_current_load(),
             "revenuePerHour": revenue_per_hour,
-            "untappedRevenue": 0,
+            "untappedRevenue": device_data.get_untapped_revenue(avg_availability),
         }
 
         return Response(response, status=status.HTTP_200_OK)
@@ -314,7 +314,7 @@ class FinanceCardsDataApiView(BaseDeviceDataApiView):
             "total_revenue": total_revenue,
             "atc_losses": device_data.get_atc_losses(total_revenue),
             "downtime_losses": total_revenue / device_data.get_dt_offline_hours(),
-            "tarrif_losses": 29019591,
+            "tarrif_losses": device_data.get_tariff_losses(avg_availability),
             "highest_losses": total_revenue / avg_availability,
             "highest_revenue": total_revenue / len(device_data.device_ids),
         }
