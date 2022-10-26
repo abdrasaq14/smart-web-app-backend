@@ -99,7 +99,8 @@ class Site(models.Model):
     company = models.ForeignKey(
         Company,
         null=False, blank=False,
-        on_delete=models.CASCADE
+        on_delete=models.CASCADE,
+        related_name='sites'
     )
 
     asset_name = models.CharField(max_length=240)
