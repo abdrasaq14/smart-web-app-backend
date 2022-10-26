@@ -1,6 +1,6 @@
 from django.urls import path
 from data.api.views import (
-    FinanceCardsDataApiView, FinanceCustomerBreakdownApiView, FinancePerformanceApiView, FinanceRevenueApiView,
+    AccountHomeCardsDataApiView, AccountHomeTopRevenueDataApiView, AccountHomeTopSavingsDataApiView, FinanceCardsDataApiView, FinanceCustomerBreakdownApiView, FinancePerformanceApiView, FinanceRevenueApiView, ManagerHomeCardsDataApiView,
     OperationsCardsDataApiView, OperationsDashboardAverageDailyLoadApiView, OperationsDashboardAverageDailyPFApiView,
     OperationsDashboardAverageDailyVoltageApiView, OperationsDashboardCardsDataApiView, OperationsSiteMonitoredApiView,
     OperationsDashboardDTStatusApiView, OperationsDashboardEnergyChartApiView, OperationsDashboardKeyInsightsApiView,
@@ -30,5 +30,13 @@ urlpatterns = [
     path("finance/performance", FinancePerformanceApiView.as_view(), name="finance-performance"),
     path("finance/customer-breakdown", FinanceCustomerBreakdownApiView.as_view(), name="finance-customer-breakdown"),
     path("finance/cards-data", FinanceCardsDataApiView.as_view(), name="finance-cards-data"),
+
+    # Manager Home
+    path("manager/cards-data", ManagerHomeCardsDataApiView.as_view(), name="manager-cards-data"),
+
+    # Account Home
+    path("account-home/cards-data", AccountHomeCardsDataApiView.as_view(), name="account-cards-data"),
+    path("account-home/top-revenues", AccountHomeTopRevenueDataApiView.as_view(), name="account-top-revenue"),
+    path("account-home/top-savings", AccountHomeTopSavingsDataApiView.as_view(), name="account-top-savings"),
 
 ]

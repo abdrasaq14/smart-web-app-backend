@@ -1,8 +1,9 @@
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from accounts.models import User
 
-from core.models import Device, Site
+from core.models import Alert, Device, Site
 from core.types import AlertStatusType
 from core.utils import CompanySiteFiltersMixin
 from data.calculations import DeviceData, DeviceRules
@@ -317,6 +318,97 @@ class FinanceCardsDataApiView(BaseDeviceDataApiView):
             "tarrif_losses": device_data.get_tariff_losses(avg_availability),
             "highest_losses": total_revenue / avg_availability,
             "highest_revenue": total_revenue / len(device_data.device_ids),
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
+# Manager Home
+class ManagerHomeCardsDataApiView(BaseDeviceDataApiView):
+    def get(self, request, **kwargs):
+        device_data = self.device_data_manager()
+        total_revenue = device_data.get_total_revenue_finance()
+
+        sites = self.get_sites(request)
+        companies = self.get_companies(request)
+        users = User.objects.filter(
+            companies__in=companies,
+            companies__sites__in=sites
+        )
+        alerts = Alert.objects.filter(
+            site__in=sites,
+            site__company__in=companies
+        )
+
+        response = {
+            "total_revenue": total_revenue,
+            "atc_losses": device_data.get_atc_losses(total_revenue),
+            "total_consumption": device_data.get_total_consumption(),
+            "current_load": device_data.get_current_load(),
+            "number_of_sites": len(sites),
+            "number_of_users": len(users),
+            "pending_alerts": len(alerts),
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
+# Account Home
+class AccountHomeCardsDataApiView(BaseDeviceDataApiView):
+    def get(self, request, **kwargs):
+        device_data = self.device_data_manager()
+
+        sites = self.get_sites(request)
+        companies = self.get_companies(request)
+        users = User.objects.filter(
+            companies__in=companies,
+            companies__sites__in=sites
+        )
+
+        response = {
+            "total_energy_expanses": 32727658,
+            "total_consumption": device_data.get_total_consumption(),
+            "current_load": device_data.get_current_load(),
+            "co2_savings": 23,
+            "number_of_companies": len(companies),
+            "number_of_sites": len(sites),
+            "number_of_users": len(users),
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
+class AccountHomeTopRevenueDataApiView(BaseDeviceDataApiView):
+    def get(self, request, **kwargs):
+        device_data = self.device_data_manager()
+
+        response = {
+            "dataset": [
+                ['company', 'savings'],
+                ['K&C Trios', 850],
+                ['Da Vinci Vault', 200],
+                ['Love Energy', 300],
+                ['Justus Industries', 500],
+                ['Kinfe ratings', 800],
+            ],
+        }
+
+        return Response(response, status=status.HTTP_200_OK)
+
+
+class AccountHomeTopSavingsDataApiView(BaseDeviceDataApiView):
+    def get(self, request, **kwargs):
+        device_data = self.device_data_manager()
+
+        response = {
+            "dataset": [
+                ['company', 'savings'],
+                ['K&C Trios', 850],
+                ['Da Vinci Vault', 200],
+                ['Love Energy', 300],
+                ['Justus Industries', 500],
+                ['Kinfe ratings', 800],
+            ],
         }
 
         return Response(response, status=status.HTTP_200_OK)
