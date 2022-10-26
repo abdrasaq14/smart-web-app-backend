@@ -1,10 +1,12 @@
 from django.urls import path
 from data.api.views import (
-    AccountHomeCardsDataApiView, AccountHomeTopRevenueDataApiView, AccountHomeTopSavingsDataApiView, FinanceCardsDataApiView, FinanceCustomerBreakdownApiView, FinancePerformanceApiView, FinanceRevenueApiView, ManagerHomeCardsDataApiView,
+    AccountHomeCardsDataApiView, AccountHomeTopRevenueDataApiView, AccountHomeTopSavingsDataApiView,
+    FinanceCardsDataApiView, FinanceCustomerBreakdownApiView, FinancePerformanceApiView, FinanceRevenueApiView,
     OperationsCardsDataApiView, OperationsDashboardAverageDailyLoadApiView, OperationsDashboardAverageDailyPFApiView,
     OperationsDashboardAverageDailyVoltageApiView, OperationsDashboardCardsDataApiView, OperationsSiteMonitoredApiView,
     OperationsDashboardDTStatusApiView, OperationsDashboardEnergyChartApiView, OperationsDashboardKeyInsightsApiView,
     OperationsDashboardRevenueLossApiView, OperationsPowerConsumptionChartApiView, OperationsProfileChartApiView,
+    ManagerHomeCardsDataApiView
 )
 
 urlpatterns = [
