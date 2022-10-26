@@ -1,5 +1,5 @@
 from rest_framework import filters, status
-from rest_framework.generics import GenericAPIView, ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView, RetrieveAPIView
+from rest_framework.generics import GenericAPIView, ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView, RetrieveAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 
 from core.api.serializers import (
@@ -8,6 +8,7 @@ from core.api.serializers import (
     DeviceSerializer,
     EventLogSerializer,
     ListDeviceSerializer,
+    ListTransactionHistorySerializer,
     SiteSerializer,
     TransactionHistorySerializer,
     UserLogSerializer,
@@ -44,10 +45,29 @@ class UserLogApiView(BaseActivityLogView):
     queryset = UserLog.objects.all().order_by("time")
 
 
-class TransactionHistoryApiView(ListAPIView, CompanySiteDateQuerysetMixin):
-    serializer_class = TransactionHistorySerializer
+class TransactionHistoryApiView(ListAPIView, CreateAPIView, CompanySiteDateQuerysetMixin):
+    serializer_class = ListTransactionHistorySerializer
+    post_serializer_class = TransactionHistorySerializer
     queryset = TransactionHistory.objects.all().order_by("time")
     pagination_class = TablePagination
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.post_serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+
+class TransactionHistoryDetailsApiView(RetrieveUpdateDestroyAPIView, CompanySiteDateQuerysetMixin):
+    serializer_class = ListTransactionHistorySerializer
+    action_serializer_class = TransactionHistorySerializer
+    queryset = TransactionHistory.objects.all().order_by("time")
+
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PUT', 'PATCH']:
+            return TransactionHistorySerializer
+        return ListTransactionHistorySerializer
 
 
 class SiteApiView(ListAPIView, CompanySiteDateQuerysetMixin):
