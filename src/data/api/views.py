@@ -315,7 +315,7 @@ class FinanceCardsDataApiView(BaseDeviceDataApiView):
             "total_revenue": total_revenue,
             "atc_losses": device_data.get_atc_losses(total_revenue),
             "downtime_losses": total_revenue / device_data.get_dt_offline_hours(),
-            "tarrif_losses": device_data.get_tariff_losses(avg_availability),
+            "tarrif_losses": device_data.get_tariff_losses(),
             "highest_losses": total_revenue / avg_availability,
             "highest_revenue": total_revenue / len(device_data.device_ids),
         }

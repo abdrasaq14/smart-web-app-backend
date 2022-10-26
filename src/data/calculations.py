@@ -722,10 +722,17 @@ class DeviceData(DeviceRules):
             by_day.append(month_entry)
         return by_day
 
-    def get_tariff_losses(self, avg_availability=None, total_consumption=None):
+    def get_tariff_losses(self, total_consumption=None):
         # (Estimated Tariff - Tariff Band) * Total Consumption
-        if not avg_availability:
-            avg_availability, power_cuts = self.get_avg_availability_and_power_cuts()
+        avg_start_date = datetime.strptime(self.end_date, DEVICE_DATE_FORMAT) - timedelta(days=30 * 3)
+
+        new_device_data = DeviceData(
+            companies=self.companies,
+            sites=self.sites,
+            start_date=datetime.strftime(avg_start_date, DEVICE_DATE_FORMAT),
+            end_date=self.end_date
+        )
+        avg_availability, power_cuts = new_device_data.get_avg_availability_and_power_cuts()
 
         if not total_consumption:
             total_consumption = self.get_total_consumption()
