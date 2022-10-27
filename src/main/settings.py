@@ -78,7 +78,7 @@ INSTALLED_APPS = [
 AUTHENTICATION_BACKENDS = [
     "guardian.backends.ObjectPermissionBackend",
     'django.contrib.auth.backends.ModelBackend',
-    'django.contrib.auth.backends.RemoteUserBackend',
+    'accounts.backends.RemoteUserBackend',
 ]
 
 MIDDLEWARE = [
@@ -202,10 +202,8 @@ if AUTH0_DOMAIN:
     JWT_ISSUER = 'https://' + AUTH0_DOMAIN + '/'
 
 JWT_AUTH = {
-    'JWT_PAYLOAD_GET_USERNAME_HANDLER':
-        'accounts.utils.jwt_get_username_from_payload_handler',
-    'JWT_DECODE_HANDLER':
-        'accounts.utils.jwt_decode_token',
+    'JWT_PAYLOAD_GET_USERNAME_HANDLER': 'accounts.utils.jwt_get_username_from_payload_handler',
+    'JWT_DECODE_HANDLER': 'accounts.utils.jwt_decode_token',
     'JWT_ALGORITHM': 'RS256',
     'JWT_AUDIENCE': API_IDENTIFIER,
     'JWT_ISSUER': JWT_ISSUER,
