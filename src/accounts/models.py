@@ -21,8 +21,8 @@ class User(auth_models.AbstractUser):
     phone_number = models.CharField(blank=True, null=True, max_length=120)
 
     EMAIL_FIELD = "email"
-    USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["email"]
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["access_level"]
 
     time = models.DateTimeField(auto_now_add=True)
 
