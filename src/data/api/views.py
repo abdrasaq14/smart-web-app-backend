@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Q
 from accounts.models import User
 
 from core.models import Alert, Device, Site
@@ -149,17 +150,22 @@ class OperationsDashboardKeyInsightsApiView(BaseDeviceDataApiView):
 
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
+        companies = self.get_companies(request)
         start_date = request.query_params.get("start_date", None)
         end_date = request.query_params.get("end_date", None)
+        q = Q(site__in=sites, site__company__in=companies)
 
-        response = {
-            "insights": [
-                "DT is overloaded between 9AM and 1PM",
-                "Recurring low PF (inspect industrial customers",
-                "No power cuts today",
-                "98% collection efficiency",
-            ],
-        }
+        if start_date:
+            q = q & Q(time__gte=start_date)
+
+        if end_date:
+            q = q & Q(time__lte=end_date)
+
+        alerts = Alert.objects.filter(q)[:4]
+
+        response = {"insights": []}
+        for alert in alerts:
+            response["insights"].append(alert.activity)
 
         return Response(response, status=status.HTTP_200_OK)
 
