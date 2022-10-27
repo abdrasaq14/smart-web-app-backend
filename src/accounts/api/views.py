@@ -1,12 +1,13 @@
 from django.http import JsonResponse
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
 from accounts.models import User
 from accounts.utils import requires_scope
 from core.pagination import TablePagination
+from core.permissions import AdminAccessPermission
 from .serializers import ListUserSerializer, UserSerializer
 
 
@@ -22,6 +23,7 @@ class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
     serializer_class = ListUserSerializer
     action_serializer_class = UserSerializer
     pagination_class = TablePagination
+    permission_classes = (IsAuthenticated, AdminAccessPermission)
 
     def post(self, request, *args, **kwargs):
         serializer = self.action_serializer_class(data=request.data)
