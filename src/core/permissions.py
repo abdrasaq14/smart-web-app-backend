@@ -12,7 +12,7 @@ class BaseAccountPermission(BasePermission):
 
     access_types = []
 
-    def requires_scope(request, required_scopes: List[str]):
+    def requires_scope(self, request, required_scopes: List[str]):
         token = get_token_auth_header(request)
         decoded = jwt.decode(token, verify=False)
 
@@ -25,7 +25,7 @@ class BaseAccountPermission(BasePermission):
         return False
 
     def has_permission(self, request, view):
-        return self.requires_scope(self.access_types)
+        return self.requires_scope(request, self.access_types)
 
 
 class AdminAccessPermission(BaseAccountPermission):
