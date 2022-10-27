@@ -1,12 +1,14 @@
 from rest_framework import status
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from accounts.models import User
 
 from core.models import Alert, Device, Site
+from core.permissions import AdminAccessPermission, FinanceAccessPermission, ManagerAccessPermission, OperationAccessPermission
 from core.types import AlertStatusType
 from core.utils import CompanySiteFiltersMixin
-from data.calculations import DeviceData, DeviceRules
+from data.calculations import DeviceData
 
 
 class BaseDeviceDataApiView(GenericAPIView, CompanySiteFiltersMixin):
@@ -22,6 +24,8 @@ class BaseDeviceDataApiView(GenericAPIView, CompanySiteFiltersMixin):
 
 # Operations Dashboard
 class OperationsCardsDataApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
+
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
 
@@ -60,6 +64,8 @@ class OperationsCardsDataApiView(BaseDeviceDataApiView):
 
 
 class OperationsProfileChartApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
+
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
         profile_chart_dataset = device_data.get_load_profile()
@@ -68,6 +74,8 @@ class OperationsProfileChartApiView(BaseDeviceDataApiView):
 
 
 class OperationsPowerConsumptionChartApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
+
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
         companies = self.get_companies(request)
@@ -94,6 +102,8 @@ class OperationsPowerConsumptionChartApiView(BaseDeviceDataApiView):
 
 
 class OperationsSiteMonitoredApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
+
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
         dt_active_df = device_data.dt_active()
@@ -113,6 +123,8 @@ class OperationsSiteMonitoredApiView(BaseDeviceDataApiView):
 
 # Operations Site Dashboard
 class OperationsDashboardRevenueLossApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
+
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
         revenue_loss = device_data.get_revenue_loss()
@@ -133,6 +145,8 @@ class OperationsDashboardRevenueLossApiView(BaseDeviceDataApiView):
 
 
 class OperationsDashboardKeyInsightsApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
+
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
         start_date = request.query_params.get("start_date", None)
@@ -151,6 +165,8 @@ class OperationsDashboardKeyInsightsApiView(BaseDeviceDataApiView):
 
 
 class OperationsDashboardEnergyChartApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
+
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
         by_month = device_data.get_energy_consumption()
@@ -177,6 +193,8 @@ class OperationsDashboardEnergyChartApiView(BaseDeviceDataApiView):
 
 
 class OperationsDashboardCardsDataApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
+
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
         avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
@@ -195,6 +213,8 @@ class OperationsDashboardCardsDataApiView(BaseDeviceDataApiView):
 
 
 class OperationsDashboardDTStatusApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
+
     def get(self, request, **kwargs):
         site_data = self.device_data_manager()
         dt_status = site_data.get_dt_status()
@@ -203,6 +223,8 @@ class OperationsDashboardDTStatusApiView(BaseDeviceDataApiView):
 
 
 class OperationsDashboardAverageDailyLoadApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
+
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
         daily_load = device_data.get_daily_load()
@@ -217,6 +239,8 @@ class OperationsDashboardAverageDailyLoadApiView(BaseDeviceDataApiView):
 
 
 class OperationsDashboardAverageDailyPFApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
+
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
         daily_pf = device_data.get_daily_power_factor()
@@ -231,6 +255,8 @@ class OperationsDashboardAverageDailyPFApiView(BaseDeviceDataApiView):
 
 
 class OperationsDashboardAverageDailyVoltageApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
+
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
         daily_voltage = device_data.get_daily_voltage()
@@ -246,6 +272,8 @@ class OperationsDashboardAverageDailyVoltageApiView(BaseDeviceDataApiView):
 
 # Finance Home Data
 class FinanceRevenueApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, FinanceAccessPermission)
+
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
         companies = self.get_companies(request)
@@ -272,6 +300,8 @@ class FinanceRevenueApiView(BaseDeviceDataApiView):
 
 
 class FinancePerformanceApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, FinanceAccessPermission)
+
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
         data_by = self.request.query_params.get("by", "month")
@@ -290,6 +320,8 @@ class FinancePerformanceApiView(BaseDeviceDataApiView):
 
 
 class FinanceCustomerBreakdownApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, FinanceAccessPermission)
+
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
         paying, defaulting = device_data.get_customer_breakdown()
@@ -306,6 +338,8 @@ class FinanceCustomerBreakdownApiView(BaseDeviceDataApiView):
 
 
 class FinanceCardsDataApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, FinanceAccessPermission)
+
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
         total_revenue = device_data.get_total_revenue_finance()
@@ -325,6 +359,8 @@ class FinanceCardsDataApiView(BaseDeviceDataApiView):
 
 # Manager Home
 class ManagerHomeCardsDataApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, ManagerAccessPermission)
+
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
         total_revenue = device_data.get_total_revenue_finance()
@@ -355,6 +391,8 @@ class ManagerHomeCardsDataApiView(BaseDeviceDataApiView):
 
 # Account Home
 class AccountHomeCardsDataApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, AdminAccessPermission)
+
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
 
@@ -379,6 +417,8 @@ class AccountHomeCardsDataApiView(BaseDeviceDataApiView):
 
 
 class AccountHomeTopRevenueDataApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, AdminAccessPermission)
+
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
 
@@ -397,6 +437,8 @@ class AccountHomeTopRevenueDataApiView(BaseDeviceDataApiView):
 
 
 class AccountHomeTopSavingsDataApiView(BaseDeviceDataApiView):
+    permission_classes = (IsAuthenticated, AdminAccessPermission)
+
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
 
