@@ -29,7 +29,7 @@ class Company(models.Model):
 
     users = models.ManyToManyField(
         "accounts.User",
-        null=True,
+        blank=True,
         related_name='companies'
     )
 
