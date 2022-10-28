@@ -46,17 +46,13 @@ class UserLogApiView(BaseActivityLogView):
 
 
 class TransactionHistoryApiView(ListAPIView, CreateAPIView, CompanySiteDateQuerysetMixin):
-    serializer_class = ListTransactionHistorySerializer
-    post_serializer_class = TransactionHistorySerializer
     queryset = TransactionHistory.objects.all().order_by("time")
     pagination_class = TablePagination
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.post_serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PUT', 'PATCH']:
+            return TransactionHistorySerializer
+        return ListTransactionHistorySerializer
 
 
 class TransactionHistoryDetailsApiView(RetrieveUpdateDestroyAPIView, CompanySiteDateQuerysetMixin):

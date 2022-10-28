@@ -89,7 +89,7 @@ class TransactionHistory(models.Model):
     amount_billed = models.FloatField(default=0)
     amount_bought = models.FloatField(default=0)
 
-    duration_days = models.IntegerField()
+    days = models.IntegerField()
     time = models.DateTimeField()
 
 

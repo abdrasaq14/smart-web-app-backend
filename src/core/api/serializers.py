@@ -69,19 +69,15 @@ class TransactionHistorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TransactionHistory
-        fields = ["id", "site", "subscription", "amount_billed", "amount_bought", "duration_days", "time"]
+        fields = ["id", "site", "subscription", "amount_billed", "amount_bought", "days", "time"]
 
 
 class ListTransactionHistorySerializer(TransactionHistorySerializer):
-    days = serializers.SerializerMethodField()
     site = serializers.SlugRelatedField(
         read_only=True,
         many=False,
         slug_field='name'
     )
-
-    def get_days(self, obj):
-        return obj.duration_days or 0
 
 
 class DeviceTariffSerializer(serializers.ModelSerializer):
