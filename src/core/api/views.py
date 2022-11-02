@@ -7,6 +7,7 @@ from core.api.serializers import (
     CompanySerializer,
     DeviceSerializer,
     EventLogSerializer,
+    ListCompanySerializer,
     ListDeviceSerializer,
     ListTransactionHistorySerializer,
     SiteSerializer,
@@ -84,13 +85,17 @@ class SiteApiView(ListAPIView, CompanySiteDateQuerysetMixin):
 
 class CompanyApiView(ListAPIView, CreateAPIView):
     queryset = Company.objects.all()
-    serializer_class = CompanySerializer
     pagination_class = TablePagination
+
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PUT', 'PATCH']:
+            return CompanySerializer
+        return ListCompanySerializer
 
 
 class CompanyDetailsApiView(RetrieveAPIView):
     queryset = Company.objects.all()
-    serializer_class = CompanySerializer
+    serializer_class = ListCompanySerializer
 
 
 class DeviceApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView, CompanySiteDateQuerysetMixin):

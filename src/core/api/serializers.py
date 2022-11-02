@@ -11,12 +11,15 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CompanySerializer(serializers.ModelSerializer):
-    users = UserSerializer(many=True)
 
     class Meta:
         model = Company
         fields = ["id", "name", "company_type", "service_type", "phone_number", "email", "address",
                   "renewal_date", "users"]
+
+
+class ListCompanySerializer(CompanySerializer):
+    users = UserSerializer(many=True)
 
 
 class SiteSerializer(serializers.ModelSerializer):
