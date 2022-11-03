@@ -76,11 +76,13 @@ class TransactionHistorySerializer(serializers.ModelSerializer):
 
 
 class ListTransactionHistorySerializer(TransactionHistorySerializer):
-    site = serializers.SlugRelatedField(
-        read_only=True,
-        many=False,
-        slug_field='name'
-    )
+    site_name = serializers.SerializerMethodField()
+
+    class Meta(TransactionHistorySerializer.Meta):
+        fields = TransactionHistorySerializer.Meta.fields + ["site_name"]
+
+    def get_site_name(self, obj):
+        return f"{obj.site.name}"
 
 
 class DeviceTariffSerializer(serializers.ModelSerializer):
