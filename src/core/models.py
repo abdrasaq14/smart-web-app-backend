@@ -111,7 +111,7 @@ class Site(models.Model):
     under_maintenance = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
-    time = models.DateTimeField()
+    time = models.DateTimeField(auto_now_add=True)
 
 
 class DeviceTariff(models.Model):
