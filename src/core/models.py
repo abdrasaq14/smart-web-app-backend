@@ -29,7 +29,7 @@ class Company(models.Model):
 
     users = models.ManyToManyField(
         "accounts.User",
-        null=True,
+        blank=True,
         related_name='companies'
     )
 
@@ -89,8 +89,8 @@ class TransactionHistory(models.Model):
     amount_billed = models.FloatField(default=0)
     amount_bought = models.FloatField(default=0)
 
-    duration_days = models.IntegerField()
-    time = models.DateTimeField()
+    days = models.IntegerField()
+    time = models.DateTimeField(auto_now_add=True)
 
 
 class Site(models.Model):
@@ -111,7 +111,7 @@ class Site(models.Model):
     under_maintenance = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
-    time = models.DateTimeField()
+    time = models.DateTimeField(auto_now_add=True)
 
 
 class DeviceTariff(models.Model):

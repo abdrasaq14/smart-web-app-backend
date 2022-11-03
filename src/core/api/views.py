@@ -8,6 +8,7 @@ from core.api.serializers import (
     CompanySerializer,
     DeviceSerializer,
     EventLogSerializer,
+    ListCompanySerializer,
     ListDeviceSerializer,
     ListTransactionHistorySerializer,
     SiteSerializer,
@@ -54,18 +55,14 @@ class UserLogApiView(BaseActivityLogView):
 
 
 class TransactionHistoryApiView(ListAPIView, CreateAPIView, CompanySiteDateQuerysetMixin):
-    serializer_class = ListTransactionHistorySerializer
-    post_serializer_class = TransactionHistorySerializer
     queryset = TransactionHistory.objects.all().order_by("time")
     pagination_class = TablePagination
     permission_classes = (IsAuthenticated, FinanceAccessPermission)
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.post_serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PUT', 'PATCH']:
+            return TransactionHistorySerializer
+        return ListTransactionHistorySerializer
 
 
 class TransactionHistoryDetailsApiView(RetrieveUpdateDestroyAPIView, CompanySiteDateQuerysetMixin):
@@ -98,13 +95,17 @@ class SiteApiView(ListAPIView, CompanySiteDateQuerysetMixin):
 
 class CompanyApiView(ListAPIView, CreateAPIView):
     queryset = Company.objects.all()
-    serializer_class = CompanySerializer
     pagination_class = TablePagination
+
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PUT', 'PATCH']:
+            return CompanySerializer
+        return ListCompanySerializer
 
 
 class CompanyDetailsApiView(RetrieveAPIView):
     queryset = Company.objects.all()
-    serializer_class = CompanySerializer
+    serializer_class = ListCompanySerializer
 
 
 class DeviceApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView, CompanySiteDateQuerysetMixin):

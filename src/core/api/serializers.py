@@ -11,12 +11,15 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class CompanySerializer(serializers.ModelSerializer):
-    users = UserSerializer(many=True)
 
     class Meta:
         model = Company
         fields = ["id", "name", "company_type", "service_type", "phone_number", "email", "address",
                   "renewal_date", "users"]
+
+
+class ListCompanySerializer(CompanySerializer):
+    users = UserSerializer(many=True)
 
 
 class SiteSerializer(serializers.ModelSerializer):
@@ -69,19 +72,17 @@ class TransactionHistorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = TransactionHistory
-        fields = ["id", "site", "subscription", "amount_billed", "amount_bought", "duration_days", "time"]
+        fields = ["id", "site", "subscription", "amount_billed", "amount_bought", "days", "time"]
 
 
 class ListTransactionHistorySerializer(TransactionHistorySerializer):
-    days = serializers.SerializerMethodField()
-    site = serializers.SlugRelatedField(
-        read_only=True,
-        many=False,
-        slug_field='name'
-    )
+    site_name = serializers.SerializerMethodField()
 
-    def get_days(self, obj):
-        return obj.duration_days or 0
+    class Meta(TransactionHistorySerializer.Meta):
+        fields = TransactionHistorySerializer.Meta.fields + ["site_name"]
+
+    def get_site_name(self, obj):
+        return f"{obj.site.name}"
 
 
 class DeviceTariffSerializer(serializers.ModelSerializer):
@@ -94,9 +95,37 @@ class DeviceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Device
         fields = ["id", "name", "location", "co_ordinate", "company", "company_district", "asset_type",
-                  "asset_capacity", "tariff", "site", "linked_at"]
+                  "asset_capacity", "tariff", "linked_at"]
+
+    def create(self, validated_data):
+        device_name = validated_data.get("name", "")
+        new_site = Site.objects.create(
+            company=Company.objects.all().first(),
+            asset_name=device_name,
+            asset_type="Device site",
+            asset_co_ordinate="",
+            asset_capacity=""
+        )
+
+        new_device = Device.objects.create(
+            id=validated_data.get('id'),
+            name=validated_data.get('name'),
+            location=validated_data.get('location'),
+            co_ordinate=validated_data.get('co_ordinate'),
+            company=new_site.company,
+            company_district=validated_data.get('company_district'),
+            asset_type=validated_data.get('asset_type'),
+            asset_capacity=validated_data.get('asset_capacity'),
+            site=new_site,
+            tariff=validated_data.get('tariff')
+        )
+
+        return new_device
 
 
 class ListDeviceSerializer(DeviceSerializer):
     company = CompanySerializer(many=False)
     tariff = DeviceTariffSerializer(many=False)
+
+    class Meta(DeviceSerializer.Meta):
+        fields = DeviceSerializer.Meta.fields + ['site']

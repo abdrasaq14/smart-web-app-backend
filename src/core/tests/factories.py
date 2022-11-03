@@ -43,7 +43,7 @@ class TransactionHistoryFactory(factory.django.DjangoModelFactory):
     amount_billed = FuzzyFloat(0, 99999)
     amount_bought = FuzzyFloat(0, 99999)
 
-    duration_days = FuzzyInteger(0, 10)
+    days = FuzzyInteger(0, 10)
     time = FuzzyDateTime(datetime(2022, 9, 1, tzinfo=UTC))
 
     class Meta:
