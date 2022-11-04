@@ -25,3 +25,11 @@ class RemoteUserBackend(ModelBackend):
             pass
 
         return user if self.user_can_authenticate(user) else None
+
+
+class BypassAuthBackend(ModelBackend):
+    """Bypass auth"""
+
+    def authenticate(self, request, remote_user):
+        """"""
+        return UserModel.objects.all().first()
