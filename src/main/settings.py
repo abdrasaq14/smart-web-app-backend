@@ -77,6 +77,8 @@ INSTALLED_APPS = [
 
 AUTHENTICATION_BACKENDS = [
     "guardian.backends.ObjectPermissionBackend",
+    'django.contrib.auth.backends.ModelBackend',
+    'accounts.backends.RemoteUserBackend',
 ]
 
 MIDDLEWARE = [
@@ -86,6 +88,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    'django.contrib.auth.middleware.RemoteUserMiddleware',
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     # "lib.middleware.loguru.middleware.DjangoLoguruMiddleware",
@@ -144,10 +147,14 @@ AUTH_PASSWORD_VALIDATORS = [
 APPEND_SLASH = False
 
 REST_FRAMEWORK = {
-    "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.BasicAuthentication",
-    ],
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
+    ),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     "COERCE_DECIMAL_TO_STRING": False,
 }
@@ -184,3 +191,21 @@ BYPASS_AUTH = env.bool("DJANGO_BYPASS_AUTH", default=False)
 AWS_ARN_RESOURCE = env.str("AWS_ARN_RESOURCE", "")
 AWS_SECRET_ARN = env.str("AWS_SECRET_ARN", "")
 AWS_RDS_DATABASE = env.str("AWS_RDS_DATABASE", "smartmeters")
+
+
+AUTH0_DOMAIN = os.environ.get('AUTH0_DOMAIN')
+API_IDENTIFIER = os.environ.get('API_IDENTIFIER')
+PUBLIC_KEY = None
+JWT_ISSUER = None
+
+if AUTH0_DOMAIN:
+    JWT_ISSUER = 'https://' + AUTH0_DOMAIN + '/'
+
+JWT_AUTH = {
+    'JWT_PAYLOAD_GET_USERNAME_HANDLER': 'accounts.utils.jwt_get_username_from_payload_handler',
+    'JWT_DECODE_HANDLER': 'accounts.utils.jwt_decode_token',
+    'JWT_ALGORITHM': 'RS256',
+    'JWT_AUDIENCE': API_IDENTIFIER,
+    'JWT_ISSUER': JWT_ISSUER,
+    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+}

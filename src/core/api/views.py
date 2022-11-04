@@ -1,6 +1,7 @@
 from rest_framework import filters, status
 from rest_framework.generics import GenericAPIView, ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView, RetrieveAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
 from core.api.serializers import (
     AlertSerializer,
@@ -17,10 +18,13 @@ from core.api.serializers import (
 )
 from core.models import Alert, Company, Device, EventLog, Site, TransactionHistory, UserLog, DeviceTariff
 from core.pagination import TablePagination
+from core.permissions import FinanceAccessPermission, ManagerAccessPermission, OperationAccessPermission
 from core.utils import CompanySiteDateQuerysetMixin
 
 
 class HealthCheckView(GenericAPIView):
+    permission_classes = ()
+
     def get(self, request, **kwargs):
         return Response(status=status.HTTP_200_OK)
 
@@ -29,26 +33,31 @@ class BaseActivityLogView(ListAPIView, UpdateAPIView, CompanySiteDateQuerysetMix
     pagination_class = TablePagination
     filter_backends = [filters.SearchFilter]
     search_fields = ["alert_id", "zone", "district", "activity", "status"]
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
 
 
 class AlertApiView(BaseActivityLogView):
     serializer_class = AlertSerializer
     queryset = Alert.objects.all().order_by("time")
+    permission_classes = (IsAuthenticated,)
 
 
 class EventLogApiView(BaseActivityLogView):
     serializer_class = EventLogSerializer
     queryset = EventLog.objects.all().order_by("time")
+    permission_classes = (IsAuthenticated,)
 
 
 class UserLogApiView(BaseActivityLogView):
     serializer_class = UserLogSerializer
     queryset = UserLog.objects.all().order_by("time")
+    permission_classes = (IsAuthenticated,)
 
 
 class TransactionHistoryApiView(ListAPIView, CreateAPIView, CompanySiteDateQuerysetMixin):
     queryset = TransactionHistory.objects.all().order_by("time")
     pagination_class = TablePagination
+    permission_classes = (IsAuthenticated, FinanceAccessPermission)
 
     def get_serializer_class(self):
         if self.request.method in ['POST', 'PUT', 'PATCH']:
@@ -60,6 +69,7 @@ class TransactionHistoryDetailsApiView(RetrieveUpdateDestroyAPIView, CompanySite
     serializer_class = ListTransactionHistorySerializer
     action_serializer_class = TransactionHistorySerializer
     queryset = TransactionHistory.objects.all().order_by("time")
+    permission_classes = (IsAuthenticated, FinanceAccessPermission)
 
     def get_serializer_class(self):
         if self.request.method in ['POST', 'PUT', 'PATCH']:
@@ -103,6 +113,7 @@ class DeviceApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView, C
     serializer_class = ListDeviceSerializer
     action_serializer_class = DeviceSerializer
     pagination_class = TablePagination
+    permission_classes = (IsAuthenticated, ManagerAccessPermission)
 
     site_related_field = 'site'
     company_related_field = 'company'

@@ -80,7 +80,3 @@ class User(auth_models.AbstractUser):
     @property
     def display_name(self):
         return f"{self.first_name} {self.last_name}"
-
-    def save(self, *args, **kwargs) -> None:
-        self.username = self.email
-        return super().save(*args, **kwargs)
