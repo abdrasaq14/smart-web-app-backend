@@ -24,8 +24,14 @@ class BaseAccountPermission(BasePermission):
 
         return False
 
+    def requires_access_level(self, request, required_scopes: List[str]):
+        user = request.user
+        if user.access_level in required_scopes:
+            return True
+        return False
+
     def has_permission(self, request, view):
-        return self.requires_scope(request, self.access_types)
+        return self.requires_access_level(request, self.access_types)
 
 
 class AdminAccessPermission(BaseAccountPermission):
