@@ -90,7 +90,7 @@ class TransactionHistory(models.Model):
     amount_bought = models.FloatField(default=0)
 
     days = models.IntegerField()
-    time = models.DateTimeField(auto_now_add=True)
+    time = models.DateTimeField()
 
 
 class Site(models.Model):

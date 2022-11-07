@@ -100,7 +100,7 @@ class DeviceSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         device_name = validated_data.get("name", "")
         new_site = Site.objects.create(
-            company=Company.objects.all().first(),
+            company=validated_data.get('company'),
             asset_name=device_name,
             asset_type="Device site",
             asset_co_ordinate="",
@@ -112,7 +112,7 @@ class DeviceSerializer(serializers.ModelSerializer):
             name=validated_data.get('name'),
             location=validated_data.get('location'),
             co_ordinate=validated_data.get('co_ordinate'),
-            company=new_site.company,
+            company=validated_data.get('company'),
             company_district=validated_data.get('company_district'),
             asset_type=validated_data.get('asset_type'),
             asset_capacity=validated_data.get('asset_capacity'),
