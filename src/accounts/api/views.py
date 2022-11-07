@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
 from accounts.models import User
-from accounts.utils import get_token_auth_header, requires_scope
+from accounts.utils import get_management_token, requires_scope
 from core.exceptions import GenericErrorException
 from core.pagination import TablePagination
 from core.permissions import AdminAccessPermission
@@ -55,14 +55,13 @@ class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
         url = "https://dev-u0pz-ez1.eu.auth0.com/api/v2/users"
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {get_token_auth_header(self.request)}"
+            "Authorization": f"Bearer {get_management_token()}"
         }
 
-        response = requests.request("POST", url, json=auth0_body, headers=headers)
+        response = requests.post(url, json=auth0_body, headers=headers)
 
         if response.status_code not in [200, 201]:
-            # import ipdb ; ipdb.set_trace()
-            raise GenericErrorException(f"Cannot register user: {response.text}")
+            raise GenericErrorException(response.json())
 
         return response.json()
 

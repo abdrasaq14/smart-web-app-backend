@@ -82,3 +82,20 @@ def requires_scope(required_scope):
             return response
         return decorated
     return require_scope
+
+
+def get_management_token():
+    management_body = {
+        "client_id": "vSRgy0iwhJPaBFZloW3QXDyz224VPJbe",
+        "client_secret": "3rE64JLXcOHKgARViWHbXvq_QJWxJ6lDP7MOaBDPt0nCovRcCKviKeE98pj0dj-5",
+        "audience": "https://dev-u0pz-ez1.eu.auth0.com/api/v2/",
+        "grant_type": "client_credentials"
+    }
+
+    url = "https://dev-u0pz-ez1.eu.auth0.com/oauth/token"
+    headers = {
+        "Content-Type": "application/json",
+    }
+
+    response = requests.post(url, json=management_body, headers=headers)
+    return response.json()['access_token']
