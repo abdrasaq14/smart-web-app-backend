@@ -76,10 +76,10 @@ INSTALLED_APPS = [
 ] + BASE_INSTALLED_APPS
 
 AUTHENTICATION_BACKENDS = [
-    # "guardian.backends.ObjectPermissionBackend",
-    # 'django.contrib.auth.backends.ModelBackend',
-    # 'accounts.backends.RemoteUserBackend',
-    'accounts.backends.BypassAuthBackend',
+    "guardian.backends.ObjectPermissionBackend",
+    'django.contrib.auth.backends.ModelBackend',
+    'accounts.backends.RemoteUserBackend',
+    # 'accounts.backends.BypassAuthBackend',
 ]
 
 MIDDLEWARE = [
@@ -149,12 +149,12 @@ APPEND_SLASH = False
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
-        # 'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        # 'rest_framework.authentication.SessionAuthentication',
-        # 'rest_framework.authentication.BasicAuthentication',
+        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication',
     ),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     "COERCE_DECIMAL_TO_STRING": False,

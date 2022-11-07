@@ -15,7 +15,7 @@ from .serializers import ListUserSerializer, UserSerializer
 
 class CurrentUserView(ListAPIView):
     serializer_class = UserSerializer
-    # permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
         return [self.request.user]
@@ -26,7 +26,7 @@ class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
     serializer_class = ListUserSerializer
     action_serializer_class = UserSerializer
     pagination_class = TablePagination
-    # permission_classes = (IsAuthenticated, AdminAccessPermission)
+    permission_classes = (IsAuthenticated, AdminAccessPermission)
 
     def post(self, request, *args, **kwargs):
         serializer = self.action_serializer_class(data=request.data)

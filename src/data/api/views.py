@@ -25,7 +25,7 @@ class BaseDeviceDataApiView(GenericAPIView, CompanySiteFiltersMixin):
 
 # Operations Dashboard
 class OperationsCardsDataApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, OperationAccessPermission)
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
 
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
@@ -65,7 +65,7 @@ class OperationsCardsDataApiView(BaseDeviceDataApiView):
 
 
 class OperationsProfileChartApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, OperationAccessPermission)
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
 
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
@@ -75,7 +75,7 @@ class OperationsProfileChartApiView(BaseDeviceDataApiView):
 
 
 class OperationsPowerConsumptionChartApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, OperationAccessPermission)
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
 
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
@@ -103,7 +103,7 @@ class OperationsPowerConsumptionChartApiView(BaseDeviceDataApiView):
 
 
 class OperationsSiteMonitoredApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, OperationAccessPermission)
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
 
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
@@ -124,7 +124,7 @@ class OperationsSiteMonitoredApiView(BaseDeviceDataApiView):
 
 # Operations Site Dashboard
 class OperationsDashboardRevenueLossApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, OperationAccessPermission)
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
 
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
@@ -146,7 +146,7 @@ class OperationsDashboardRevenueLossApiView(BaseDeviceDataApiView):
 
 
 class OperationsDashboardKeyInsightsApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, OperationAccessPermission)
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
 
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
@@ -171,7 +171,7 @@ class OperationsDashboardKeyInsightsApiView(BaseDeviceDataApiView):
 
 
 class OperationsDashboardEnergyChartApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, OperationAccessPermission)
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
 
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
@@ -199,7 +199,7 @@ class OperationsDashboardEnergyChartApiView(BaseDeviceDataApiView):
 
 
 class OperationsDashboardCardsDataApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, OperationAccessPermission)
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
 
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
@@ -219,7 +219,7 @@ class OperationsDashboardCardsDataApiView(BaseDeviceDataApiView):
 
 
 class OperationsDashboardDTStatusApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, OperationAccessPermission)
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
 
     def get(self, request, **kwargs):
         site_data = self.device_data_manager()
@@ -229,7 +229,7 @@ class OperationsDashboardDTStatusApiView(BaseDeviceDataApiView):
 
 
 class OperationsDashboardAverageDailyLoadApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, OperationAccessPermission)
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
 
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
@@ -245,7 +245,7 @@ class OperationsDashboardAverageDailyLoadApiView(BaseDeviceDataApiView):
 
 
 class OperationsDashboardAverageDailyPFApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, OperationAccessPermission)
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
 
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
@@ -261,7 +261,7 @@ class OperationsDashboardAverageDailyPFApiView(BaseDeviceDataApiView):
 
 
 class OperationsDashboardAverageDailyVoltageApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, OperationAccessPermission)
+    permission_classes = (IsAuthenticated, OperationAccessPermission)
 
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
@@ -278,7 +278,7 @@ class OperationsDashboardAverageDailyVoltageApiView(BaseDeviceDataApiView):
 
 # Finance Home Data
 class FinanceRevenueApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, FinanceAccessPermission)
+    permission_classes = (IsAuthenticated, FinanceAccessPermission)
 
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
@@ -306,7 +306,7 @@ class FinanceRevenueApiView(BaseDeviceDataApiView):
 
 
 class FinancePerformanceApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, FinanceAccessPermission)
+    permission_classes = (IsAuthenticated, FinanceAccessPermission)
 
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
@@ -326,7 +326,7 @@ class FinancePerformanceApiView(BaseDeviceDataApiView):
 
 
 class FinanceCustomerBreakdownApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, FinanceAccessPermission)
+    permission_classes = (IsAuthenticated, FinanceAccessPermission)
 
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
@@ -344,7 +344,7 @@ class FinanceCustomerBreakdownApiView(BaseDeviceDataApiView):
 
 
 class FinanceCardsDataApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, FinanceAccessPermission)
+    permission_classes = (IsAuthenticated, FinanceAccessPermission)
 
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
@@ -365,7 +365,7 @@ class FinanceCardsDataApiView(BaseDeviceDataApiView):
 
 # Manager Home
 class ManagerHomeCardsDataApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, ManagerAccessPermission)
+    permission_classes = (IsAuthenticated, ManagerAccessPermission)
 
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
@@ -397,7 +397,7 @@ class ManagerHomeCardsDataApiView(BaseDeviceDataApiView):
 
 # Account Home
 class AccountHomeCardsDataApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, AdminAccessPermission)
+    permission_classes = (IsAuthenticated, AdminAccessPermission)
 
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
@@ -423,7 +423,7 @@ class AccountHomeCardsDataApiView(BaseDeviceDataApiView):
 
 
 class AccountHomeTopRevenueDataApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, AdminAccessPermission)
+    permission_classes = (IsAuthenticated, AdminAccessPermission)
 
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
@@ -443,7 +443,7 @@ class AccountHomeTopRevenueDataApiView(BaseDeviceDataApiView):
 
 
 class AccountHomeTopSavingsDataApiView(BaseDeviceDataApiView):
-    # permission_classes = (IsAuthenticated, AdminAccessPermission)
+    permission_classes = (IsAuthenticated, AdminAccessPermission)
 
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
