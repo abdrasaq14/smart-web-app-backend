@@ -33,7 +33,7 @@ class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
 
         auth0_user = self.auth0_register(serializer)
         serializer.is_valid(raise_exception=True)
-        serializer.save(username=auth0_user['user_id'])
+        serializer.save(username=auth0_user['user_id'].replace('|', '.'))
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
