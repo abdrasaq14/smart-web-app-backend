@@ -31,9 +31,16 @@ class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.action_serializer_class(data=request.data)
 
-        auth0_user = self.auth0_register(serializer)
         serializer.is_valid(raise_exception=True)
-        serializer.save(username=auth0_user['user_id'].replace('|', '.'))
+        created_user = serializer.save()
+
+        try:
+            auth0_user = self.auth0_register(serializer)
+            created_user.username = auth0_user['user_id'].replace('|', '.')
+            created_user.save()
+        except GenericErrorException as e:
+            created_user.delete()
+            raise e
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
