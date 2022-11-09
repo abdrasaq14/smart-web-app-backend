@@ -21,12 +21,16 @@ class CurrentUserView(ListAPIView):
         return [self.request.user]
 
 
-class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
+class UserApiView(CreateAPIView, UpdateAPIView, DestroyAPIView):
     queryset = User.objects.all()
     serializer_class = ListUserSerializer
     action_serializer_class = UserSerializer
     pagination_class = TablePagination
     permission_classes = (IsAuthenticated, AdminAccessPermission)
+
+    def get(self, request, *args, **kwargs):
+        serializer = self.get_serializer(request.user, many=False)
+        return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
         serializer = self.action_serializer_class(data=request.data)
