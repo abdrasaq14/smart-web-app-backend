@@ -28,40 +28,37 @@ class OperationsCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, OperationAccessPermission)
 
     def get(self, request, **kwargs):
+        card_type = self.request.query_params.get('card_type', None)
+        device_data = self.device_data_manager()
         sites = self.get_sites(request)
+        response = {}
 
-        sites_under_maintenance = 0
-        for site in sites:
-            sites_under_maintenance += site.alerts.filter(
-                status=AlertStatusType.PENDING.value
-            ).count()
+        if card_type == 'sites' or not card_type:
+            sites_under_maintenance = 0
+            for site in sites:
+                sites_under_maintenance += site.alerts.filter(
+                    status=AlertStatusType.PENDING.value
+                ).count()
 
-        results = {
-            "total_consumption": 0,
-            "current_load": 0,
-            "avg_availability": 0,
-            "power_cuts": 0,
-            "overloaded_dts": 0,
-            "sites_under_maintenance": sites_under_maintenance,
-        }
+            response["sites_under_maintenance"] = sites_under_maintenance
 
-        try:
-            device_data = self.device_data_manager()
+        if card_type == 'total_consumption' or not card_type:
+            response["total_consumption"] = device_data.get_total_consumption()
 
-            (
-                active_power,
-                power_cuts,
-            ) = device_data.get_avg_availability_and_power_cuts()
-            results["avg_availability"] = active_power
-            results["power_cuts"] = power_cuts
-            results["total_consumption"] = device_data.get_total_consumption()
-            results["current_load"] = device_data.get_current_load()
-            results["overloaded_dts"] = device_data.get_overloaded_dts()
+        if card_type == 'current_load' or not card_type:
+            response["current_load"] = device_data.get_current_load()
 
-        except Exception as e:
-            raise e
+        if card_type == 'availability' or not card_type:
+            active_power, power_cuts = device_data.get_avg_availability_and_power_cuts()
+            response["avg_availability"] = active_power
+            response["power_cuts"] = power_cuts
 
-        return Response(results, status=status.HTTP_200_OK)
+            response["avg_availability"] = device_data.get_total_consumption()
+
+        if card_type == 'overloaded_dts' or not card_type:
+            response["overloaded_dts"] = device_data.get_overloaded_dts()
+
+        return Response(response, status=status.HTTP_200_OK)
 
 
 class OperationsProfileChartApiView(BaseDeviceDataApiView):
@@ -433,6 +430,7 @@ class AccountHomeCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, AdminAccessPermission)
 
     def get(self, request, **kwargs):
+        card_type = self.request.query_params.get('card_type', None)
         device_data = self.device_data_manager()
 
         sites = self.get_sites(request)
