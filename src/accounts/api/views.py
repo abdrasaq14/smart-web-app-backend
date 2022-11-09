@@ -13,24 +13,21 @@ from core.permissions import AdminAccessPermission
 from .serializers import ListUserSerializer, UserSerializer
 
 
-class CurrentUserView(ListAPIView):
-    serializer_class = UserSerializer
+class CurrentUserView():
+    serializer_class = ListUserSerializer
     permission_classes = (IsAuthenticated,)
 
-    def get_queryset(self):
-        return [self.request.user]
+    def get(self, request, *args, **kwargs):
+        serializer = self.get_serializer(request.user, many=False)
+        return Response(serializer.data)
 
 
-class UserApiView(CreateAPIView, UpdateAPIView, DestroyAPIView):
+class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
     queryset = User.objects.all()
     serializer_class = ListUserSerializer
     action_serializer_class = UserSerializer
     pagination_class = TablePagination
     permission_classes = (IsAuthenticated, AdminAccessPermission)
-
-    def get(self, request, *args, **kwargs):
-        serializer = self.get_serializer(request.user, many=False)
-        return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
         serializer = self.action_serializer_class(data=request.data)
