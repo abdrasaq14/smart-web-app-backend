@@ -202,18 +202,27 @@ class OperationsDashboardCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, OperationAccessPermission)
 
     def get(self, request, **kwargs):
+        card_type = self.request.query_params.get('card_type', None)
         device_data = self.device_data_manager()
-        avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
-        revenue_per_hour = device_data.get_revenue_per_hour(avg_availability)
+        response = {}
 
-        response = {
-            "gridHours": avg_availability,
-            "tariffPlan": device_data.get_total_consumption(),
-            "noOfOutages": power_cuts,
-            "downtime": device_data.get_current_load(),
-            "revenuePerHour": revenue_per_hour,
-            "untappedRevenue": device_data.get_untapped_revenue(avg_availability),
-        }
+        if card_type == 'availability' or not card_type:
+            avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
+            response["gridHours"] = avg_availability
+            response["noOfOutages"] = power_cuts
+
+        if card_type == 'tariffPlan' or not card_type:
+            response["tariffPlan"] = device_data.get_total_consumption()
+
+        if card_type == 'downtime' or not card_type:
+            response["downtime"] = device_data.get_current_load()
+
+        if card_type == 'revenuePerHour' or not card_type:
+            revenue_per_hour = device_data.get_revenue_per_hour(avg_availability)
+            response["revenuePerHour"] = revenue_per_hour
+
+        if card_type == 'untappedRevenue' or not card_type:
+            response["untappedRevenue"] = device_data.get_untapped_revenue(avg_availability)
 
         return Response(response, status=status.HTTP_200_OK)
 
