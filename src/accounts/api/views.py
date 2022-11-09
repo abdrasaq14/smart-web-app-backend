@@ -14,7 +14,7 @@ from .serializers import ListUserSerializer, UserSerializer
 
 
 class CurrentUserView(ListAPIView):
-    serializer_class = UserSerializer
+    serializer_class = ListUserSerializer
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
