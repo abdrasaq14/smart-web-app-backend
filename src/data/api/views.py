@@ -356,18 +356,34 @@ class FinanceCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, FinanceAccessPermission)
 
     def get(self, request, **kwargs):
+        card_type = self.request.query_params.get('card_type', None)
         device_data = self.device_data_manager()
-        total_revenue = device_data.get_total_revenue_finance()
-        avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
+        response = {}
 
-        response = {
-            "total_revenue": total_revenue,
-            "atc_losses": device_data.get_atc_losses(total_revenue),
-            "downtime_losses": total_revenue / device_data.get_dt_offline_hours(),
-            "tarrif_losses": device_data.get_tariff_losses(),
-            "highest_losses": total_revenue / avg_availability,
-            "highest_revenue": total_revenue / len(device_data.device_ids),
-        }
+        if card_type == 'atc_losses' or not card_type:
+            total_revenue = device_data.get_total_revenue_finance()
+            response["total_revenue"] = total_revenue
+            response["atc_losses"] = device_data.get_atc_losses(total_revenue)
+
+        if card_type == 'downtime_losses' or not card_type:
+            total_revenue = device_data.get_total_revenue_finance()
+            offline_hours = device_data.get_dt_offline_hours()
+            response["total_revenue"] = total_revenue
+            response["downtime_losses"] = total_revenue / (offline_hours if offline_hours > 0 else 1)
+
+        if card_type == 'tarrif_losses' or not card_type:
+            response["tarrif_losses"] = device_data.get_tariff_losses()
+
+        if card_type == 'highest_losses' or not card_type:
+            total_revenue = device_data.get_total_revenue_finance()
+            avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
+            response["total_revenue"] = total_revenue
+            response["highest_losses"] = total_revenue / (avg_availability if avg_availability > 0 else 1)
+
+        if card_type == 'highest_revenue' or not card_type:
+            total_revenue = device_data.get_total_revenue_finance()
+            response["total_revenue"] = total_revenue
+            response["highest_revenue"] = total_revenue / len(device_data.device_ids)
 
         return Response(response, status=status.HTTP_200_OK)
 
