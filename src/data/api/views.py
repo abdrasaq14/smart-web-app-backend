@@ -393,11 +393,12 @@ class ManagerHomeCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, ManagerAccessPermission)
 
     def get(self, request, **kwargs):
+        card_type = self.request.query_params.get('card_type', None)
         device_data = self.device_data_manager()
-        total_revenue = device_data.get_total_revenue_finance()
 
         sites = self.get_sites(request)
         companies = self.get_companies(request)
+
         users = User.objects.filter(
             companies__in=companies,
             companies__sites__in=sites
@@ -408,14 +409,21 @@ class ManagerHomeCardsDataApiView(BaseDeviceDataApiView):
         )
 
         response = {
-            "total_revenue": total_revenue,
-            "atc_losses": device_data.get_atc_losses(total_revenue),
-            "total_consumption": device_data.get_total_consumption(),
-            "current_load": device_data.get_current_load(),
             "number_of_sites": len(sites),
             "number_of_users": len(users),
-            "pending_alerts": len(alerts),
+            "pending_alerts": len(alerts)
         }
+
+        if card_type == 'revenue_losses' or not card_type:
+            total_revenue = device_data.get_total_revenue_finance()
+            response["total_revenue"] = total_revenue
+            response["atc_losses"] = device_data.get_atc_losses(total_revenue)
+
+        if card_type == 'total_consumption' or not card_type:
+            response["total_consumption"] = device_data.get_total_consumption()
+
+        if card_type == 'current_load' or not card_type:
+            response["current_load"] = device_data.get_current_load()
 
         return Response(response, status=status.HTTP_200_OK)
 
