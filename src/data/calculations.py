@@ -62,7 +62,7 @@ class DeviceRules(BaseDeviceData):
         q = Q(
             date__gte=self.start_date,
             date__lte=self.end_date,
-            device_serial__in=self.device_ids,
+            gateway_serial__in=self.device_ids,
         )
         q = q & Q(
             ~Q(line_to_neutral_voltage_phase_a=0)
@@ -72,8 +72,8 @@ class DeviceRules(BaseDeviceData):
 
         readings = (
             SmartDeviceReadings.objects.filter(q)
-            .values("device_serial")
-            .annotate(total=Count("device_serial"))
+            .values("gateway_serial")
+            .annotate(total=Count("gateway_serial"))
             .filter(total__gt=0)
         )
 
@@ -83,25 +83,25 @@ class DeviceRules(BaseDeviceData):
         q = Q(
             date__gte=self.start_date,
             date__lte=self.end_date,
-            device_serial__in=self.device_ids,
+            gateway_serial__in=self.device_ids,
             line_to_neutral_voltage_phase_a=0,
             line_to_neutral_voltage_phase_b=0,
             line_to_neutral_voltage_phase_c=0,
         )
         readings = (
             SmartDeviceReadings.objects.filter(q)
-            .values("device_serial")
-            .annotate(total=Count("device_serial"))
+            .values("gateway_serial")
+            .annotate(total=Count("gateway_serial"))
             .filter(total__gt=0)
         )
 
         return pd.DataFrame(readings)
 
-    def average_load(self, device_serial: str) -> float:
+    def average_load(self, device_id: str) -> float:
         avg_power_total = SmartDeviceReadings.objects.filter(
             date__gte=self.start_date,
             date__lte=self.end_date,
-            device_serial=device_serial,
+            gateway_serial=device_id,
         ).aggregate(avg_power_total=Avg("active_power_overall_total"))
 
         return avg_power_total["avg_power_total"]
@@ -116,7 +116,7 @@ class DeviceData(DeviceRules):
                 SmartDeviceReadings.objects.filter(
                     date__gte=self.start_date,
                     date__lte=self.end_date,
-                    device_serial=device_id,
+                    gateway_serial=device_id,
                 )
                 .order_by("timestamp")
                 .values("import_active_energy_overall_total")
@@ -137,7 +137,7 @@ class DeviceData(DeviceRules):
         for device_id in self.device_ids:
             real_time_data = (
                 SmartDeviceReadings.objects.filter(
-                    device_serial=device_id
+                    gateway_serial=device_id
                 )
                 .order_by("-timestamp")
                 .first()
@@ -161,7 +161,7 @@ class DeviceData(DeviceRules):
                 SmartDeviceReadings.objects.filter(
                     date__gte=self.start_date,
                     date__lte=self.end_date,
-                    device_serial=device_id,
+                    gateway_serial=device_id,
                 )
                 .order_by("timestamp")
                 .values(
@@ -220,7 +220,7 @@ class DeviceData(DeviceRules):
                 SmartDeviceReadings.objects.filter(
                     date__gte=self.start_date,
                     date__lte=self.end_date,
-                    device_serial=device_id,
+                    gateway_serial=device_id,
                 )
                 .order_by("timestamp")
                 .values("timestamp", "active_power_overall_total")
@@ -243,18 +243,18 @@ class DeviceData(DeviceRules):
             SmartDeviceReadings.objects.filter(
                 date__gte=self.start_date,
                 date__lte=self.end_date,
-                device_serial__in=self.device_ids,
+                gateway_serial__in=self.device_ids,
             )
             .order_by("-timestamp")
-            .values("device_serial", "import_active_energy_overall_total")
+            .values("gateway_serial", "import_active_energy_overall_total")
         )
 
         by_district = {}
 
         for device_id in self.device_ids:
             device = Device.objects.get(id=device_id)
-            first_value = readings.filter(device_serial=device_id).first()
-            last_value = readings.filter(device_serial=device_id).last()
+            first_value = readings.filter(gateway_serial=device_id).first()
+            last_value = readings.filter(gateway_serial=device_id).last()
 
             if not first_value or not last_value:
                 continue
@@ -279,7 +279,7 @@ class DeviceData(DeviceRules):
                 device_mean = SmartDeviceReadings.objects.filter(
                     date__gte=self.start_date,
                     date__lte=self.end_date,
-                    device_serial=device_id,
+                    gateway_serial=device_id,
                     timestamp__hour=i
                 ).aggregate(active_power_mean=Avg("active_power_overall_total"))
 
@@ -295,19 +295,19 @@ class DeviceData(DeviceRules):
             SmartDeviceReadings.objects.filter(
                 date__gte=self.start_date,
                 date__lte=self.end_date,
-                device_serial__in=self.device_ids,
+                gateway_serial__in=self.device_ids,
             )
             .order_by("-timestamp")
-            .values("timestamp", "device_serial", "import_active_energy_overall_total")
+            .values("timestamp", "gateway_serial", "import_active_energy_overall_total")
         )
 
         results = {"total_value": 0, "consumption": 0}
 
-        for device_serial in self.device_ids:
-            device_avg_load = self.average_load(device_serial)
+        for device_id in self.device_ids:
+            device_avg_load = self.average_load(device_id)
 
-            first_entry = readings.filter(device_serial=device_serial).first()
-            last_entry = readings.filter(device_serial=device_serial).last()
+            first_entry = readings.filter(gateway_serial=device_id).first()
+            last_entry = readings.filter(gateway_serial=device_id).last()
 
             if not first_entry or not last_entry:
                 continue
@@ -331,7 +331,7 @@ class DeviceData(DeviceRules):
                 SmartDeviceReadings.objects.filter(
                     date__gte=self.start_date,
                     date__lte=self.end_date,
-                    device_serial=device_id,
+                    gateway_serial=device_id,
                 )
                 .order_by("-timestamp")
                 .first()
@@ -364,7 +364,7 @@ class DeviceData(DeviceRules):
                 SmartDeviceReadings.objects.filter(
                     date__gte=self.start_date,
                     date__lte=self.end_date,
-                    device_serial=device_id,
+                    gateway_serial=device_id,
                 )
                 .order_by("timestamp")
                 .values(
@@ -421,7 +421,7 @@ class DeviceData(DeviceRules):
                 SmartDeviceReadings.objects.filter(
                     date__gte=self.start_date,
                     date__lte=self.end_date,
-                    device_serial=device_id,
+                    gateway_serial=device_id,
                 )
                 .order_by("timestamp")
                 .values("import_active_energy_overall_total")
@@ -456,7 +456,7 @@ class DeviceData(DeviceRules):
                     date__gte=self.start_date,
                     date__lte=self.end_date,
                     date__month=i,
-                    device_serial=device_id
+                    gateway_serial=device_id
                 )
                 old_entry = SmartDeviceReadings.objects.filter(q).order_by('timestamp').first()
                 real_time_entry = SmartDeviceReadings.objects.filter(q).order_by('timestamp').last()
@@ -500,7 +500,7 @@ class DeviceData(DeviceRules):
                 voltage_mean = SmartDeviceReadings.objects.filter(
                     date__gte=self.start_date,
                     date__lte=self.end_date,
-                    device_serial=device_id,
+                    gateway_serial=device_id,
                     timestamp__hour=i
                 ).aggregate(
                     red_phase_mean=Avg(red_phase_key),
@@ -526,18 +526,18 @@ class DeviceData(DeviceRules):
             SmartDeviceReadings.objects.filter(
                 date__gte=self.start_date,
                 date__lte=self.end_date,
-                device_serial__in=self.device_ids,
+                gateway_serial__in=self.device_ids,
             )
             .order_by("-timestamp")
-            .values("device_serial", "import_active_energy_overall_total")
+            .values("gateway_serial", "import_active_energy_overall_total")
         )
 
         by_district = {}
 
         for device_id in self.device_ids:
             device = Device.objects.get(id=device_id)
-            first_value = readings.filter(device_serial=device_id).first()
-            last_value = readings.filter(device_serial=device_id).last()
+            first_value = readings.filter(gateway_serial=device_id).first()
+            last_value = readings.filter(gateway_serial=device_id).last()
 
             if not first_value or not last_value:
                 continue
@@ -557,18 +557,18 @@ class DeviceData(DeviceRules):
             SmartDeviceReadings.objects.filter(
                 date__gte=self.start_date,
                 date__lte=self.end_date,
-                device_serial__in=self.device_ids,
+                gateway_serial__in=self.device_ids,
             )
             .order_by("-timestamp")
-            .values("device_serial", "import_active_energy_overall_total")
+            .values("gateway_serial", "import_active_energy_overall_total")
         )
 
         total_revenue = 0
 
         for device_id in self.device_ids:
             device = Device.objects.get(id=device_id)
-            first_value = readings.filter(device_serial=device_id).first()
-            last_value = readings.filter(device_serial=device_id).last()
+            first_value = readings.filter(gateway_serial=device_id).first()
+            last_value = readings.filter(gateway_serial=device_id).last()
 
             if not first_value or not last_value:
                 continue
@@ -603,7 +603,7 @@ class DeviceData(DeviceRules):
                 SmartDeviceReadings.objects.filter(
                     date__gte=self.start_date,
                     date__lte=self.end_date,
-                    device_serial=device_id,
+                    gateway_serial=device_id,
                 )
                 .order_by("timestamp")
                 .values(
@@ -657,7 +657,7 @@ class DeviceData(DeviceRules):
                 SmartDeviceReadings.objects.filter(
                     date__gte=self.start_date,
                     date__lte=self.end_date,
-                    device_serial=device_id,
+                    gateway_serial=device_id,
                 )
                 .order_by("timestamp")
                 .values("import_active_energy_overall_total")
