@@ -13,8 +13,8 @@ from core.permissions import AdminAccessPermission
 from .serializers import ListUserSerializer, UserSerializer
 
 
-class CurrentUserView():
-    serializer_class = ListUserSerializer
+class CurrentUserView(ListAPIView):
+    serializer_class = UserSerializer
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
