@@ -28,40 +28,37 @@ class OperationsCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, OperationAccessPermission)
 
     def get(self, request, **kwargs):
+        card_type = self.request.query_params.get('card_type', None)
+        device_data = self.device_data_manager()
         sites = self.get_sites(request)
+        response = {}
 
-        sites_under_maintenance = 0
-        for site in sites:
-            sites_under_maintenance += site.alerts.filter(
-                status=AlertStatusType.PENDING.value
-            ).count()
+        if card_type == 'sites' or not card_type:
+            sites_under_maintenance = 0
+            for site in sites:
+                sites_under_maintenance += site.alerts.filter(
+                    status=AlertStatusType.PENDING.value
+                ).count()
 
-        results = {
-            "total_consumption": 0,
-            "current_load": 0,
-            "avg_availability": 0,
-            "power_cuts": 0,
-            "overloaded_dts": 0,
-            "sites_under_maintenance": sites_under_maintenance,
-        }
+            response["sites_under_maintenance"] = sites_under_maintenance
 
-        try:
-            device_data = self.device_data_manager()
+        if card_type == 'total_consumption' or not card_type:
+            response["total_consumption"] = device_data.get_total_consumption()
 
-            (
-                active_power,
-                power_cuts,
-            ) = device_data.get_avg_availability_and_power_cuts()
-            results["avg_availability"] = active_power
-            results["power_cuts"] = power_cuts
-            results["total_consumption"] = device_data.get_total_consumption()
-            results["current_load"] = device_data.get_current_load()
-            results["overloaded_dts"] = device_data.get_overloaded_dts()
+        if card_type == 'current_load' or not card_type:
+            response["current_load"] = device_data.get_current_load()
 
-        except Exception as e:
-            raise e
+        if card_type == 'availability' or not card_type:
+            active_power, power_cuts = device_data.get_avg_availability_and_power_cuts()
+            response["avg_availability"] = active_power
+            response["power_cuts"] = power_cuts
 
-        return Response(results, status=status.HTTP_200_OK)
+            response["avg_availability"] = device_data.get_total_consumption()
+
+        if card_type == 'overloaded_dts' or not card_type:
+            response["overloaded_dts"] = device_data.get_overloaded_dts()
+
+        return Response(response, status=status.HTTP_200_OK)
 
 
 class OperationsProfileChartApiView(BaseDeviceDataApiView):
@@ -202,18 +199,27 @@ class OperationsDashboardCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, OperationAccessPermission)
 
     def get(self, request, **kwargs):
+        card_type = self.request.query_params.get('card_type', None)
         device_data = self.device_data_manager()
-        avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
-        revenue_per_hour = device_data.get_revenue_per_hour(avg_availability)
+        response = {}
 
-        response = {
-            "gridHours": avg_availability,
-            "tariffPlan": device_data.get_total_consumption(),
-            "noOfOutages": power_cuts,
-            "downtime": device_data.get_current_load(),
-            "revenuePerHour": revenue_per_hour,
-            "untappedRevenue": device_data.get_untapped_revenue(avg_availability),
-        }
+        if card_type == 'availability' or not card_type:
+            avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
+            response["gridHours"] = avg_availability
+            response["noOfOutages"] = power_cuts
+
+        if card_type == 'tariffPlan' or not card_type:
+            response["tariffPlan"] = device_data.get_total_consumption()
+
+        if card_type == 'downtime' or not card_type:
+            response["downtime"] = device_data.get_current_load()
+
+        if card_type == 'revenuePerHour' or not card_type:
+            revenue_per_hour = device_data.get_revenue_per_hour(avg_availability)
+            response["revenuePerHour"] = revenue_per_hour
+
+        if card_type == 'untappedRevenue' or not card_type:
+            response["untappedRevenue"] = device_data.get_untapped_revenue(avg_availability)
 
         return Response(response, status=status.HTTP_200_OK)
 
@@ -347,18 +353,34 @@ class FinanceCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, FinanceAccessPermission)
 
     def get(self, request, **kwargs):
+        card_type = self.request.query_params.get('card_type', None)
         device_data = self.device_data_manager()
-        total_revenue = device_data.get_total_revenue_finance()
-        avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
+        response = {}
 
-        response = {
-            "total_revenue": total_revenue,
-            "atc_losses": device_data.get_atc_losses(total_revenue),
-            "downtime_losses": total_revenue / device_data.get_dt_offline_hours(),
-            "tarrif_losses": device_data.get_tariff_losses(),
-            "highest_losses": total_revenue / avg_availability,
-            "highest_revenue": total_revenue / len(device_data.device_ids),
-        }
+        if card_type == 'atc_losses' or not card_type:
+            total_revenue = device_data.get_total_revenue_finance()
+            response["total_revenue"] = total_revenue
+            response["atc_losses"] = device_data.get_atc_losses(total_revenue)
+
+        if card_type == 'downtime_losses' or not card_type:
+            total_revenue = device_data.get_total_revenue_finance()
+            offline_hours = device_data.get_dt_offline_hours()
+            response["total_revenue"] = total_revenue
+            response["downtime_losses"] = total_revenue / (offline_hours if offline_hours > 0 else 1)
+
+        if card_type == 'tarrif_losses' or not card_type:
+            response["tarrif_losses"] = device_data.get_tariff_losses()
+
+        if card_type == 'highest_losses' or not card_type:
+            total_revenue = device_data.get_total_revenue_finance()
+            avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
+            response["total_revenue"] = total_revenue
+            response["highest_losses"] = total_revenue / (avg_availability if avg_availability > 0 else 1)
+
+        if card_type == 'highest_revenue' or not card_type:
+            total_revenue = device_data.get_total_revenue_finance()
+            response["total_revenue"] = total_revenue
+            response["highest_revenue"] = total_revenue / len(device_data.device_ids)
 
         return Response(response, status=status.HTTP_200_OK)
 
@@ -368,11 +390,12 @@ class ManagerHomeCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, ManagerAccessPermission)
 
     def get(self, request, **kwargs):
+        card_type = self.request.query_params.get('card_type', None)
         device_data = self.device_data_manager()
-        total_revenue = device_data.get_total_revenue_finance()
 
         sites = self.get_sites(request)
         companies = self.get_companies(request)
+
         users = User.objects.filter(
             companies__in=companies,
             companies__sites__in=sites
@@ -383,14 +406,21 @@ class ManagerHomeCardsDataApiView(BaseDeviceDataApiView):
         )
 
         response = {
-            "total_revenue": total_revenue,
-            "atc_losses": device_data.get_atc_losses(total_revenue),
-            "total_consumption": device_data.get_total_consumption(),
-            "current_load": device_data.get_current_load(),
             "number_of_sites": len(sites),
             "number_of_users": len(users),
-            "pending_alerts": len(alerts),
+            "pending_alerts": len(alerts)
         }
+
+        if card_type == 'revenue_losses' or not card_type:
+            total_revenue = device_data.get_total_revenue_finance()
+            response["total_revenue"] = total_revenue
+            response["atc_losses"] = device_data.get_atc_losses(total_revenue)
+
+        if card_type == 'total_consumption' or not card_type:
+            response["total_consumption"] = device_data.get_total_consumption()
+
+        if card_type == 'current_load' or not card_type:
+            response["current_load"] = device_data.get_current_load()
 
         return Response(response, status=status.HTTP_200_OK)
 
@@ -400,6 +430,7 @@ class AccountHomeCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, AdminAccessPermission)
 
     def get(self, request, **kwargs):
+        card_type = self.request.query_params.get('card_type', None)
         device_data = self.device_data_manager()
 
         sites = self.get_sites(request)
