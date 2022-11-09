@@ -14,11 +14,12 @@ from .serializers import ListUserSerializer, UserSerializer
 
 
 class CurrentUserView(ListAPIView):
-    serializer_class = UserSerializer
+    serializer_class = ListUserSerializer
     permission_classes = (IsAuthenticated,)
 
-    def get_queryset(self):
-        return [self.request.user]
+    def get(self, request, *args, **kwargs):
+        serializer = self.get_serializer(request.user, many=False)
+        return Response(serializer.data)
 
 
 class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
