@@ -346,8 +346,11 @@ class DeviceData(DeviceRules):
                 Device.objects.get(id=device_id).asset_capacity * 0.8
             ) * 100
 
-            dt_status["humidity"] += real_time_data.analog_input_channel_2 * 4.108
-            dt_status["temperature"] += real_time_data.analog_input_channel_1 * 1.833
+            if real_time_data.analog_input_channel_2:
+                dt_status["humidity"] += real_time_data.analog_input_channel_2 * 4.108
+
+            if real_time_data.analog_input_channel_1:
+                dt_status["temperature"] += real_time_data.analog_input_channel_1 * 1.833
 
         for key in dt_status.keys():
             dt_status[key] = round((dt_status[key] / len(self.device_ids)), 2)
