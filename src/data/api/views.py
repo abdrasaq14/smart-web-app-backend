@@ -3,7 +3,10 @@ from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Q
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
 from accounts.models import User
+from core.constants import DEFAULT_CACHE_TIME
 
 from core.models import Alert, Device, Site
 from core.permissions import AdminAccessPermission, FinanceAccessPermission, ManagerAccessPermission, OperationAccessPermission
@@ -27,6 +30,7 @@ class BaseDeviceDataApiView(GenericAPIView, CompanySiteFiltersMixin):
 class OperationsCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, OperationAccessPermission)
 
+    @method_decorator(cache_page(DEFAULT_CACHE_TIME))
     def get(self, request, **kwargs):
         card_type = self.request.query_params.get('card_type', None)
         device_data = self.device_data_manager()
@@ -64,6 +68,7 @@ class OperationsCardsDataApiView(BaseDeviceDataApiView):
 class OperationsProfileChartApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, OperationAccessPermission)
 
+    @method_decorator(cache_page(DEFAULT_CACHE_TIME))
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
         profile_chart_dataset = device_data.get_load_profile()
@@ -123,6 +128,7 @@ class OperationsSiteMonitoredApiView(BaseDeviceDataApiView):
 class OperationsDashboardRevenueLossApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, OperationAccessPermission)
 
+    @method_decorator(cache_page(DEFAULT_CACHE_TIME))
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
         revenue_loss = device_data.get_revenue_loss()
@@ -198,6 +204,7 @@ class OperationsDashboardEnergyChartApiView(BaseDeviceDataApiView):
 class OperationsDashboardCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, OperationAccessPermission)
 
+    @method_decorator(cache_page(DEFAULT_CACHE_TIME))
     def get(self, request, **kwargs):
         card_type = self.request.query_params.get('card_type', None)
         device_data = self.device_data_manager()
@@ -286,6 +293,7 @@ class OperationsDashboardAverageDailyVoltageApiView(BaseDeviceDataApiView):
 class FinanceRevenueApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, FinanceAccessPermission)
 
+    @method_decorator(cache_page(DEFAULT_CACHE_TIME))
     def get(self, request, **kwargs):
         sites = self.get_sites(request)
         companies = self.get_companies(request)
@@ -352,6 +360,7 @@ class FinanceCustomerBreakdownApiView(BaseDeviceDataApiView):
 class FinanceCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, FinanceAccessPermission)
 
+    @method_decorator(cache_page(DEFAULT_CACHE_TIME))
     def get(self, request, **kwargs):
         card_type = self.request.query_params.get('card_type', None)
         device_data = self.device_data_manager()
@@ -389,6 +398,7 @@ class FinanceCardsDataApiView(BaseDeviceDataApiView):
 class ManagerHomeCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, ManagerAccessPermission)
 
+    @method_decorator(cache_page(DEFAULT_CACHE_TIME))
     def get(self, request, **kwargs):
         card_type = self.request.query_params.get('card_type', None)
         device_data = self.device_data_manager()
@@ -429,6 +439,7 @@ class ManagerHomeCardsDataApiView(BaseDeviceDataApiView):
 class AccountHomeCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, AdminAccessPermission)
 
+    @method_decorator(cache_page(DEFAULT_CACHE_TIME))
     def get(self, request, **kwargs):
         card_type = self.request.query_params.get('card_type', None)
         device_data = self.device_data_manager()
