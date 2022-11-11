@@ -13,6 +13,7 @@ urlpatterns = [
     path("user-logs/<int:pk>", UserLogApiView.as_view(), name="user-logs-details"),
 
     path("sites", SiteApiView.as_view(), name="sites"),
+    path("site/<int:pk>", SiteApiView.as_view(), name="site"),
     path("transaction-history", TransactionHistoryApiView.as_view(), name="transaction-history"),
     path("transaction-history/<int:pk>", TransactionHistoryDetailsApiView.as_view(), name="transaction-history-details"),
 

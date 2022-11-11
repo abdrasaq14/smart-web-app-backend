@@ -77,7 +77,7 @@ class TransactionHistoryDetailsApiView(RetrieveUpdateDestroyAPIView, CompanySite
         return ListTransactionHistorySerializer
 
 
-class SiteApiView(ListAPIView, CompanySiteDateQuerysetMixin):
+class SiteApiView(ListAPIView, CompanySiteDateQuerysetMixin, DestroyAPIView):
     queryset = Site.objects.all().order_by("time")
     serializer_class = SiteSerializer
     pagination_class = TablePagination
@@ -91,6 +91,12 @@ class SiteApiView(ListAPIView, CompanySiteDateQuerysetMixin):
     ]
     site_related_field = ''
     company_related_field = 'company'
+
+    def perform_destroy(self, instance):
+        EventLog.objects.filter(site=instance).delete()
+        UserLog.objects.filter(site=instance).delete()
+        Alert.objects.filter(site=instance).delete()
+        instance.delete()
 
 
 class CompanyApiView(ListAPIView, CreateAPIView):
