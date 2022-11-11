@@ -98,10 +98,10 @@ class DeviceSerializer(serializers.ModelSerializer):
                   "asset_capacity", "tariff", "linked_at"]
 
     def create(self, validated_data):
-        device_name = validated_data.get("name", "")
         new_site = Site.objects.create(
+            name=validated_data.get('name'),
             company=validated_data.get('company'),
-            asset_name=device_name,
+            asset_name=validated_data.get('name'),
             asset_type="Device site",
             asset_co_ordinate="",
             asset_capacity=""

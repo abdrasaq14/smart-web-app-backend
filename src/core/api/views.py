@@ -16,7 +16,7 @@ from core.api.serializers import (
     UserLogSerializer,
     DeviceTariffSerializer
 )
-from core.models import Alert, Company, Device, EventLog, Site, TransactionHistory, UserLog, DeviceTariff
+from core.models import ActivityLog, Alert, Company, Device, EventLog, Site, TransactionHistory, UserLog, DeviceTariff
 from core.pagination import TablePagination
 from core.permissions import FinanceAccessPermission, ManagerAccessPermission, OperationAccessPermission
 from core.utils import CompanySiteDateQuerysetMixin
@@ -133,6 +133,14 @@ class DeviceApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView, C
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
         return Response(serializer.data)
+
+    def perform_destroy(self, instance):
+        site = instance.site
+        EventLog.objects.filter(site=site).delete()
+        UserLog.objects.filter(site=site).delete()
+        Alert.objects.filter(site=site).delete()
+        site.delete()
+        instance.delete()
 
 
 class DeviceTariffApiView(ListAPIView):

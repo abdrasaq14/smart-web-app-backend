@@ -124,7 +124,7 @@ class DeviceTariff(models.Model):
 
 
 class Device(models.Model):
-    id = models.CharField(max_length=240, unique=True, primary_key=True, editable=False)
+    id = models.CharField(max_length=240, unique=True, primary_key=True)
 
     name = models.CharField(max_length=120)
     location = models.CharField(max_length=240)
