@@ -114,7 +114,7 @@ class OperationsSiteMonitoredApiView(BaseDeviceDataApiView):
 
         return Response(
             {
-                "total": Site.objects.all().count(),
+                "total": len(dt_active_df.index) + len(dt_inactive_df.index),
                 "dataset": [
                     {"key": "active", "value": len(dt_active_df.index)},
                     {"key": "offline", "value": len(dt_inactive_df.index)},
