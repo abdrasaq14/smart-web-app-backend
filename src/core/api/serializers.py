@@ -104,7 +104,7 @@ class DeviceSerializer(serializers.ModelSerializer):
             asset_name=validated_data.get('name'),
             asset_type="Device site",
             asset_co_ordinate="",
-            asset_capacity=""
+            asset_capacity=validated_data.get('asset_capacity')
         )
 
         new_device = Device.objects.create(
