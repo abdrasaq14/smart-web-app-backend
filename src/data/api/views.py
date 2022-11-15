@@ -134,9 +134,9 @@ class OperationsDashboardRevenueLossApiView(BaseDeviceDataApiView):
         revenue_loss = device_data.get_revenue_loss()
 
         response = {
-            "total": revenue_loss["total_value"] + revenue_loss["consumption"],
+            "total": revenue_loss["consumption"],
             "dataset": [
-                {"key": "billing", "value": revenue_loss["total_value"]},
+                # {"key": "billing", "value": revenue_loss["total_value"]},
                 {"key": "collection", "value": revenue_loss["consumption"]},
                 {
                     "key": "downtime",
