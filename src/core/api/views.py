@@ -36,7 +36,7 @@ class BaseActivityLogView(ListAPIView, UpdateAPIView, CompanySiteDateQuerysetMix
     permission_classes = (IsAuthenticated, OperationAccessPermission)
 
 
-class AlertApiView(BaseActivityLogView):
+class AlertApiView(BaseActivityLogView, CreateAPIView):
     serializer_class = AlertSerializer
     queryset = Alert.objects.all().order_by("time")
     permission_classes = (IsAuthenticated,)

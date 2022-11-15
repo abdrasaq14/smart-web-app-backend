@@ -596,10 +596,7 @@ class DeviceData(DeviceRules):
             ).aggregate(total=Sum("amount_bought"))
             total_amount += amount['total'] if amount['total'] else 0
 
-        # if not total_revenue:
-        #     return 0
         return total_amount, total_revenue
-        # return 1 - (total_amount / total_revenue)
 
     def get_dt_offline_hours(self):
         offline_hours_list = []
