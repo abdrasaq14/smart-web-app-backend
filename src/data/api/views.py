@@ -360,7 +360,7 @@ class FinanceCustomerBreakdownApiView(BaseDeviceDataApiView):
 class FinanceCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, FinanceAccessPermission)
 
-    @method_decorator(cache_page(DEFAULT_CACHE_TIME))
+    # @method_decorator(cache_page(DEFAULT_CACHE_TIME))
     def get(self, request, **kwargs):
         card_type = self.request.query_params.get('card_type', None)
         device_data = self.device_data_manager()
