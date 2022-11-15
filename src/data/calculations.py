@@ -594,7 +594,8 @@ class DeviceData(DeviceRules):
 
         if not total_revenue:
             return 0
-        return 1 - (total_amount / total_revenue)
+        return total_amount, total_revenue
+        # return 1 - (total_amount / total_revenue)
 
     def get_dt_offline_hours(self):
         offline_hours_list = []

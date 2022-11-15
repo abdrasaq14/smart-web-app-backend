@@ -369,7 +369,10 @@ class FinanceCardsDataApiView(BaseDeviceDataApiView):
         if card_type == 'atc_losses' or not card_type:
             total_revenue = device_data.get_total_revenue_finance()
             response["total_revenue"] = total_revenue
-            response["atc_losses"] = device_data.get_atc_losses(total_revenue)
+            total_amount, total_revenue = device_data.get_atc_losses(total_revenue)
+            response["atc_losses"] = 1 - (total_amount / total_revenue)
+            response["total_amount"] = total_amount
+            response["total_revenue"] = total_revenue
 
         if card_type == 'downtime_losses' or not card_type:
             total_revenue = device_data.get_total_revenue_finance()
@@ -424,7 +427,10 @@ class ManagerHomeCardsDataApiView(BaseDeviceDataApiView):
         if card_type == 'revenue_losses' or not card_type:
             total_revenue = device_data.get_total_revenue_finance()
             response["total_revenue"] = total_revenue
-            response["atc_losses"] = device_data.get_atc_losses(total_revenue)
+            total_amount, total_revenue = device_data.get_atc_losses(total_revenue)
+            response["atc_losses"] = 1 - (total_amount / total_revenue)
+            response["total_amount"] = total_amount
+            response["total_revenue"] = total_revenue
 
         if card_type == 'total_consumption' or not card_type:
             response["total_consumption"] = device_data.get_total_consumption()
