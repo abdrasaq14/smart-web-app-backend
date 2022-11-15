@@ -589,7 +589,11 @@ class DeviceData(DeviceRules):
         total_amount = 0
 
         for site in self.sites:
-            amount = TransactionHistory.objects.filter(site=site).aggregate(total=Sum("amount_bought"))
+            amount = TransactionHistory.objects.filter(
+                site=site,
+                time__gte=self.start_date,
+                time__lte=self.end_date
+            ).aggregate(total=Sum("amount_bought"))
             total_amount += amount['total'] if amount['total'] else 0
 
         # if not total_revenue:
