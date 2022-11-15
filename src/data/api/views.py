@@ -35,12 +35,14 @@ class OperationsCardsDataApiView(BaseDeviceDataApiView):
         card_type = self.request.query_params.get('card_type', None)
         device_data = self.device_data_manager()
         sites = self.get_sites(request)
+        companies = self.get_companies(request)
         response = {}
 
         if card_type == 'sites' or not card_type:
             sites_under_maintenance = 0
             for site in sites:
                 sites_under_maintenance += site.alerts.filter(
+                    company__in=companies,
                     status=AlertStatusType.PENDING.value
                 ).count()
 
