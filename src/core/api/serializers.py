@@ -48,6 +48,17 @@ class AlertSerializer(ActivityLogSerializer):
         model = Alert
 
 
+class ActionAlertSerializer(ActivityLogSerializer):
+    site = serializers.SlugRelatedField(
+        queryset=Site.objects.all(),
+        many=False,
+        slug_field='id'
+    )
+
+    class Meta(ActivityLogSerializer.Meta):
+        model = Alert
+
+
 class EventLogSerializer(ActivityLogSerializer):
     class Meta(ActivityLogSerializer.Meta):
         model = EventLog

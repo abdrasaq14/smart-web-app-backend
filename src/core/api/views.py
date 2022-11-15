@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 
 from core.api.serializers import (
+    ActionAlertSerializer,
     AlertSerializer,
     CompanySerializer,
     DeviceSerializer,
@@ -37,9 +38,13 @@ class BaseActivityLogView(ListAPIView, UpdateAPIView, CompanySiteDateQuerysetMix
 
 
 class AlertApiView(BaseActivityLogView, CreateAPIView):
-    serializer_class = AlertSerializer
     queryset = Alert.objects.all().order_by("time")
     permission_classes = (IsAuthenticated,)
+
+    def get_serializer_class(self):
+        if self.request.method in ['POST', 'PUT', 'PATCH']:
+            return ActionAlertSerializer
+        return AlertSerializer
 
 
 class EventLogApiView(BaseActivityLogView):
