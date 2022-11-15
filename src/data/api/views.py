@@ -42,7 +42,7 @@ class OperationsCardsDataApiView(BaseDeviceDataApiView):
             sites_under_maintenance = 0
             for site in sites:
                 sites_under_maintenance += site.alerts.filter(
-                    company__in=companies,
+                    site__company__in=companies,
                     status=AlertStatusType.PENDING.value
                 ).count()
 
