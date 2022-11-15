@@ -370,7 +370,7 @@ class FinanceCardsDataApiView(BaseDeviceDataApiView):
             total_revenue = device_data.get_total_revenue_finance()
             response["total_revenue"] = total_revenue
             total_amount, total_revenue = device_data.get_atc_losses(total_revenue)
-            response["atc_losses"] = 1 - (total_amount / total_revenue)
+            response["atc_losses"] = 1 - (total_amount / total_revenue) if total_revenue else 0
             response["total_amount"] = total_amount
             response["total_revenue"] = total_revenue
 
@@ -428,7 +428,7 @@ class ManagerHomeCardsDataApiView(BaseDeviceDataApiView):
             total_revenue = device_data.get_total_revenue_finance()
             response["total_revenue"] = total_revenue
             total_amount, total_revenue = device_data.get_atc_losses(total_revenue)
-            response["atc_losses"] = 1 - (total_amount / total_revenue)
+            response["atc_losses"] = 1 - (total_amount / total_revenue) if total_revenue else 0
             response["total_amount"] = total_amount
             response["total_revenue"] = total_revenue
 
