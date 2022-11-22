@@ -222,7 +222,7 @@ class OperationsDashboardCardsDataApiView(BaseDeviceDataApiView):
             response["downtime"] = device_data.get_current_load()
 
         if card_type == 'revenuePerHour' or not card_type:
-            revenue_per_hour = device_data.get_revenue_per_hour(avg_availability)
+            revenue_per_hour = device_data.get_revenue_per_hour()
             response["revenuePerHour"] = revenue_per_hour
 
         if card_type == 'untappedRevenue' or not card_type:
