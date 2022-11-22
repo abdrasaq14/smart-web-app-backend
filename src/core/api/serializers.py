@@ -24,11 +24,16 @@ class ListCompanySerializer(CompanySerializer):
 
 class SiteSerializer(serializers.ModelSerializer):
     company = CompanySerializer(many=False)
+    asset_co_ordinate = serializers.SerializerMethodField()
 
     class Meta:
         model = Site
         fields = ["id", "name", "asset_name", "asset_type", "asset_co_ordinate", "asset_capacity",
                   "under_maintenance", "is_active", "time", "company"]
+
+    def get_asset_co_ordinate(self, obj):
+        device = obj.devices.first()
+        return device.co_ordinate if device else None
 
 
 class ActivityLogSerializer(serializers.ModelSerializer):
@@ -114,7 +119,6 @@ class DeviceSerializer(serializers.ModelSerializer):
             company=validated_data.get('company'),
             asset_name=validated_data.get('name'),
             asset_type="Device site",
-            asset_co_ordinate="",
             asset_capacity=validated_data.get('asset_capacity')
         )
 

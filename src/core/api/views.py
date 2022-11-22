@@ -99,7 +99,6 @@ class SiteApiView(ListAPIView, CompanySiteDateQuerysetMixin, DestroyAPIView):
         "name",
         "asset_name",
         "asset_type",
-        "asset_co_ordinate",
         "asset_capacity",
     ]
     site_related_field = ''
