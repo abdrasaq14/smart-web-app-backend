@@ -26,9 +26,6 @@ class SiteFactory(factory.django.DjangoModelFactory):
     company = factory.SubFactory(CompanyFactory)
 
     asset_name = factory.Sequence(lambda n: "Asset name - %s" % n)
-    asset_type = factory.Sequence(lambda n: "AType - %s" % n)
-    asset_capacity = factory.Sequence(lambda n: "1234 KW - %s" % n)
-
     time = FuzzyDateTime(datetime(2022, 9, 12, tzinfo=UTC))
 
     class Meta:

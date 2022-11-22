@@ -95,12 +95,7 @@ class SiteApiView(ListAPIView, CompanySiteDateQuerysetMixin, DestroyAPIView):
     serializer_class = SiteSerializer
     pagination_class = TablePagination
     filter_backends = [filters.SearchFilter]
-    search_fields = [
-        "name",
-        "asset_name",
-        "asset_type",
-        "asset_capacity",
-    ]
+    search_fields = ["name", "asset_name"]
     site_related_field = ''
     company_related_field = 'company'
 
