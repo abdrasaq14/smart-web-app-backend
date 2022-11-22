@@ -38,7 +38,7 @@ class BaseActivityLogView(ListAPIView, UpdateAPIView, CompanySiteDateQuerysetMix
 
 
 class AlertApiView(BaseActivityLogView, CreateAPIView):
-    queryset = Alert.objects.all().order_by("time")
+    queryset = Alert.objects.all().order_by("time", "status")
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
