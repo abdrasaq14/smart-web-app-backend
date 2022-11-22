@@ -226,7 +226,7 @@ class OperationsDashboardCardsDataApiView(BaseDeviceDataApiView):
             response["revenuePerHour"] = revenue_per_hour
 
         if card_type == 'untappedRevenue' or not card_type:
-            response["untappedRevenue"] = device_data.get_untapped_revenue(avg_availability)
+            response["untappedRevenue"] = device_data.get_untapped_revenue()
 
         return Response(response, status=status.HTTP_200_OK)
 
