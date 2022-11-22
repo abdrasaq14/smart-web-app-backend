@@ -739,7 +739,8 @@ class DeviceData(DeviceRules):
             start_date=datetime.strftime(avg_start_date, DEVICE_DATE_FORMAT),
             end_date=self.end_date
         )
-        avg_availability, power_cuts = new_device_data.get_avg_availability_and_power_cuts()
+        # avg_availability, power_cuts = new_device_data.get_avg_availability_and_power_cuts()
+        avg_availability, power_cuts = self.get_avg_availability_and_power_cuts()
 
         if not total_consumption:
             total_consumption = self.get_total_consumption()
