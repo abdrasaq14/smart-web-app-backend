@@ -44,11 +44,14 @@ class BaseDeviceData:
     def _devices_from_sites(self) -> List[str]:
         # Extract all devices from our sites
         device_ids = list()
-        for site in self.sites:
-            device_ids = device_ids + list(Device.objects.filter(
-                site__in=self.sites,
-                company__in=self.companies
-            ).values_list("id", flat=True))
+        for company in self.companies:
+            company_devices = list(
+                Device.objects.filter(
+                    site__in=self.sites,
+                    company=company
+                ).values_list("id", flat=True)
+            )
+            device_ids = device_ids + company_devices
 
         if len(device_ids) < 1:
             raise GenericErrorException('No linked devices!')
