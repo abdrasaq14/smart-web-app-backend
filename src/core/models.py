@@ -104,7 +104,6 @@ class Site(models.Model):
     )
 
     asset_name = models.CharField(max_length=240)
-    asset_type = models.CharField(max_length=120)
 
     under_maintenance = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
