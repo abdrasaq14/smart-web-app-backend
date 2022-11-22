@@ -41,6 +41,14 @@ class AlertApiView(BaseActivityLogView, CreateAPIView):
     queryset = Alert.objects.all().order_by("time")
     permission_classes = (IsAuthenticated,)
 
+    def get_queryset(self):
+        alert_status = self.request.query_params.get("status")
+        queryset = self.queryset
+
+        if alert_status:
+            return queryset.filter(status=alert_status)
+        return queryset
+
     def get_serializer_class(self):
         if self.request.method in ['POST', 'PUT', 'PATCH']:
             return ActionAlertSerializer
