@@ -59,8 +59,6 @@ class OperationsCardsDataApiView(BaseDeviceDataApiView):
             response["avg_availability"] = active_power
             response["power_cuts"] = power_cuts
 
-            response["avg_availability"] = device_data.get_total_consumption()
-
         if card_type == 'overloaded_dts' or not card_type:
             response["overloaded_dts"] = device_data.get_overloaded_dts()
 
