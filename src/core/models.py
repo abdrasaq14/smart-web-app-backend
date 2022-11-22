@@ -105,7 +105,6 @@ class Site(models.Model):
 
     asset_name = models.CharField(max_length=240)
     asset_type = models.CharField(max_length=120)
-    asset_co_ordinate = models.CharField(max_length=120)
     asset_capacity = models.IntegerField(blank=True, null=True, default=0)
 
     under_maintenance = models.BooleanField(default=False)
