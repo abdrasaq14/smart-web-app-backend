@@ -212,7 +212,7 @@ class OperationsDashboardCardsDataApiView(BaseDeviceDataApiView):
 
         if card_type == 'availability' or not card_type:
             avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
-            response["gridHours"] = avg_availability
+            response["gridHours"] = device_data.get_grid_hours()
             response["noOfOutages"] = power_cuts
 
         if card_type == 'tariffPlan' or not card_type:
