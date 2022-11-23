@@ -160,12 +160,17 @@ class DeviceData(DeviceRules):
         for device_id in self.device_ids:
             active_time = power_cuts = 0
 
+            q = Q(
+                date__gte=self.start_date,
+                date__lte=self.end_date,
+                gateway_serial=device_id
+            )
+
+            if self.start_date == self.end_date:
+                q = Q(date=self.start_date, gateway_serial=device_id)
+
             data_readings = (
-                SmartDeviceReadings.objects.filter(
-                    date__gte=self.start_date,
-                    date__lte=self.end_date,
-                    gateway_serial=device_id,
-                )
+                SmartDeviceReadings.objects.filter(q)
                 .order_by("timestamp")
                 .values(
                     "line_to_neutral_voltage_phase_a",
