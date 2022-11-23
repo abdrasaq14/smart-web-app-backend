@@ -345,9 +345,10 @@ class FinanceCustomerBreakdownApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
         paying, defaulting = device_data.get_customer_breakdown()
+        total = paying + defaulting
 
         response = {
-            "total": paying + defaulting,
+            "total": total,
             "dataset": [
                 {"key": "paying", "value": paying},
                 {"key": "defaulting", "value": defaulting},
