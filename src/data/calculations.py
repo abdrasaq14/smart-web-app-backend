@@ -405,11 +405,14 @@ class DeviceData(DeviceRules):
                 ):
                     power_cuts += 1
 
-            days_range = (
-                data_readings.last()["timestamp"] - data_readings.first()["timestamp"]
-            )
-            if days_range.days > 0:
-                active_time = active_time / days_range.days
+            try:
+                days_range = (
+                    data_readings.last()["timestamp"] - data_readings.first()["timestamp"]
+                )
+                if days_range.days > 0:
+                    active_time = active_time / days_range.days
+            except TypeError:
+                continue
 
             grid_hours += active_time / 60
 
