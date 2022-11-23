@@ -183,6 +183,9 @@ class DeviceData(DeviceRules):
             for idx, data in enumerate(data_readings):
                 try:
                     nxt_data = data_readings[idx + 1]
+
+                    if data["timestamp"].day != nxt_data["timestamp"].day:
+                        continue
                 except IndexError:
                     break
 
@@ -207,17 +210,17 @@ class DeviceData(DeviceRules):
                 ):
                     power_cuts += 1
 
-            last_date = datetime.strptime(self.end_date, DEVICE_DATE_FORMAT)
-            first_date = datetime.strptime(self.start_date, DEVICE_DATE_FORMAT)
-
-            days_range = (last_date - first_date)
-            if days_range.days > 0:
-                active_time = active_time / (days_range.days + 1)
-
             total_power_cuts += power_cuts
             active_power_list.append(active_time)
 
         avg_power_seconds_mean = mean(active_power_list)
+        last_date = datetime.strptime(self.end_date, DEVICE_DATE_FORMAT)
+        first_date = datetime.strptime(self.start_date, DEVICE_DATE_FORMAT)
+
+        days_range = (last_date - first_date)
+        if days_range.days > 0:
+            avg_power_seconds_mean = avg_power_seconds_mean / (days_range.days + 1)
+
         return round(avg_power_seconds_mean / 3600, 2), total_power_cuts
 
     def get_overloaded_dts(self) -> int:
