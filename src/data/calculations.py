@@ -184,7 +184,13 @@ class DeviceData(DeviceRules):
                 try:
                     nxt_data = data_readings[idx + 1]
 
+                    diff_time = nxt_data["timestamp"] - data["timestamp"]
+                    diff_seconds = diff_time.total_seconds()
+
                     if data["timestamp"].day != nxt_data["timestamp"].day:
+                        continue
+
+                    if diff_seconds > 3600:
                         continue
                 except IndexError:
                     break
@@ -197,14 +203,10 @@ class DeviceData(DeviceRules):
                 nxt_volt_b = nxt_data["line_to_neutral_voltage_phase_b"]
                 nxt_volt_c = nxt_data["line_to_neutral_voltage_phase_c"]
 
-                diff_time = nxt_data["timestamp"] - data["timestamp"]
-                diff_seconds = diff_time.total_seconds()
-
                 if volt_a != 0 or volt_b != 0 or volt_c != 0 and (
                     nxt_volt_a != 0 or nxt_volt_b != 0 or nxt_volt_c != 0
                 ):
                     active_time += diff_seconds
-
                 elif (volt_a == 0 and volt_b == 0 and volt_c == 0) and (
                     nxt_volt_a != 0 or nxt_volt_b != 0 or nxt_volt_c != 0
                 ):
