@@ -222,10 +222,10 @@ class DeviceData(DeviceRules):
         last_date = datetime.strptime(self.end_date, DEVICE_DATE_FORMAT)
         first_date = datetime.strptime(self.start_date, DEVICE_DATE_FORMAT)
         days_range = (last_date - first_date)
-        if days_range.days > 0:
-            active_time = active_time / (days_range.days + 1)
 
         avg_power_seconds_mean = mean(active_power_list)
+        if days_range.days > 0:
+            avg_power_seconds_mean = avg_power_seconds_mean / (days_range.days + 1)
         return round(avg_power_seconds_mean / 3600, 2), total_power_cuts
 
     def get_overloaded_dts(self) -> int:
