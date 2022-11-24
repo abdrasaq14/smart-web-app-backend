@@ -376,10 +376,9 @@ class FinanceCardsDataApiView(BaseDeviceDataApiView):
             response["total_revenue"] = total_revenue
 
         if card_type == 'downtime_losses' or not card_type:
-            total_revenue = device_data.get_total_revenue_finance()
+            revenue_per_hour = device_data.get_revenue_per_hour()
             offline_hours = device_data.get_dt_offline_hours()
-            response["total_revenue"] = total_revenue
-            response["downtime_losses"] = total_revenue * offline_hours
+            response["downtime_losses"] = revenue_per_hour * offline_hours
 
         if card_type == 'tariff_losses' or not card_type:
             response["tariff_losses"] = device_data.get_tariff_losses()
