@@ -361,7 +361,7 @@ class FinanceCustomerBreakdownApiView(BaseDeviceDataApiView):
 class FinanceCardsDataApiView(BaseDeviceDataApiView):
     permission_classes = (IsAuthenticated, FinanceAccessPermission)
 
-    @method_decorator(cache_page(DEFAULT_CACHE_TIME))
+    # @method_decorator(cache_page(DEFAULT_CACHE_TIME))
     def get(self, request, **kwargs):
         card_type = self.request.query_params.get('card_type', None)
         device_data = self.device_data_manager()
@@ -381,8 +381,8 @@ class FinanceCardsDataApiView(BaseDeviceDataApiView):
             response["total_revenue"] = total_revenue
             response["downtime_losses"] = total_revenue * offline_hours
 
-        if card_type == 'tarrif_losses' or not card_type:
-            response["tarrif_losses"] = device_data.get_tariff_losses()
+        if card_type == 'tariff_losses' or not card_type:
+            response["tariff_losses"] = device_data.get_tariff_losses()
 
         if card_type == 'highest_losses' or not card_type:
             total_revenue = device_data.get_total_revenue_finance()
@@ -396,7 +396,6 @@ class FinanceCardsDataApiView(BaseDeviceDataApiView):
             response["highest_revenue"] = total_revenue / len(device_data.device_ids)
 
         return Response(response, status=status.HTTP_200_OK)
-
 
 # Manager Home
 class ManagerHomeCardsDataApiView(BaseDeviceDataApiView):

@@ -706,8 +706,8 @@ class DeviceData(DeviceRules):
             start_date=datetime.strftime(avg_start_date, DEVICE_DATE_FORMAT),
             end_date=self.end_date
         )
-        # avg_availability, power_cuts = new_device_data.get_avg_availability_and_power_cuts()
-        avg_availability, power_cuts = self.get_avg_availability_and_power_cuts()
+        avg_availability, power_cuts = new_device_data.get_avg_availability_and_power_cuts()
+        # avg_availability, power_cuts = self.get_avg_availability_and_power_cuts()
 
         if not total_consumption:
             total_consumption = self.get_total_consumption()
@@ -717,7 +717,20 @@ class DeviceData(DeviceRules):
             total_tariff += Device.objects.get(id=device_id).tariff.price
         total_tariff_avg = total_tariff / len(self.device_ids)
 
-        return (avg_availability - total_tariff_avg) * total_consumption
+        # Very nice implementaion mate :)
+        estimated_tariff = 0
+        if avg_availability > 20:
+            estimated_tariff = 54.08
+        elif avg_availability >= 16 and avg_availability <= 20:
+            estimated_tariff = 49.81
+        elif avg_availability >= 12 and avg_availability <= 16:
+            estimated_tariff = 43.01
+        elif avg_availability >= 8 and avg_availability <= 12:
+            estimated_tariff = 40.82
+        elif avg_availability < 8:
+            estimated_tariff = 36.15
+
+        return (estimated_tariff - total_tariff_avg) * total_consumption
 
     def get_untapped_revenue(self, avg_availability=None):
         if not avg_availability:
