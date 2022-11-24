@@ -144,7 +144,7 @@ class DeviceData(DeviceRules):
                 if data["timestamp"].day != nxt_data["timestamp"].day:
                     continue
 
-                if diff_seconds > 900:
+                if diff_seconds > 1800:
                     continue
             except IndexError:
                 break
