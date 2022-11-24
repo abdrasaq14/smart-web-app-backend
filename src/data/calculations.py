@@ -383,37 +383,9 @@ class DeviceData(DeviceRules):
         return grid_hours
 
     def get_revenue_per_hour(self, avg_availability=None) -> float:
-        # Revenue (Total consumption * Tariff Band) divided by the hours of DT active
-
-        if not avg_availability:
-            avg_availability = self.get_avg_availability_and_power_cuts()[0]
-
-        net_device_data = []
-        for device_id in self.device_ids:
-            readings = (
-                SmartDeviceReadings.objects.filter(
-                    date__gte=self.start_date,
-                    date__lte=self.end_date,
-                    gateway_serial=device_id,
-                )
-                .order_by("timestamp")
-                .values("import_active_energy_overall_total")
-            )
-
-            if not readings:
-                continue
-
-            net_device_data.append(
-                (
-                    readings.last()["import_active_energy_overall_total"]
-                    - readings.first()["import_active_energy_overall_total"]
-                )
-                * Device.objects.get(id=device_id).tariff.price
-            )
-        revenue = round(np.sum(net_device_data), 2)
-        if np.isnan(revenue / avg_availability):
-            return 0
-        return (revenue / avg_availability)
+        total_revenue = self.get_total_revenue_finance()
+        uptime = self.get_grid_hours()
+        return (total_revenue / uptime)
 
     def get_traffic_plan(self):
         traffic_prices = Device.objects.filter(id__in=self.device_ids).values_list('tariff__price', flat=True)
