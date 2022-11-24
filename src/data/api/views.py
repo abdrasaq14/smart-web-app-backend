@@ -386,9 +386,9 @@ class FinanceCardsDataApiView(BaseDeviceDataApiView):
 
         if card_type == 'highest_losses' or not card_type:
             total_revenue = device_data.get_total_revenue_finance()
-            avg_availability, power_cuts = device_data.get_avg_availability_and_power_cuts()
+            revenue_per_hour = device_data.get_revenue_per_hour()
             response["total_revenue"] = total_revenue
-            response["highest_losses"] = total_revenue / (avg_availability if avg_availability > 0 else 1)
+            response["highest_losses"] = revenue_per_hour
 
         if card_type == 'highest_revenue' or not card_type:
             total_revenue = device_data.get_total_revenue_finance()
