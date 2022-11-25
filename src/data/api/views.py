@@ -132,7 +132,11 @@ class OperationsDashboardRevenueLossApiView(BaseDeviceDataApiView):
     def get(self, request, **kwargs):
         device_data = self.device_data_manager()
         revenue_loss = device_data.get_revenue_loss()
-        downtime = revenue_loss["total_value"] - revenue_loss["consumption"]
+        # downtime = revenue_loss["total_value"] - revenue_loss["consumption"]
+        revenue_per_hour = self.get_revenue_per_hour()
+        offline_hours = self.get_dt_offline_hours()
+        downtime_losses = revenue_per_hour * offline_hours
+        downtime = downtime_losses / device_data.get_tariff_losses()
 
         response = {
             "total": revenue_loss["consumption"] + downtime,

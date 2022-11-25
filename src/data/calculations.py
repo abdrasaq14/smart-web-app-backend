@@ -655,8 +655,9 @@ class DeviceData(DeviceRules):
 
         return (estimated_tariff - total_tariff_avg) * total_consumption
 
-    def get_untapped_revenue(self, avg_availability=None):
-        if not avg_availability:
-            avg_availability, power_cuts = self.get_avg_availability_and_power_cuts()
+    def get_untapped_revenue(self):
+        revenue_per_hour = self.get_revenue_per_hour()
+        offline_hours = self.get_dt_offline_hours()
+        downtime_losses = revenue_per_hour * offline_hours
 
-        return avg_availability * 30 + self.get_tariff_losses(avg_availability)
+        return downtime_losses + self.get_tariff_losses()
