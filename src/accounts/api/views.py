@@ -60,7 +60,7 @@ class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
             "password": "Sm@rterise123"
         }
 
-        url = "https://dev-u0pz-ez1.eu.auth0.com/api/v2/users"
+        url = "https://dev-mgw72jpas4obd84e.us.auth0.com/api/v2/users"
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {get_management_token()}"
