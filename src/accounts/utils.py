@@ -86,13 +86,13 @@ def requires_scope(required_scope):
 
 def get_management_token():
     management_body = {
-        "client_id": "vSRgy0iwhJPaBFZloW3QXDyz224VPJbe",
-        "client_secret": "3rE64JLXcOHKgARViWHbXvq_QJWxJ6lDP7MOaBDPt0nCovRcCKviKeE98pj0dj-5",
-        "audience": "https://dev-u0pz-ez1.eu.auth0.com/api/v2/",
+        "client_id": "RLHdjXQH7M3j8Tj1ygx7t8YZ0jgZsnxH",
+        "client_secret": "fmJkyRyv5VLEixz_sDJVpMxv0P34sJVWFO0wkyRd8tRYjXVe9OBIQjVw5wyf6heg",
+        "audience": "https://dev-mgw72jpas4obd84e.us.auth0.com/api/v2/",
         "grant_type": "client_credentials"
     }
 
-    url = "https://dev-u0pz-ez1.eu.auth0.com/oauth/token"
+    url = "https://dev-mgw72jpas4obd84e.us.auth0.com/oauth/token"
     headers = {
         "Content-Type": "application/json",
     }
