@@ -3,14 +3,14 @@ attrs==22.1.0
 awswrangler==2.17.0
 coreapi==2.3.3
 coreschema==0.0.4
-Django==4.1  # Ensure consistency with other packages
-django-cors-headers==3.13.0
+Django  # Ensure consistency with other packages
+django-cors-headers
 django-environ==0.9.0
-django-extensions==3.2.0  # Compatible with Django>=3.2
-django-guardian==2.4.0  # Compatible with Django>=2.2
-django-polymorphic==3.1.0  # Compatible with Django>=2.1
-djangorestframework==3.13.1  # Compatible with Django>=2.2
-drf-yasg==1.21.3  # Compatible with Django>=2.2.16
+django-extensions # Compatible with Django>=3.2
+django-guardian # Compatible with Django>=2.2
+django-polymorphic  # Compatible with Django>=2.1
+djangorestframework  # Compatible with Django>=2.2
+drf-yasg  # Compatible with Django>=2.2.16
 Jinja2==3.1.2
 loguru==0.6.0
 numpy==1.23.3

@@ -8,7 +8,7 @@ factory-boy==3.2.0
 freezegun==1.1.0
 
 # Updated model-bakery to resolve dependency conflicts with Django 4.1
-model-bakery==1.20.0  # Compatible with Django 4.1
+model-bakery # Compatible with Django 4.1
 
 pytest==6.2.3
 pytest-django==4.1.0
