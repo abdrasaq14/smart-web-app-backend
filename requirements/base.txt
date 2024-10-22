@@ -11,7 +11,7 @@ django-guardian # Compatible with Django>=2.2
 django-polymorphic  # Compatible with Django>=2.1
 djangorestframework  # Compatible with Django>=2.2
 drf-yasg  # Compatible with Django>=2.2.16
-Jinja2==3.1.2
+Jinja2==3.1.2 #dd
 loguru==0.6.0
 numpy==1.23.3
 pandas==1.5.0
