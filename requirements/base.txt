@@ -1,16 +1,16 @@
-asgiref==3.5.2
+asgiref==3.6.0
 attrs==22.1.0
 awswrangler==2.17.0
 coreapi==2.3.3
 coreschema==0.0.4
-Django==4.1
+Django==4.1  # Ensure consistency with other packages
 django-cors-headers==3.13.0
 django-environ==0.9.0
-django-extensions==3.2.0
-django-guardian==2.4.0
-django-polymorphic==3.1.0
-djangorestframework==3.13.1
-drf-yasg==1.21.3
+django-extensions==3.2.0  # Compatible with Django>=3.2
+django-guardian==2.4.0  # Compatible with Django>=2.2
+django-polymorphic==3.1.0  # Compatible with Django>=2.1
+djangorestframework==3.13.1  # Compatible with Django>=2.2
+drf-yasg==1.21.3  # Compatible with Django>=2.2.16
 Jinja2==3.1.2
 loguru==0.6.0
 numpy==1.23.3
@@ -30,7 +30,7 @@ sqlparse==0.4.2
 urllib3==1.26.12
 matplotlib==3.6.0
 matplotlib-inline==0.1.6
-drf-jwt~=1.19.2
-pyjwt~=1.7.1
-python-dotenv~=0.21.0
-cryptography~=38.0.1
+drf-jwt==1.19.2  # Compatible with Django>=1.11
+pyjwt==1.7.1
+python-dotenv==0.21.0
+cryptography==38.0.1
