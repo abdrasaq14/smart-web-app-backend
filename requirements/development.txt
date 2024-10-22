@@ -3,7 +3,7 @@
 
 # General development packages
 black
-django-extensions
+django-extensions>=3.2.0
 flake8
 ipdb==0.13.7
 isort
@@ -12,4 +12,12 @@ ipython
 
 # Updated Werkzeug version
 Werkzeug==2.2.2  # Updated from 2.0.2 to 2.2.2
+
+# Django and related packages
+Django==4.2
+django-cors-headers>=3.13.0
+drf-yasg>=1.21.3
+djangorestframework>=3.13.1
+model-bakery==1.20.0  # Make sure this aligns with Django 4.2
+
 
