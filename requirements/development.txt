@@ -3,19 +3,10 @@
 
 # General development packages
 black
-django-extensions==3.2.0  # Compatible with Django>=3.2
+django-extensions
 flake8
 ipdb==0.13.7
 isort
 pre-commit==2.15.0
 ipython
-
-# Updated Werkzeug version
-Werkzeug==2.2.2  # Updated from 2.0.2 to 2.2.2
-
-# Django and related packages
-Django==4.1
-django-cors-headers==3.13.0
-drf-yasg==1.21.3
-djangorestframework==3.13.1
-model-bakery==1.20.0  # This version supports Django 4.2, and should work with Django 4.1 as well
+Werkzeug==2.2.2 # 2.0.2
