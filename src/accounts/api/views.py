@@ -1,17 +1,35 @@
 from django.http import JsonResponse
 import requests
+from functools import wraps
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
 from accounts.models import User
-from accounts.utils import get_management_token, requires_scope
+from accounts.utils import get_management_token, get_token_auth_header
 from core.exceptions import GenericErrorException
 from core.pagination import TablePagination
-from core.permissions import AdminAccessPermission
-from .serializers import ListUserSerializer, UserSerializer
+from core.permissions import AdminAccessPermission              
+from .serializers import ListUserSerializer, UserSerializer     
+import jwt
 
+def requires_permission(required_permission):
+    """Decorator to check if a specific permission is present in the user's JWT token."""
+    def require_permission(f):
+        @wraps(f)
+        def decorated(*args, **kwargs):
+            token = get_token_auth_header(args[0])
+            decoded = jwt.decode(token, options={"verify_signature": False})
+            if decoded.get("permissions"):
+                token_permissions = decoded["permissions"]
+                if required_permission in token_permissions:
+                    return f(*args, **kwargs)
+            response = JsonResponse({'message': 'You don\'t have the required permission'})
+            response.status_code = 403
+            return response
+        return decorated
+    return require_permission
 
 class CurrentUserView(ListAPIView):
     serializer_class = ListUserSerializer
@@ -20,7 +38,6 @@ class CurrentUserView(ListAPIView):
     def get(self, request, *args, **kwargs):
         serializer = self.get_serializer(request.user, many=False)
         return Response(serializer.data)
-
 
 class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
     queryset = User.objects.all()
@@ -31,7 +48,6 @@ class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
 
     def post(self, request, *args, **kwargs):
         serializer = self.action_serializer_class(data=request.data)
-
         serializer.is_valid(raise_exception=True)
         created_user = serializer.save()
 
@@ -63,7 +79,7 @@ class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
         url = "https://dev-mgw72jpas4obd84e.us.auth0.com/api/v2/users"
         headers = {
             "Content-Type": "application/json",
-            "Authorization": f"Bearer {get_management_token()}"
+            "Authorization": f"Bearer {get_management_token()}" 
         }
 
         response = requests.post(url, json=auth0_body, headers=headers)
@@ -81,19 +97,17 @@ class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
         self.perform_update(serializer)
         return Response(serializer.data)
 
-
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def public(request):
     return JsonResponse({'message': 'Hello from a public endpoint! You don\'t need to be authenticated to see this.'})
 
-
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def private(request):
     return JsonResponse({'message': 'Hello from a private endpoint! You need to be authenticated to see this.'})
 
-
 @api_view(['GET'])
-@requires_scope('admin')
+@requires_permission('admin:access')
 def private_scoped(request):
-    return JsonResponse({'message': 'Hello from a private endpoint! You need to be authenticated and have a scope of read:messages to see this.'})
+    return JsonResponse({'message': 'Hello from a private endpoint! You need to be authenticated and have the admin:access permission to see this.'})
