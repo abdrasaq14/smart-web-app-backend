@@ -129,6 +129,7 @@ from .serializers import ListUserSerializer, UserSerializer
 
 class CurrentUserView(ListAPIView):
     serializer_class = ListUserSerializer
+    print("CurrentUserView: Fetching current user data.", self.get_serializer(request.user, many=False))
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
@@ -219,7 +220,7 @@ def public(request):
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
-def public(request):
+def private(request):
     print("private: Accessing private endpoint.")
     return JsonResponse({'message': 'Hello from a private endpoint! You need to be authenticated to see this.'})
 
