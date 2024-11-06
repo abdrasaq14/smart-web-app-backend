@@ -213,12 +213,13 @@ class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def public(request):
-    print("public: Accessing public endpoint.")
+    print("public: Accessing public endpoint route.")
     return JsonResponse({'message': 'Hello from a public endpoint! You don\'t need to be authenticated to see this.'})
 
 
 @api_view(['GET'])
-def private(request):
+@permission_classes([AllowAny])
+def public(request):
     print("private: Accessing private endpoint.")
     return JsonResponse({'message': 'Hello from a private endpoint! You need to be authenticated to see this.'})
 
