@@ -133,10 +133,10 @@ class CurrentUserView(ListAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
-        print("CurrentUserView: Fetching current user data.")
-        serializer = self.get_serializer(request.user, many=False)
-        print("CurrentUserView: User data retrieved:", serializer.data)
-        return Response(serializer.data)
+        print("CurrentUserView: Fetching current user data.", request.user)
+        # serializer = self.get_serializer(request.user, many=False)
+       # print("CurrentUserView: User data retrieved:", serializer.data)
+        return Response("Success")
 
 
 class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
