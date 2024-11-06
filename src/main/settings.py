@@ -186,7 +186,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # Auth
 AUTH_USER_MODEL = "accounts.User"
 
-BYPASS_AUTH = env.bool("DJANGO_BYPASS_AUTH", default=True)
+BYPASS_AUTH = env.bool("DJANGO_BYPASS_AUTH", default=False)
 
 
 AWS_ARN_RESOURCE = env.str("AWS_ARN_RESOURCE", "")
