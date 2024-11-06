@@ -130,7 +130,7 @@ from .serializers import ListUserSerializer, UserSerializer
 class CurrentUserView(ListAPIView):
     serializer_class = ListUserSerializer
     print("CurrentUserView: Fetching current user data.", self.get_serializer(request.user, many=False))
-    permission_classes = (IsAuthenticated,)
+    # permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
         print("CurrentUserView: Fetching current user data.", request.user)
