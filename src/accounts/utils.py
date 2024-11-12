@@ -202,9 +202,9 @@ def requires_scope(required_scope):
 
 def get_management_token():
     management_body = {
-        "client_id": "RLHdjXQH7M3j8Tj1ygx7t8YZ0jgZsnxH",
-        "client_secret": "fmJkyRyv5VLEixz_sDJVpMxv0P34sJVWFO0wkyRd8tRYjXVe9OBIQjVw5wyf6heg",
-        "audience": "test api for perms",
+        "client_id": "ymRc8UQkScJZM76PsbknMpZRjZWiZIo1",
+        "client_secret": "0sa8I6ndW8m1QeqWFZYAIwT2VlRI8j83B3Kwm2AhOrmGLfNULqrZngmqWLHaoFLz",
+        "audience": "https://dev-mgw72jpas4obd84e.us.auth0.com/api/v2/",
         "grant_type": "client_credentials"
     }
 
