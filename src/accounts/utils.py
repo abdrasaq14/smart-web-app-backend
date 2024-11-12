@@ -204,7 +204,7 @@ def get_management_token():
     management_body = {
         "client_id": "ymRc8UQkScJZM76PsbknMpZRjZWiZIo1",
         "client_secret": "0sa8I6ndW8m1QeqWFZYAIwT2VlRI8j83B3Kwm2AhOrmGLfNULqrZngmqWLHaoFLz",
-        "audience": "https://dev-mgw72jpas4obd84e.us.auth0.com/api/v2/",
+        "audience": "test api for perms",
         "grant_type": "client_credentials"
     }
 
