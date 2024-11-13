@@ -121,7 +121,7 @@ WSGI_APPLICATION = "main.wsgi.application"
 
 DATABASES = {
     "default": env.db(
-        "DJANGO_DEFAULT_DATABASE", default="postgres://smt:1234@127.0.0.1/smt"
+         "DJANGO_DEFAULT_DATABASE", default="postgres://abdrasaq:abdrasaq14@127.0.0.1/smartmeters"
     ),
 }
 
@@ -152,14 +152,13 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',  # Updated to SimpleJWT
         'rest_framework.authentication.SessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     "COERCE_DECIMAL_TO_STRING": False,
 }
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/

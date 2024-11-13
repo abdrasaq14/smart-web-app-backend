@@ -168,7 +168,7 @@ def jwt_decode_token(token):
 
 def get_token_auth_header(request):
     """Obtains the access token from the Authorization Header"""
-     print("Obtains the access token from the Authorization Header")
+    print("Obtains the access token from the Authorization Header")
     auth = request.META.get("HTTP_AUTHORIZATION", None)
     if auth:
         print("Authorization header: {auth}")
