@@ -10,14 +10,14 @@ class BaseAccountPermission(BasePermission):
     Simple base account permissions.
     """
 
-    required_permissions = []
+    access_types = []
 
     def requires_scope(self, request, required_scopes: List[str]):
         token = get_token_auth_header(request)
         decoded = jwt.decode(token, verify=False)
 
-        if decoded.get("permissions"):
-            token_scopes = decoded["permissions"].split()
+        if decoded.get("scope"):
+            token_scopes = decoded["scope"].split()
             for token_scope in token_scopes:
                 if token_scope in required_scopes:
                     return True
@@ -26,29 +26,30 @@ class BaseAccountPermission(BasePermission):
 
     def requires_access_level(self, request, required_scopes: List[str]):
         user = request.user
-        if user.permissions in required_scopes:
+        if user.access_level in required_scopes:
+            print("this is user access level: ", user.access_level, " and this is the required scope: ", required_scopes)
             return True
         return False
 
     def has_permission(self, request, view):
-        return self.requires_access_level(request, self.required_permissions)
+        return self.requires_access_level(request, self.access_types)
 
 
 class AdminAccessPermission(BaseAccountPermission):
     """Admin access permissions"""
-    required_permissions = ['admin:access']
+    access_types = ['admin']
 
 
 class ManagerAccessPermission(BaseAccountPermission):
     """Manager access permissions"""
-    required_permissions = ['admin:access', 'manager:access']
+    access_types = ['admin', 'manager']
 
 
 class OperationAccessPermission(BaseAccountPermission):
     """Operation access permissions"""
-    required_permissions = ['admin:access', 'manager:access', "operation:access"]
+    access_types = ['admin', 'manager', 'operation']
 
 
 class FinanceAccessPermission(BaseAccountPermission):
     """Finance access permissions"""
-    required_permissions = ['admin:access', 'manager:access', "operation:access", "finance:access"]
+    access_types = ['admin', 'manager', 'operation', 'finance']
