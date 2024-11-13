@@ -26,8 +26,8 @@ class BaseAccountPermission(BasePermission):
 
     def requires_access_level(self, request, required_scopes: List[str]):
         user = request.user
-        if user.permissions in required_scopes:
-            print("this is user permissions: ", user.permissions, " and this is the required scope: ", required_scopes)
+        if user.access_level in required_scopes:
+            print("this is user access_level: ", user.access_level, " and this is the required scope: ", required_scopes)
             return True
         return False
 
