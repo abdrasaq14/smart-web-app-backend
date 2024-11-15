@@ -113,6 +113,7 @@
 #     return JsonResponse({'message': 'Hello from a private endpoint! You need to be authenticated and have the admin:access permission to see this.'})
 
 from django.http import JsonResponse
+import jwt
 import requests
 from rest_framework.generics import ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -121,20 +122,47 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
 from accounts.models import User
 from accounts.utils import get_management_token, requires_scope
+from authentication.custom_authentication import CustomJWTAuthentication
 from core.exceptions import GenericErrorException
 from core.pagination import TablePagination
 from core.permissions import AdminAccessPermission
 from .serializers import ListUserSerializer, UserSerializer
 
 
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.exceptions import AuthenticationFailed
+
 class CurrentUserView(ListAPIView):
     serializer_class = ListUserSerializer
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
+        print("Authorization header:", request.headers.get('Authorization'))  # Log the header
         print("CurrentUserView: Fetching current user data.", request.user)
-        serializer = self.get_serializer(request.user, many=False)    
+
+        try:
+            # Extract the token from the Authorization header
+            auth_header = request.headers.get('Authorization', None)
+            if not auth_header:
+                raise AuthenticationFailed("Authorization header is missing.")
+
+            parts = auth_header.split()
+            if len(parts) != 2 or parts[0].lower() != "bearer":
+                raise AuthenticationFailed('Authorization header must be in the form "Bearer <token>".')
+
+            auth_token = parts[1]
+
+            # Validate and decode the token using the custom authentication method
+            decoded_token = CustomJWTAuthentication.validate_jwt(auth_token)
+            print("Decoded Token:", decoded_token)
+
+        except Exception as e:
+            raise AuthenticationFailed(f"Token is invalid: {e}")
+
+        # Fetch and serialize the current user
+        serializer = self.get_serializer(request.user, many=False)
         return Response(serializer.data)
+
 
 
 class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):

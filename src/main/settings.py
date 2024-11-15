@@ -15,7 +15,22 @@ from pathlib import Path
 
 import environ
 from corsheaders.defaults import default_headers
+# import requests 
+# from jose import jwk
 
+# # Fetching Auth0 public key dynamically
+# def get_jwks():
+#     jwks_url = f"https://{AUTH0_DOMAIN}/.well-known/jwks.json"
+#     response = requests.get(jwks_url)
+#     return response.json()
+
+# # Function to get the key for token verification
+# def get_jwk(key_id):
+#     jwks = get_jwks()
+#     for key in jwks['keys']:
+#         if key['kid'] == key_id:
+#             return jwk.construct(key)
+#     raise Exception("Unable to find the key")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -42,16 +57,18 @@ SECRET_KEY = env.str(
 DEBUG = env.bool("DJANGO_DEBUG", default=False)
 TESTING = "pytest" in sys.argv[0]
 
-ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["127.0.0.1", "localhost"])
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["127.0.0.1","localhost"])
 
 CORS_ALLOW_HEADERS = default_headers + ("cache-control",)
 CORS_ALLOW_ALL_ORIGINS = env.bool('DJANGO_CORS_ALLOW_ALL_ORIGINS', default=False)
 if not CORS_ALLOW_ALL_ORIGINS:
     CORS_ALLOWED_ORIGINS = env.list(
         "DJANGO_CORS_ALLOWED_ORIGINS",
-        default=["http://127.0.0.1:2000", "http://localhost:2000"],
+        default=["http://127.0.0.1:3000","http://localhost:3000"],
     )
-
+    
+# print("ALLOWED_HOSTS:", ALLOWED_HOSTS)
+# print("CORS_ALLOWED_ORIGINS:", CORS_ALLOWED_ORIGINS)
 # Application definition
 
 BASE_INSTALLED_APPS = [
@@ -121,7 +138,7 @@ WSGI_APPLICATION = "main.wsgi.application"
 
 DATABASES = {
     "default": env.db(
-        "DJANGO_DEFAULT_DATABASE", default="postgres://smt:1234@127.0.0.1/smt"
+         "DJANGO_DEFAULT_DATABASE", default="postgres://abdrasaq:abdrasaq14@127.0.0.1/smartmeters"
     ),
 }
 
@@ -152,9 +169,10 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
+        'authentication.custom_authentication.CustomJWTAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.BasicAuthentication',
     ),
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     "COERCE_DECIMAL_TO_STRING": False,
@@ -202,15 +220,18 @@ JWT_ISSUER = None
 if AUTH0_DOMAIN:
     JWT_ISSUER = 'https://' + AUTH0_DOMAIN + '/'
 
-JWT_AUTH = {
-    'JWT_PAYLOAD_GET_USERNAME_HANDLER': 'accounts.utils.jwt_get_username_from_payload_handler',
-    'JWT_DECODE_HANDLER': 'accounts.utils.jwt_decode_token',
-    'JWT_ALGORITHM': 'RS256',
-    'JWT_AUDIENCE': API_IDENTIFIER,
-    'JWT_ISSUER': JWT_ISSUER,
-    'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+SIMPLE_JWT = {
+    'ALGORITHM': 'RS256',
+    'SIGNING_KEY': '',  # This will be populated dynamically
+    'VERIFYING_KEY': '',  # Will fetch the key from Auth0
+    'JWK_URL': f'https://{AUTH0_DOMAIN}/.well-known/jwks.json',  # Correct Auth0 JWKS URL
+    'AUTH_HEADER_TYPES': ('Bearer',),  # Should be Bearer for standard JWT usage,
+    'AUDIENCE': 'http://127.0.0.1:8000/',  # Ensure this matches the token's aud field
 }
 
+#  'https://dev-mgw72jpas4obd84e.us.auth0.com/.well-known/jwks.json'
+
+print("AUTH0DOMAIN", AUTH0_DOMAIN, SIMPLE_JWT, JWT_ISSUER)
 # CACHES = {
 #     'default': {
 #         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
