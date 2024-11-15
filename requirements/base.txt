@@ -20,6 +20,7 @@ pandas
 pyarrow
 python-dateutil
 pytz
+psycopg>=3
 PyYAML
 s3transfer
 setuptools
