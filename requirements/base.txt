@@ -1,10 +1,6 @@
 asgiref==3.6.0
 attrs==22.1.0
-<<<<<<< HEAD
-awswrangler==3.10.0
-=======
 awswrangler>=3.10.0,<4.0.0
->>>>>>> 0f491a0297a8ab00abc593484de39f83b7fe952d
 coreapi==2.3.3
 coreschema==0.0.4
 Django
