@@ -1,19 +1,23 @@
 asgiref==3.6.0
 attrs==22.1.0
+<<<<<<< HEAD
 awswrangler==3.10.0
+=======
+awswrangler>=3.10.0,<4.0.0
+>>>>>>> 0f491a0297a8ab00abc593484de39f83b7fe952d
 coreapi==2.3.3
 coreschema==0.0.4
-Django  # Ensure consistency with other packages
+Django
 django-cors-headers
 django-environ==0.9.0
-django-extensions # Compatible with Django>=3.2
-django-guardian # Compatible with Django>=2.2
-django-polymorphic  # Compatible with Django>=2.1
-djangorestframework  # Compatible with Django>=2.2
-drf-yasg  # Compatible with Django>=2.2.16
-Jinja2==3.1.2 #dd
+django-extensions
+django-guardian
+django-polymorphic
+djangorestframework
+drf-yasg
+Jinja2==3.1.2
 loguru==0.6.0
-numpy==1.23.3
+numpy>=1.26,<3.0
 pandas==1.5.0
 pre-commit==2.15.0
 psycopg2-binary==2.9.3
@@ -30,8 +34,7 @@ sqlparse==0.4.2
 urllib3==1.26.12
 matplotlib==3.6.0
 matplotlib-inline==0.1.6
-drf-jwt # Compatible with Django>=1.11
+drf-jwt
 pyjwt==1.7.1
 python-dotenv==0.21.0
 cryptography==38.0.1
-
