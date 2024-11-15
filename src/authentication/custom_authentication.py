@@ -47,7 +47,7 @@ logger = logging.getLogger(__name__)
 
 # Constants for Auth0 and API configuration
 AUTH0_DOMAIN = getattr(settings, 'AUTH0_DOMAIN', 'dev-mgw72jpas4obd84e.us.auth0.com')
-API_IDENTIFIER = getattr(settings, 'API_IDENTIFIER', 'http://127.0.0.1:8000/https://api.demo.powersmarter.net/')
+API_IDENTIFIER = getattr(settings, 'API_IDENTIFIER', 'https://api.demo.powersmarter.net/')
 ALGORITHMS = getattr(settings, 'ALGORITHMS', ['RS256'])
 
 class CustomJWTAuthentication(BaseAuthentication):
