@@ -226,7 +226,7 @@ SIMPLE_JWT = {
     'VERIFYING_KEY': '',  # Will fetch the key from Auth0
     'JWK_URL': f'https://{AUTH0_DOMAIN}/.well-known/jwks.json',  # Correct Auth0 JWKS URL
     'AUTH_HEADER_TYPES': ('Bearer',),  # Should be Bearer for standard JWT usage,
-    'AUDIENCE': 'http://127.0.0.1:8000/',  # Ensure this matches the token's aud field
+    'AUDIENCE': 'https://api.demo.powersmarter.net/',  # Ensure this matches the token's aud field
 }
 
 #  'https://dev-mgw72jpas4obd84e.us.auth0.com/.well-known/jwks.json'
