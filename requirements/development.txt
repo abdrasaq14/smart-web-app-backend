@@ -5,13 +5,13 @@
 black
 django-extensions # Compatible with Django>=3.2
 flake8
-ipdb==0.13.7
+ipdb
 isort
-pre-commit==2.15.0
+pre-commit
 ipython
 
 # Updated Werkzeug version
-Werkzeug==2.2.2  # Updated from 2.0.2 to 2.2.2
+Werkzeug  # Updated from 2.0.2 to 2.2.2
 
 # Django and related packages
 Django
