@@ -17,6 +17,9 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements/base.txt
 RUN pip install --no-cache-dir -r requirements/development.txt
 
+# Freeze versions into a requirements.lock file
+RUN pip freeze > requirements.lock
+
 WORKDIR /api
 COPY . .
 
