@@ -13,6 +13,7 @@ djangorestframework
 drf-yasg
 inflection
 jmespath
+pyjwt
 loguru
 numpy
 packaging
