@@ -138,7 +138,7 @@ WSGI_APPLICATION = "main.wsgi.application"
 
 DATABASES = {
     "default": env.db(
-         "DJANGO_DEFAULT_DATABASE", default="postgres://abdrasaq:abdrasaq14@127.0.0.1/smartmeters"
+        "DJANGO_DEFAULT_DATABASE", default="postgres://smt:1234@127.0.0.1/smt"
     ),
 }
 
