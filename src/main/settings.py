@@ -134,25 +134,25 @@ WSGI_APPLICATION = "main.wsgi.application"
 
 
 # Database
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',  # PostgreSQL engine
-        'NAME': 'postgres',  # Replace with your database name
-        'USER': 'postgres',  # Replace with your database user
-        'PASSWORD': 'smarterise',  # Replace with your database password
-        'HOST': 'smarterise.cc1vuyce9zcm.eu-west-2.rds.amazonaws.com',  # Database host
-        'PORT': '5432',  # PostgreSQL port
-    }
-}
-
-
-
 # DATABASES = {
-#     "default": env.db(
-#         "DJANGO_DEFAULT_DATABASE",
-#         default="postgres://postgres:smarterise@smarterise.cc1vuyce9zcm.eu-west-2.rds.amazonaws.com:5432/postgres"
-#     ),
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',  # PostgreSQL engine
+#         'NAME': 'postgres',  # Replace with your database name
+#         'USER': 'postgres',  # Replace with your database user
+#         'PASSWORD': 'smarterise',  # Replace with your database password
+#         'HOST': 'smarterise.cc1vuyce9zcm.eu-west-2.rds.amazonaws.com',  # Database host
+#         'PORT': '5432',  # PostgreSQL port
+#     }
 # }
+
+
+
+DATABASES = {
+    "default": env.db(
+        "DJANGO_DEFAULT_DATABASE",
+        default="postgres://postgres:smarterise@smarterise.cc1vuyce9zcm.eu-west-2.rds.amazonaws.com:5432/postgres"
+    ),
+}
 
 
 
