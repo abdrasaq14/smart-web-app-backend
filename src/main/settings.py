@@ -135,12 +135,13 @@ WSGI_APPLICATION = "main.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
 DATABASES = {
     "default": env.db(
-        "DJANGO_DEFAULT_DATABASE", default="postgres://smt:1234@127.0.0.1/smt"
+        "DJANGO_DEFAULT_DATABASE",
+        default="postgres://dbadmin:smarterise@dev-smarterise-cluster.cluster-cc1vuyce9zcm.eu-west-2.rds.amazonaws.com:5432/smartmeters"
     ),
 }
+
 
 
 # Password validation
