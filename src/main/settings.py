@@ -134,23 +134,23 @@ WSGI_APPLICATION = "main.wsgi.application"
 
 
 # Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "smartmeters",  # Database name
-        "USER": "dbadmin",  # Database username
-        "PASSWORD": "smarterise",  # Database password
-        "HOST": "dev-smarterise-cluster.cluster-cc1vuyce9zcm.eu-west-2.rds.amazonaws.com",  # Database host
-        "PORT": "5432",  
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',  # PostgreSQL engine
+        'NAME': 'postgres',  # Replace with your database name
+        'USER': 'postgres',  # Replace with your database user
+        'PASSWORD': 'smarterise',  # Replace with your database password
+        'HOST': 'smarterise.cc1vuyce9zcm.eu-west-2.rds.amazonaws.com',  # Database host
+        'PORT': '5432',  # PostgreSQL port
     }
 }
+
 
 
 # DATABASES = {
 #     "default": env.db(
 #         "DJANGO_DEFAULT_DATABASE",
-#         default="postgres://dbadmin:smarterise@dev-smarterise-cluster.cluster-cc1vuyce9zcm.eu-west-2.rds.amazonaws.com:5432/smartmeters"
+#         default="postgres://postgres:smarterise@smarterise.cc1vuyce9zcm.eu-west-2.rds.amazonaws.com:5432/postgres"
 #     ),
 # }
 
@@ -227,6 +227,7 @@ AWS_RDS_DATABASE = env.str("AWS_RDS_DATABASE", "smartmeters")
 
 AUTH0_DOMAIN = os.environ.get('AUTH0_DOMAIN')
 API_IDENTIFIER = os.environ.get('API_IDENTIFIER')
+print("API DEINTIFIER", API_IDENTIFIER)
 PUBLIC_KEY = None
 JWT_ISSUER = None
 
@@ -239,12 +240,12 @@ SIMPLE_JWT = {
     'VERIFYING_KEY': '',  # Will fetch the key from Auth0
     'JWK_URL': f'https://{AUTH0_DOMAIN}/.well-known/jwks.json',  # Correct Auth0 JWKS URL
     'AUTH_HEADER_TYPES': ('Bearer',),  # Should be Bearer for standard JWT usage,
-    'AUDIENCE': 'https://api.demo.powersmarter.net/',  # Ensure this matches the token's aud field
+    'AUDIENCE': API_IDENTIFIER,  # Ensure this matches the token's aud field
 }
 
 #  'https://dev-mgw72jpas4obd84e.us.auth0.com/.well-known/jwks.json'
 
-print("AUTH0DOMAIN", AUTH0_DOMAIN, SIMPLE_JWT, JWT_ISSUER)
+# print("AUTH0DOMAIN", AUTH0_DOMAIN, SIMPLE_JWT, JWT_ISSUER)
 # CACHES = {
 #     'default': {
 #         'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
