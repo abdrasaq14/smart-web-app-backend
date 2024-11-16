@@ -142,9 +142,10 @@ DATABASES = {
         "USER": "dbadmin",  # Database username
         "PASSWORD": "smarterise",  # Database password
         "HOST": "dev-smarterise-cluster.cluster-cc1vuyce9zcm.eu-west-2.rds.amazonaws.com",  # Database host
-        "PORT": "5432",  # Database port
+        "PORT": "5432",  
     }
 }
+
 
 # DATABASES = {
 #     "default": env.db(
