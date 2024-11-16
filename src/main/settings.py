@@ -136,11 +136,22 @@ WSGI_APPLICATION = "main.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 DATABASES = {
-    "default": env.db(
-        "DJANGO_DEFAULT_DATABASE",
-        default="postgres://dbadmin:smarterise@dev-smarterise-cluster.cluster-cc1vuyce9zcm.eu-west-2.rds.amazonaws.com:5432/smartmeters"
-    ),
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "smartmeters",  # Database name
+        "USER": "dbadmin",  # Database username
+        "PASSWORD": "smarterise",  # Database password
+        "HOST": "dev-smarterise-cluster.cluster-cc1vuyce9zcm.eu-west-2.rds.amazonaws.com",  # Database host
+        "PORT": "5432",  # Database port
+    }
 }
+
+# DATABASES = {
+#     "default": env.db(
+#         "DJANGO_DEFAULT_DATABASE",
+#         default="postgres://dbadmin:smarterise@dev-smarterise-cluster.cluster-cc1vuyce9zcm.eu-west-2.rds.amazonaws.com:5432/smartmeters"
+#     ),
+# }
 
 
 
