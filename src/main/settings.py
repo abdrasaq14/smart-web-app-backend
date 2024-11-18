@@ -154,6 +154,7 @@ DATABASES = {
     ),
 }
 
+print("DATABASE", DATABASES)
 
 
 # Password validation
