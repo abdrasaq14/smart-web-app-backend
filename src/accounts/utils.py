@@ -110,6 +110,7 @@ from django.contrib.auth import authenticate
 import requests
 from guardian.shortcuts import assign_perm, remove_perm
 
+auth0_domain = os.environ.get('AUTH0_DOMAIN')
 
 def assign_user_perm(perm, user_or_group, obj, revoke=False) -> None:
     """Assigns permissions for a given object to a given django user or group
@@ -139,7 +140,7 @@ def jwt_get_username_from_payload_handler(payload):
 
 def jwt_decode_token(token):
     header = jwt.get_unverified_header(token)
-    auth0_domain = os.environ.get('AUTH0_DOMAIN')
+   
     jwks = requests.get('https://{}/.well-known/jwks.json'.format(auth0_domain)).json()
     print("JWKS keys: {jwks}")
     public_key = None
@@ -202,13 +203,15 @@ def requires_scope(required_scope):
 
 def get_management_token():
     management_body = {
-        "client_id": "ymRc8UQkScJZM76PsbknMpZRjZWiZIo1",
-        "client_secret": "0sa8I6ndW8m1QeqWFZYAIwT2VlRI8j83B3Kwm2AhOrmGLfNULqrZngmqWLHaoFLz",
-        "audience": "test api for perms",
+        "client_id": os.environ.get('AUTH0_CLIENT_ID'),
+        "client_secret": os.environ.get('AUTH0_CLIENT_SECRET'),
+        "audience": os.environ.get('API_IDENTIFIER'),
         "grant_type": "client_credentials"
     }
-
-    url = "https://dev-mgw72jpas4obd84e.us.auth0.com/oauth/token"
+    print("utilmanagement", management_body)
+    # url = "https://dev-mgw72jpas4obd84e.us.auth0.com/oauth/token"
+    url = 'https://{}/oauth/token'.format(auth0_domain)
+    print("utilsurl", url)
     headers = {
         "Content-Type": "application/json",
     }

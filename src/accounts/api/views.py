@@ -112,6 +112,7 @@
 # def private_scoped(request):
 #     return JsonResponse({'message': 'Hello from a private endpoint! You need to be authenticated and have the admin:access permission to see this.'})
 
+import os
 from django.http import JsonResponse
 import jwt
 import requests
@@ -132,6 +133,7 @@ from .serializers import ListUserSerializer, UserSerializer
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 
+auth0_domain = os.environ.get('AUTH0_DOMAIN')
 class CurrentUserView(ListAPIView):
     serializer_class = ListUserSerializer
     permission_classes = (IsAuthenticated,)
@@ -157,6 +159,7 @@ class CurrentUserView(ListAPIView):
             print("Decoded Token:", decoded_token)
 
         except Exception as e:
+            print("AuthError", e)
             raise AuthenticationFailed(f"Token is invalid: {e}")
 
         # Fetch and serialize the current user
@@ -210,7 +213,9 @@ class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
             "password": "Sm@rterise123"
         }
 
-        url = "https://dev-mgw72jpas4obd84e.us.auth0.com/api/v2/users"
+        # url = "https://dev-mgw72jpas4obd84e.us.auth0.com/api/v2/users"
+        url =  'https://{}/api/v2/users'.format(auth0_domain)
+        print("Viewurl", url)
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {get_management_token()}"
