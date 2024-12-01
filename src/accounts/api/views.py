@@ -186,6 +186,7 @@ class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
 
         try:
             auth0_user = self.auth0_register(serializer)
+            # This is field is currently not validated tomeb a compulsory field as users are creatad without this
             created_user.username = auth0_user['user_id'].replace('|', '.')
             created_user.save()
             print("UserApiView: Auth0 user registered:", auth0_user)
@@ -225,7 +226,7 @@ class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
         response = requests.post(url, json=auth0_body, headers=headers)
 
         if response.status_code not in [200, 201]:
-            print("UserApiView: Auth0 registration failed with status:", response.status_code)
+            print("UserApiView: Auth0 registration failed with status:", response.json())
             raise GenericErrorException(response.json())
 
         print("UserApiView: Auth0 registration successful:", response.json())

@@ -205,7 +205,7 @@ def get_management_token():
     management_body = {
         "client_id": os.environ.get('AUTH0_CLIENT_ID'),
         "client_secret": os.environ.get('AUTH0_CLIENT_SECRET'),
-        "audience": os.environ.get('API_IDENTIFIER'),
+        "audience": f"https://{auth0_domain}/api/v2/",  # Management API endpoint,
         "grant_type": "client_credentials"
     }
     print("utilmanagement", management_body)
@@ -217,5 +217,6 @@ def get_management_token():
     }
 
     response = requests.post(url, json=management_body, headers=headers)
+    print("response.json", response, response.json())
     return response.json()['access_token']
 
