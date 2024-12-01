@@ -49,7 +49,7 @@ logger = logging.getLogger(__name__)
 AUTH0_DOMAIN = getattr(settings, 'AUTH0_DOMAIN', 'dev-mgw72jpas4obd84e.us.auth0.com')
 API_IDENTIFIER = getattr(settings, 'API_IDENTIFIER', 'https://api.demo.powersmarter.net/')
 ALGORITHMS = getattr(settings, 'ALGORITHMS', ['RS256'])
-
+print("DETAILS", API_IDENTIFIER)
 class CustomJWTAuthentication(BaseAuthentication):
     
     @staticmethod
@@ -60,6 +60,7 @@ class CustomJWTAuthentication(BaseAuthentication):
             url = f'https://{AUTH0_DOMAIN}/.well-known/jwks.json'
             response = requests.get(url)
             jwks = response.json()['keys']
+            print("JWKS", jwks)
             cache.set('auth0_jwks', jwks, timeout=86400)  # Cache for 1 day
         return jwks
 
@@ -88,6 +89,7 @@ class CustomJWTAuthentication(BaseAuthentication):
                     audience=API_IDENTIFIER,
                     issuer=f'https://{AUTH0_DOMAIN}/'
                 )
+                print("Paylload", payload)
                 return payload
 
             raise Exception("Unable to find appropriate key.")
@@ -101,13 +103,15 @@ class CustomJWTAuthentication(BaseAuthentication):
             return None  # Allow unauthenticated access
 
         parts = auth.split()
+        print("parts", parts)
         if len(parts) != 2:
             raise AuthenticationFailed('Authorization header must be in the form "Bearer <token>"')
 
         token = parts[1]
         payload = self.validate_jwt(token)
-
+        print("authenticatevalidagte", payload)
         try:
+            print("userObject", payload['sub'])
             user = User.objects.get(username=payload['sub'])
         except User.DoesNotExist:
             raise AuthenticationFailed('User not found for the provided token.')

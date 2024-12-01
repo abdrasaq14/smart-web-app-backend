@@ -186,8 +186,9 @@ class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
 
         try:
             auth0_user = self.auth0_register(serializer)
-            # This is field is currently not validated tomeb a compulsory field as users are creatad without this
-            created_user.username = auth0_user['user_id'].replace('|', '.')
+            # This is field is currently not validated to be a compulsory field as users are creatad without this
+            # created_user.username = auth0_user['user_id'].replace('|', '.') #this is comflicting with auth0 as autho user_id is stored as auth0|67555
+            created_user.username = auth0_user['user_id'] #this is comflicting with auth0 as autho user_id is stored as auth0|67555
             created_user.save()
             print("UserApiView: Auth0 user registered:", auth0_user)
         except GenericErrorException as e:
