@@ -142,7 +142,6 @@ def jwt_decode_token(token):
     header = jwt.get_unverified_header(token)
    
     jwks = requests.get('https://{}/.well-known/jwks.json'.format(auth0_domain)).json()
-    print("JWKS keys: {jwks}")
     public_key = None
     for jwk in jwks['keys']:
         if jwk['kid'] == header['kid']:
@@ -155,7 +154,6 @@ def jwt_decode_token(token):
     issuer = 'https://{}/'.format(auth0_domain)
     try:
         decoded_token = jwt.decode(token, public_key, audience=api_identifier, issuer=issuer, algorithms=['RS256'])
-        print("Decoded token: {decoded_token}")
         return decoded_token
     except jwt.ExpiredSignatureError:
         print("Token has expired.")

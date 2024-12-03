@@ -139,9 +139,7 @@ class CurrentUserView(ListAPIView):
     permission_classes = (IsAuthenticated,)
 
     def get(self, request, *args, **kwargs):
-        print("Authorization header:", request.headers.get('Authorization'))  # Log the header
-        print("CurrentUserView: Fetching current user data.", request.user)
-
+        
         try:
             # Extract the token from the Authorization header
             auth_header = request.headers.get('Authorization', None)
@@ -156,10 +154,8 @@ class CurrentUserView(ListAPIView):
 
             # Validate and decode the token using the custom authentication method
             decoded_token = CustomJWTAuthentication.validate_jwt(auth_token)
-            print("Decoded Token:", decoded_token)
-
+           
         except Exception as e:
-            print("AuthError", e)
             raise AuthenticationFailed(f"Token is invalid: {e}")
 
         # Fetch and serialize the current user
@@ -176,32 +172,26 @@ class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
     permission_classes = (IsAuthenticated, AdminAccessPermission)
 
     def post(self, request, *args, **kwargs):
-        print("UserApiView: Creating new user.")
         serializer = self.action_serializer_class(data=request.data)
-        print("UserApiView: Incoming request data:", request.data)
-
+        
         serializer.is_valid(raise_exception=True)
         created_user = serializer.save()
-        print("UserApiView: User created:", created_user)
-
+        
         try:
             auth0_user = self.auth0_register(serializer)
             # This is field is currently not validated to be a compulsory field as users are creatad without this
             # created_user.username = auth0_user['user_id'].replace('|', '.') #this is comflicting with auth0 as autho user_id is stored as auth0|67555
             created_user.username = auth0_user['user_id'] #this is comflicting with auth0 as autho user_id is stored as auth0|67555
             created_user.save()
-            print("UserApiView: Auth0 user registered:", auth0_user)
+           
         except GenericErrorException as e:
-            print("UserApiView: Error during user registration:", str(e))
             created_user.delete()
             raise e
 
         headers = self.get_success_headers(serializer.data)
-        print("UserApiView: User created successfully, responding with data.")
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
     def auth0_register(self, serializer):
-        print("UserApiView: Registering user with Auth0.")
         data = self.request.data
         auth0_body = {
             "email": data['email'],
@@ -217,48 +207,39 @@ class UserApiView(ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView):
 
         # url = "https://dev-mgw72jpas4obd84e.us.auth0.com/api/v2/users"
         url =  'https://{}/api/v2/users'.format(auth0_domain)
-        print("Viewurl", url)
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Bearer {get_management_token()}"
         }
 
-        print("UserApiView: Sending request to Auth0:", auth0_body)
         response = requests.post(url, json=auth0_body, headers=headers)
 
         if response.status_code not in [200, 201]:
-            print("UserApiView: Auth0 registration failed with status:", response.json())
             raise GenericErrorException(response.json())
 
-        print("UserApiView: Auth0 registration successful:", response.json())
         return response.json()
 
     def update(self, request, *args, **kwargs):
-        print("UserApiView: Updating user.")
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.action_serializer_class(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
-        print("UserApiView: User updated successfully:", serializer.data)
         return Response(serializer.data)
 
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def public(request):
-    print("public: Accessing public endpoint route.")
     return JsonResponse({'message': 'Hello from a public endpoint! You don\'t need to be authenticated to see this.'})
 
 
 @api_view(['GET'])
 def private(request):
-    print("private: Accessing private endpoint.")
     return JsonResponse({'message': 'Hello from a private endpoint! You need to be authenticated to see this.'})
 
 
 @api_view(['GET'])
 @requires_scope('admin')
 def private_scoped(request):
-    print("private_scoped: Accessing scoped private endpoint.")
     return JsonResponse({'message': 'Hello from a private endpoint! You need to be authenticated and have a scope of read:messages to see this.'})
